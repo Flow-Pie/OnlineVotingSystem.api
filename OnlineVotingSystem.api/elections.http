@@ -1,0 +1,33 @@
+@route = elections
+@auth_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJlbWFpbCI6ImFkbWluQHN5c3RlbS5jb20iLCJOYXRpb25hbElkIjoiMTAwMDAwMDEiLCJJc0FkbWluIjoidHJ1ZSIsIm5iZiI6MTc0MTQ3NzA2MCwiZXhwIjoxNzQxNDc4ODYwLCJpYXQiOjE3NDE0NzcwNjAsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYvIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NTI1NiJ9.0lzXPkAKuAlxwEdevIZ8fumIVB-38MTL5hI7lASWey8Wuoi2a3fyV7dtfEkMvvjthXc0ZcDnLB3wCEM6nxoJRA
+@electionId = D1FA1320-6AA3-42C1-A080-D1D6E0E01043
+
+### GET Elections
+GET localhost:5256/{{route}}
+
+### GET Election by electionId
+GET localhost:5256/{{route}}/{{electionId}}
+
+### POST new election
+POST localhost:5256/{{route}}/create
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "Title": "Presitential Election",
+  "Description": "The 2025 University Presidential Election",
+  "StartTime": "2025-08-01T08:00:00Z",
+  "EndTime": "2025-08-01T17:00:00Z"
+}
+
+### PATCH exsiting election
+PATCH localhost:5256/{{route}}/{{electionId}}
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "Title":"Presidential Election"
+}
+
+### Delete an election (Replace with actual ID)
+DELETE http://localhost:5000/{{route}}/{electionId}

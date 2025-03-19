@@ -1,0 +1,37 @@
+### Create a new user.
+POST localhost:5256/auth/register
+Content-Type: application/json
+
+{
+  "Name": "Kyle Mutua",
+  "NationalId": 12345678,
+  "Email": "email5@example.com",
+  "Password": "Passwords1!"
+}
+
+### Login with email.
+POST localhost:5256/auth/login
+Content-Type: application/json
+
+{
+  "Identifier": "email5@example.com",
+  "Password": "Passwords1!"
+}
+
+### Login with NationalId.
+POST localhost:5256/auth/login
+Content-Type: application/json
+
+{
+  "Identifier": "12345678",
+  "Password": "Passwords1!"
+}
+
+### Login Admin
+POST localhost:5256/auth/login
+Content-Type: application/json
+
+{
+  "Identifier": "10000001",
+  "Password": "AdminPassword!1234"
+}
