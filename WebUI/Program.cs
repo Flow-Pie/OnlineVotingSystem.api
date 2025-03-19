@@ -6,11 +6,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5256/";
+
+
 builder.Services.AddHttpClient<IElectionsService, ElectionService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+builder.Services.AddHttpClient<IUsersService, UsersService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
+// Razor Components
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 

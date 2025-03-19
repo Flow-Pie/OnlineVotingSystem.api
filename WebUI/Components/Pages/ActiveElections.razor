@@ -1,4 +1,5 @@
 @page "/active-elections"
+@using OnlineVotingSystem.api.DTOs
 @using OnlineVotingSystem.api.DTOs.Election
 @rendermode InteractiveServer
 
@@ -26,12 +27,20 @@
                             <p><strong>End Date:</strong> @election.EndTime.ToShortDateString()</p>
                             <p><strong>Positions:</strong> @string.Join(", ", election.Description)</p>
                             <p><strong>Total Candidates:</strong> TODO!! </p>
-                            <p><strong>Total Voters:</strong>TODO!! </p>
-                            <p><strong>Created By:</strong>@election.CreatedBy </p>
+                            <p><strong>Total Voters:</strong> TODO!! </p>
+                            
+                            <button class="btn btn-primary btn-sm"
+                               @onclick="() => ToggleDetails(election.Id)">
+                                <i class="bi bi-eye"></i>
+                                @(ElectionDetailsState.GetValueOrDefault(election.Id, false) ? "Hide Details" : "View Details")
+                            </button>
 
-                            <a href="/election-details/@election.Id" class="btn btn-primary btn-sm">
-                                <i class="bi bi-eye"></i> View Details
-                            </a>
+                            @if (ElectionDetailsState.GetValueOrDefault(election.Id, false))
+                            {
+                                <div class="mt-3 p-2 bg-primary text-black">
+                                    <p><strong>Created By:</strong> @GetCreatorName(election.CreatedBy)</p>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -41,62 +50,51 @@
 </main>
 
 @code {
-    [Inject] 
+    [Inject]
     public required IElectionsService ElectionsService { get; set;}
-    
-    //api list
+    [Inject]
+    public required IUsersService UsersService { get; set; }
+
+    private Dictionary<Guid, string> UserNames = new();
     public required List<ElectionDetailsDto> ElectionsModel { get; set; }
-    //old list
-   // private List<Election>? Elections { get; set; } = null;
+    
+    private Dictionary<Guid, bool> ElectionDetailsState = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ElectionsModel = (await ElectionsService.GetElectionsAsync()).ToList();
+        
+        foreach (var election in ElectionsModel)
+        {
+            ElectionDetailsState[election.Id] = false;
+        }
+
+        var userIds = ElectionsModel.Select(e => e.CreatedBy).Distinct();
+        var fetchTasks = userIds.Select(FetchUserAndStoreNameAsync);
+        await Task.WhenAll(fetchTasks);
+    }
+
+    private async Task FetchUserAndStoreNameAsync(Guid userId)
+    {
+        try
+        {
+            var user = await UsersService.GetUserByIdAsync(userId);
+            UserNames[userId] = user?.Name ?? "Unknown";
+        }
+        catch
+        {
+            UserNames[userId] = "Error";
+        }
+    }
 
     
-    protected override async Task<Task> OnInitializedAsync()
+    private void ToggleDetails(Guid electionId)
     {
-        
-        ElectionsModel = (await ElectionsService.GetElectionsAsync()).ToList();
-        // Dummy Data for Active Elections
-       /* Elections = new List<Election>
-        {
-            new Election
-            {
-                Id = 1,
-                Name = "Presidential Election 2027",
-                Date = new DateTime(2027, 8, 9),
-                Positions = new List<string> { "President", "Deputy President" },
-                TotalCandidates = 8,
-                TotalVoters = 18000000
-            },
-            new Election
-            {
-                Id = 2,
-                Name = "Gubernatorial Elections",
-                Date = new DateTime(2027, 8, 9),
-                Positions = new List<string> { "Governor", "Deputy Governor" },
-                TotalCandidates = 47,
-                TotalVoters = 12000000
-            },
-            new Election
-            {
-                Id = 3,
-                Name = "Senate Elections",
-                Date = new DateTime(2027, 8, 9),
-                Positions = new List<string> { "Senator" },
-                TotalCandidates = 67,
-                TotalVoters = 10000000
-            }
-        };*/
+        ElectionDetailsState[electionId] = !ElectionDetailsState.GetValueOrDefault(electionId, false);
+    }
 
-        return Task.CompletedTask;
-    }
-/*
-    private class Election
+    private string GetCreatorName(Guid userId)
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public DateTime Date { get; set; }
-        public List<string> Positions { get; set; } = new();
-        public int TotalCandidates { get; set; }
-        public int TotalVoters { get; set; }
+        return UserNames.TryGetValue(userId, out var name) ? name : "Unknown";
     }
-*/
 }

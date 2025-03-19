@@ -79,6 +79,7 @@
 </style>
 
 @code {
+    [Inject] public required IElectionsService ElectionsService { get; set; }
     private string ElectionName { get; set; } = "";
     private DateTime ElectionDate { get; set; } = DateTime.Today;
     private List<string> Positions { get; set; } = new List<string>();

@@ -1,4 +1,5 @@
 using OnlineVotingSystem.api.DTOs.Election;
+using OnlineVotingSystem.api.DTOs.ElectionPosition;
 using OnlineVotingSystem.api.DTOs.Position;
 using OnlineVotingSystem.api.Entities;
 
@@ -21,32 +22,38 @@ public class ElectionService : IElectionsService
            ??new List<ElectionDetailsDto>();
     }
 
-    public async Task<ElectionDetailsDto> GetElectionAsync(int electionId)
+    public async Task<ElectionDetailsDto> GetElectionAsync(Guid electionId)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<PositionDetails>> GetElectionPositionsAsync(int electionId)
+    public async Task<IEnumerable<PositionDetails>> GetElectionPositionsAsync(Guid electionId)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ElectionDetailsDto> CreateElectionAsync(string title, string? description, DateTime startTime, DateTime endTime)
+    public async Task<ElectionDetailsDto> CreateElectionAsync(CreateElectionDto createElectionDto)
+    {
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync("/elections", createElectionDto);
+        if(!response.IsSuccessStatusCode) throw new HttpRequestException($"Error creating election: {response.ReasonPhrase}");
+        return await response.Content.ReadFromJsonAsync<ElectionDetailsDto>()
+               ?? throw new InvalidOperationException("Failed to deserialize election details.");
+    }
+    
+    public async Task<ElectionPositionSerialized> CreateElectionPositionAsync(Guid electionId, CreateElectionPositionDto  createPositionDto)
+    {
+       HttpResponseMessage response = await httpClient.PostAsJsonAsync($"/elections/{electionId}/positions", createPositionDto);
+       if(!response.IsSuccessStatusCode) throw new HttpRequestException($"Error creating election positions: {response.ReasonPhrase}");
+       return await response.Content.ReadFromJsonAsync<ElectionPositionSerialized>()
+           ?? throw new InvalidOperationException("Failed to deserialize election positions.");
+    }
+
+    public async Task<bool> DeleteElectionAsync(Guid electionId)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<PositionDetails> CreateElectionPositionAsync(int electionId, int positionId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<bool> DeleteElectionAsync(int electionId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<ElectionDetailsDto> UpdateElectionAsync(int electionId, string title, string? description, DateTime startTime, DateTime endTime)
+    public async Task<ElectionDetailsDto> UpdateElectionAsync(Guid electionId, string title, string? description, DateTime startTime, DateTime endTime)
     {
         throw new NotImplementedException();
     }
