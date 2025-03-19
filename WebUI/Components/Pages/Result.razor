@@ -1,0 +1,299 @@
+@page "/results"
+@rendermode InteractiveServer
+@using System.Text
+@using System.Timers
+@inject IJSRuntime JSRuntime
+
+<main class="container mt-4">
+    <h2 class="fw-bold mb-3 text-center">📊 Election Analytics</h2>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <select @bind="SelectedRegion" class="form-select">
+                <option value="">All Regions</option>
+                @foreach (var region in Regions)
+                {
+                    <option value="@region">@region</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-8 d-flex gap-2 justify-content-end">
+            <button class="btn btn-outline-primary" @onclick="ExportCSV">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Real-time Data -->
+    <div class="alert alert-info mb-3 d-flex align-items-center gap-2">
+        <div class="spinner-border spinner-border-sm"></div>
+        <span>Live results updating in @refreshCountdown seconds</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Interactive Charts -->
+        <div class="col-lg-8">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold mb-3">Live Results</h5>
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demographic Insights -->
+        <div class="col-lg-4">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold mb-3">Voter Demographics</h5>
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <button class="nav-link @(activeTab == "age" ? "active" : "")"
+                                @onclick='() => SwitchTab("age")'>Age Groups</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(activeTab == "gender" ? "active" : "")"
+                                @onclick='() => SwitchTab("gender")'>Gender</button>
+                    </li>
+                </ul>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="demographicChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regional Breakdown -->
+    <div class="card mt-4 p-3 shadow-sm">
+        <h5 class="fw-bold mb-3">Regional Breakdown</h5>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Region</th>
+                    <th>Total Votes</th>
+                    <th>Leading Candidate</th>
+                    <th>Voter Turnout</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var region in RegionalData)
+                {
+                    <tr>
+                        <td>@region.RegionName</td>
+                        <td>@region.TotalVotes.ToString("N0")</td>
+                        <td>@region.LeadingCandidate</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar"
+                                     style="width: @region.TurnoutPercentage%; background-color: @GetRegionColor(region.RegionName)">
+                                    @region.TurnoutPercentage.ToString("0.##")%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+@code {
+    private List<CandidateResult> ChartData = new();
+    private List<RegionResult> RegionalData = new();
+    private string SelectedRegion = "";
+    private string activeTab = "age";
+    private int refreshCountdown = 30;
+    private Timer? refreshTimer;
+    private List<string> Regions = new() { "North", "South", "East", "West" };
+    private IJSObjectReference? chartModule;
+    private object? resultsChartInstance;
+    private object? demographicChartInstance;
+    private Random random = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        InitializeDummyData();
+        refreshTimer = new Timer(1000);
+        refreshTimer.Elapsed += OnTimerElapsed;
+        refreshTimer.Start();
+    }
+
+    private async void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () => await UpdateCountdown());
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                "import", "./js/charts.js");
+
+            resultsChartInstance = await chartModule.InvokeAsync<object>(
+                "initializeResultsChart",
+                "resultsChart",
+                ChartData.Select(c => c.Candidate).ToArray(),
+                ChartData.Select(c => c.Votes).ToArray(),
+                ChartData.Select(c => c.PartyColor).ToArray()
+            );
+
+            await InitializeDemographicChart();
+        }
+    }
+
+    private async Task InitializeDemographicChart()
+    {
+        if (chartModule != null)
+        {
+            demographicChartInstance = await chartModule.InvokeAsync<object>(
+                "initializeDemographicChart",
+                "demographicChart",
+                GetDemographicLabels(),
+                GetDemographicData()
+            );
+        }
+    }
+
+    private void InitializeDummyData()
+    {
+        var parties = new[] { ("Party A", "#4e73df"), ("Party B", "#1cc88a"), ("Party C", "#f6c23e") };
+        ChartData = Enumerable.Range(1, 6).Select(i => new CandidateResult
+        {
+            Candidate = $"Candidate {(char)('A' + i - 1)}",
+            Votes = random.Next(5000, 25000),
+            PartyColor = parties[i % 3].Item2,
+            PartyName = parties[i % 3].Item1
+        }).ToList();
+
+        RegionalData = Regions.Select(region => new RegionResult
+        {
+            RegionName = region,
+            TotalVotes = random.Next(10000, 50000),
+            LeadingCandidate = ChartData.OrderByDescending(c => c.Votes).First().Candidate,
+            TurnoutPercentage = Math.Round(random.NextDouble() * 30 + 60, 2)
+        }).ToList();
+    }
+
+    private async Task UpdateCountdown()
+    {
+        refreshCountdown--;
+
+        if (refreshCountdown <= 0)
+        {
+            refreshCountdown = 30;
+            foreach (var candidate in ChartData)
+            {
+                candidate.Votes += random.Next(50, 200);
+            }
+            await UpdateCharts();
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UpdateCharts()
+    {
+        if (chartModule != null && resultsChartInstance != null)
+        {
+            await chartModule.InvokeVoidAsync(
+                "updateChartData",
+                resultsChartInstance,
+                ChartData.Select(c => c.Candidate).ToArray(),
+                ChartData.Select(c => c.Votes).ToArray(),
+                ChartData.Select(c => c.PartyColor).ToArray()
+            );
+        }
+
+        if (chartModule != null && demographicChartInstance != null)
+        {
+            await chartModule.InvokeVoidAsync(
+                "updateDemographicChart",
+                demographicChartInstance,
+                GetDemographicLabels(),
+                GetDemographicData()
+            );
+        }
+    }
+
+    private async Task SwitchTab(string tab)
+    {
+        activeTab = tab;
+        await UpdateDemographicChart();
+    }
+
+    private async Task UpdateDemographicChart()
+    {
+        if (chartModule != null && demographicChartInstance != null)
+        {
+            await chartModule.InvokeVoidAsync(
+                "updateDemographicChart",
+                demographicChartInstance,
+                GetDemographicLabels(),
+                GetDemographicData()
+            );
+        }
+    }
+
+    private string[] GetDemographicLabels() => activeTab == "age"
+        ? new[] { "18-25", "26-35", "36-50", "51+" }
+        : new[] { "Male", "Female", "Other" };
+
+    private int[] GetDemographicData()
+    {
+        return activeTab == "age"
+            ? new[] { random.Next(20,40), random.Next(30,50), random.Next(20,40), random.Next(10,30) }
+            : new[] { random.Next(40,60), random.Next(35,55), random.Next(1,5) };
+    }
+
+    private async Task ExportCSV()
+    {
+        var csvContent = new StringBuilder();
+        csvContent.AppendLine("Candidate,Party,Votes,Percentage");
+
+        var totalVotes = ChartData.Sum(c => c.Votes);
+        foreach (var candidate in ChartData)
+        {
+            var percentage = (double)candidate.Votes / totalVotes;
+            csvContent.AppendLine($"{candidate.Candidate},{candidate.PartyName},{candidate.Votes},{percentage:P}");
+        }
+
+        await JSRuntime.InvokeVoidAsync("downloadFile",
+            "election-results.csv",
+            "text/csv",
+            csvContent.ToString());
+    }
+
+    private string GetRegionColor(string region) => region switch
+    {
+        "North" => "#4e73df",
+        "South" => "#1cc88a",
+        "East" => "#36b9cc",
+        "West" => "#f6c23e",
+        _ => "#858796"
+    };
+
+    public void Dispose()
+    {
+        refreshTimer?.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private class CandidateResult
+    {
+        public string Candidate { get; set; } = string.Empty;
+        public int Votes { get; set; }
+        public string PartyColor { get; set; } = string.Empty;
+        public string PartyName { get; set; } = string.Empty;
+    }
+
+    private class RegionResult
+    {
+        public string RegionName { get; set; } = string.Empty;
+        public int TotalVotes { get; set; }
+        public string LeadingCandidate { get; set; } = string.Empty;
+        public double TurnoutPercentage { get; set; }
+    }
+}

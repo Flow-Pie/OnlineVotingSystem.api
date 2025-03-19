@@ -1,0 +1,89 @@
+@page "/active-elections"
+@rendermode InteractiveServer
+
+<main class="container mt-4">
+    <h2 class="fw-bold mb-3">Active Elections</h2>
+
+    @if (Elections == null)
+    {
+        <div class="alert alert-info text-center">Loading elections...</div>
+    }
+    else if (Elections.Count == 0)
+    {
+        <div class="alert alert-warning text-center">No active elections at the moment.</div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var election in Elections)
+            {
+                <div class="col-md-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold">@election.Name</h5>
+                            <p><strong>Date:</strong> @election.Date.ToShortDateString()</p>
+                            <p><strong>Positions:</strong> @string.Join(", ", election.Positions)</p>
+                            <p><strong>Total Candidates:</strong> @election.TotalCandidates</p>
+                            <p><strong>Total Voters:</strong> @election.TotalVoters</p>
+
+                            <a href="/election-details/@election.Id" class="btn btn-primary btn-sm">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</main>
+
+@code {
+    private List<Election>? Elections { get; set; } = null;
+
+    protected override Task OnInitializedAsync()
+    {
+        // Dummy Data for Active Elections
+        Elections = new List<Election>
+        {
+            new Election
+            {
+                Id = 1,
+                Name = "Presidential Election 2027",
+                Date = new DateTime(2027, 8, 9),
+                Positions = new List<string> { "President", "Deputy President" },
+                TotalCandidates = 8,
+                TotalVoters = 18000000
+            },
+            new Election
+            {
+                Id = 2,
+                Name = "Gubernatorial Elections",
+                Date = new DateTime(2027, 8, 9),
+                Positions = new List<string> { "Governor", "Deputy Governor" },
+                TotalCandidates = 47,
+                TotalVoters = 12000000
+            },
+            new Election
+            {
+                Id = 3,
+                Name = "Senate Elections",
+                Date = new DateTime(2027, 8, 9),
+                Positions = new List<string> { "Senator" },
+                TotalCandidates = 67,
+                TotalVoters = 10000000
+            }
+        };
+
+        return Task.CompletedTask;
+    }
+
+    private class Election
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+        public List<string> Positions { get; set; } = new();
+        public int TotalCandidates { get; set; }
+        public int TotalVoters { get; set; }
+    }
+}

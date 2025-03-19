@@ -1,0 +1,212 @@
+@page "/candidates"
+@rendermode InteractiveServer
+
+<main class="container mt-4">
+    <h2 class="fw-bold mb-3">Registered Candidates</h2>
+
+    <!-- Search & Filter -->
+    <div class="mb-3 d-flex">
+        <input type="text" class="form-control me-2" @bind="SearchTerm" placeholder="Search candidates...">
+        <button class="btn btn-outline-primary" @onclick="FilterCandidates">
+            <i class="bi bi-search"></i> Search
+        </button>
+    </div>
+
+    @if (!GroupedCandidates.Any())
+    {
+        <div class="alert alert-warning text-center">No candidates found.</div>
+    }
+    else
+    {
+        <div class="accordion" id="candidatesAccordion">
+            @foreach (var position in GroupedCandidates.Keys)
+            {
+                var positionKey = position.Replace(" ", "");
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading-@positionKey">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@positionKey">
+                            @position
+                        </button>
+                    </h2>
+                    <div id="collapse-@positionKey" class="accordion-collapse collapse" data-bs-parent="#candidatesAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                @foreach (var candidate in GetPagedCandidates(position))
+                                {
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm mb-4">
+                                            <img src="@candidate.PhotoUrl" class="card-img-top" alt="Candidate Image">
+                                            <div class="card-body">
+                                                <h5 class="fw-bold">@candidate.FullName</h5>
+                                                <p><strong>Party:</strong> @candidate.Party</p>
+                                                <p><strong>Election:</strong> @candidate.ElectionName</p>
+                                                <p><strong>Total Votes:</strong> @candidate.TotalVotes</p>
+
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-sm btn-primary" @onclick="() => ViewProfile(candidate.Id)">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </button>
+                                                    <button class="btn btn-sm btn-warning" @onclick="() => EditCandidate(candidate.Id)">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteCandidate(candidate.Id)">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Pagination Controls -->
+                            @if (GetTotalPages(position) > 1)
+                            {
+                                <nav>
+                                    <ul class="pagination justify-content-center mt-3">
+                                        <li class="page-item @(CurrentPages[position] == 1 ? "disabled" : "")">
+                                            <button class="page-link" @onclick="() => PreviousPage(position)">Previous</button>
+                                        </li>
+                                        <li class="page-item @(CurrentPages[position] == GetTotalPages(position) ? "disabled" : "")">
+                                            <button class="page-link" @onclick="() => NextPage(position)">Next</button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</main>
+
+@code {
+    private string SearchTerm { get; set; } = "";
+    private List<CandidateModel> Candidates { get; set; } = new List<CandidateModel>();
+    private Dictionary<string, List<CandidateModel>> GroupedCandidates { get; set; } = new();
+
+    // Track pages per position
+    private Dictionary<string, int> CurrentPages { get; set; } = new();
+
+    // Pagination
+    private int PageSize { get; set; } = 3; // Show 3 candidates per page
+
+    protected override void OnInitialized()
+    {
+        LoadCandidates();
+        GroupCandidates();
+    }
+
+    private void LoadCandidates()
+    {
+        Candidates = new List<CandidateModel>
+        {
+            new() { Id = 1, FullName = "John Doe", Party = "Party A", Position = "President", ElectionName = "2027 General Election", TotalVotes = 5000, PhotoUrl = "https://via.placeholder.com/150" },
+            new() { Id = 2, FullName = "Jane Smith", Party = "Party B", Position = "President", ElectionName = "2027 General Election", TotalVotes = 3200, PhotoUrl = "https://via.placeholder.com/150" },
+            new() { Id = 3, FullName = "Jane Maina", Party = "Party L", Position = "President", ElectionName = "2027 General Election", TotalVotes = 3000, PhotoUrl = "https://via.placeholder.com/150" },
+            new() { Id = 4, FullName = "Smith", Party = "Party T", Position = "President", ElectionName = "2027 General Election", TotalVotes = 3200, PhotoUrl = "https://via.placeholder.com/150" },
+            new() { Id = 5, FullName = "Michael Johnson", Party = "Independent", Position = "Vice President", ElectionName = "2027 General Election", TotalVotes = 2100, PhotoUrl = "https://via.placeholder.com/150" },
+            new() { Id = 6, FullName = "Alice Brown", Party = "Party C", Position = "Secretary", ElectionName = "2027 General Election", TotalVotes = 1800, PhotoUrl = "https://via.placeholder.com/150" },
+            new() { Id = 7, FullName = "Robert Wilson", Party = "Independent", Position = "Secretary", ElectionName = "2027 General Election", TotalVotes = 1900, PhotoUrl = "https://via.placeholder.com/150" },
+            new() { Id = 8, FullName = "Emma Davis", Party = "Party A", Position = "Vice President", ElectionName = "2027 General Election", TotalVotes = 2500, PhotoUrl = "https://via.placeholder.com/150" }
+        };
+    }
+
+    private void GroupCandidates()
+    {
+        GroupedCandidates = Candidates
+            .GroupBy(c => c.Position)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var position in GroupedCandidates.Keys)
+        {
+            CurrentPages[position] = 1;
+        }
+    }
+
+    private void FilterCandidates()
+    {
+        if (string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            GroupCandidates();
+        }
+        else
+        {
+            var filtered = Candidates
+                .Where(c => c.FullName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                            c.Party.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                            c.Position.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            GroupedCandidates = filtered
+                .GroupBy(c => c.Position)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var position in GroupedCandidates.Keys)
+            {
+                CurrentPages[position] = 1;
+            }
+        }
+    }
+
+    private IEnumerable<CandidateModel> GetPagedCandidates(string position)
+    {
+        if (!GroupedCandidates.TryGetValue(position, out var candidates)) return Enumerable.Empty<CandidateModel>();
+
+        return candidates.Skip((CurrentPages[position] - 1) * PageSize).Take(PageSize);
+    }
+
+    private int GetTotalPages(string position)
+    {
+        return GroupedCandidates.TryGetValue(position, out var candidates) 
+            ? (int)Math.Ceiling((double)candidates.Count / PageSize) 
+            : 1;
+    }
+
+    private void PreviousPage(string position)
+    {
+        if (CurrentPages[position] > 1)
+        {
+            CurrentPages[position]--;
+            StateHasChanged();
+        }
+    }
+
+    private void NextPage(string position)
+    {
+        if (CurrentPages[position] < GetTotalPages(position))
+        {
+            CurrentPages[position]++;
+            StateHasChanged();
+        }
+    }
+
+    public class CandidateModel
+    {
+        public int Id { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string Party { get; set; } = string.Empty;
+        public string Position { get; set; } = string.Empty;
+        public string ElectionName { get; set; } = string.Empty;
+        public int TotalVotes { get; set; }
+        public string PhotoUrl { get; set; } = "https://via.placeholder.com/150";
+    }
+
+    //TODOS!!
+    private void ViewProfile(int candidateId)
+    {
+        Console.WriteLine("Viewing profile.....");
+    }
+
+    private void EditCandidate(int candidateId)
+    {
+        Console.WriteLine("Editing...");
+    }
+
+    private void DeleteCandidate(int candidateId)
+    {
+        Console.WriteLine("Deleting....");
+    }
+
+}

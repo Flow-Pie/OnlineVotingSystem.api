@@ -1,0 +1,66 @@
+﻿<div class="d-flex flex-column vh-100">
+    <!-- Top Navbar -->
+    <div class="top-row ps-3 navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white fw-bold" href="">E-Voting System</a>
+        </div>
+    </div>
+
+    <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+    <!-- Sidebar Navigation -->
+    <div class="nav-scrollable flex-grow-1" onclick="document.querySelector('.navbar-toggler').click()">
+        <nav class="nav flex-column">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="dashboard">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="create-election">
+                    <i class="bi bi-clipboard-plus-fill me-2"></i> Add Election
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="active-elections">
+                    <i class="bi bi-calendar-check me-2"></i> Active Election
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="candidates">
+                    <i class="bi bi-person-badge-fill me-2"></i> Candidates
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="results">
+                    <i class="bi bi-bar-chart-fill me-2"></i> Results
+                </NavLink>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Info Box -->
+    <div class="card bg-dark border-secondary border-1 mx-3 mb-3 p-3 rounded-3 shadow-sm mt-auto card-dark-hover">
+        <div class="d-flex align-items-start">
+            <i class="bi bi-info-circle-fill text-info fs-5 mt-1 me-2"></i>
+            <div>
+                <h6 class="fw-semibold mb-1 text-light">System Information</h6>
+                <div class="d-flex flex-column">
+                <span class="small text-light mb-1">
+                    <span class="fw-medium">Version:</span> 1.0.0
+                </span>
+                    <span class="small text-light">
+                    <span class="fw-medium">Status:</span> 
+                    <span class="badge bg-success bg-opacity-25 text-success fs-xxsmall">Operational</span>
+                </span>
+                </div>
+            </div>
+        </div>
+        <hr class="my-2 text-secondary opacity-25">
+        <p class="small text-light opacity-75 mb-0">&copy; 2025 E-Vote Engine. <br/> All rights reserved.</p>
+    </div>
+</div>

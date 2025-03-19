@@ -1,0 +1,104 @@
+@page "/create-election"
+@rendermode InteractiveServer
+
+<main class="container mt-4">
+    <h2 class="fw-bold mb-3">Create Election & Positions</h2>
+
+    <div class="row">
+        <!-- Left: Form Section -->
+        <div class="col-lg-8">
+            <div class="card shadow p-4 mb-4">
+                <form @onsubmit="HandleSubmit">
+                    <!-- Election Details -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Election Name</label>
+                        <input type="text" class="form-control" @bind="ElectionName" placeholder="Enter election name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Election Date</label>
+                        <input type="date" class="form-control" @bind="ElectionDate" required>
+                    </div>
+
+                    <hr>
+
+                    <!-- Positions Section -->
+                    <h5 class="fw-bold mb-3">Positions</h5>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" @onclick="AddPosition">
+                            <i class="bi bi-plus-circle"></i> Add Position
+                        </button>
+                    </div>
+
+                    <div class="position-list">
+                        @for (int i = 0; i < Positions.Count; i++)
+                        {
+                            <div class="input-group mb-2">
+                                <span class="input-group-text bg-secondary text-white">@(i + 1)</span>
+                                <input type="text" class="form-control" @bind="Positions[i]" placeholder="Enter position (e.g. President)" required>
+                                <button type="button" class="btn btn-danger" @onclick="() => RemovePosition(i)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <hr>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Save Election
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Cards Section -->
+        <div class="col-lg-4">
+            <div class="card text-white bg-info mb-3 small-card">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-people-fill"></i> Total Elections</h6>
+                    <p class="card-text fs-4">5</p>
+                </div>
+            </div>
+            <div class="card text-white bg-warning mb-3 small-card">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-bar-chart-line-fill"></i> Active Positions</h6>
+                    <p class="card-text fs-4">@Positions.Count</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .small-card {
+        max-width: 250px; /* Adjust card size */
+    }
+</style>
+
+@code {
+    private string ElectionName { get; set; } = "";
+    private DateTime ElectionDate { get; set; } = DateTime.Today;
+    private List<string> Positions { get; set; } = new List<string>();
+
+    private void AddPosition()
+    {
+        Positions.Add("");
+    }
+
+    private void RemovePosition(int index)
+    {
+        if (index >= 0 && index < Positions.Count)
+        {
+            Positions.RemoveAt(index);
+        }
+    }
+
+    private void HandleSubmit()
+    {
+        // TODO: Connect this logic to a database or API
+        Console.WriteLine($"Election: {ElectionName}, Date: {ElectionDate}, Positions: {string.Join(", ", Positions)}");
+    }
+}

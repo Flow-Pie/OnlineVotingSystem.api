@@ -1,0 +1,49 @@
+{
+  "Files": [
+    {
+      "Id": "/home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/WebUI.bundle.scp.css",
+      "PackagePath": "staticwebassets/WebUI.bundle.scp.css"
+    },
+    {
+      "Id": "/home/jon/Documents/WebUI/WebUI/wwwroot/app.css",
+      "PackagePath": "staticwebassets/app.css"
+    },
+    {
+      "Id": "/home/jon/Documents/WebUI/WebUI/wwwroot/bootstrap/bootstrap.min.css",
+      "PackagePath": "staticwebassets/bootstrap/bootstrap.min.css"
+    },
+    {
+      "Id": "/home/jon/Documents/WebUI/WebUI/wwwroot/bootstrap/bootstrap.min.css.map",
+      "PackagePath": "staticwebassets/bootstrap/bootstrap.min.css.map"
+    },
+    {
+      "Id": "/home/jon/Documents/WebUI/WebUI/wwwroot/favicon.png",
+      "PackagePath": "staticwebassets/favicon.png"
+    },
+    {
+      "Id": "/home/jon/Documents/WebUI/WebUI/wwwroot/js/charts.js",
+      "PackagePath": "staticwebassets/js/charts.js"
+    },
+    {
+      "Id": "/home/jon/Documents/WebUI/WebUI/wwwroot/js/dashboardCharts.js",
+      "PackagePath": "staticwebassets/js/dashboardCharts.js"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.WebUI.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.WebUI.props",
+      "PackagePath": "build\\WebUI.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.WebUI.props",
+      "PackagePath": "buildMultiTargeting\\WebUI.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.WebUI.props",
+      "PackagePath": "buildTransitive\\WebUI.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

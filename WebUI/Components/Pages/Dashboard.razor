@@ -1,0 +1,234 @@
+@page "/dashboard"
+@rendermode InteractiveServer
+@using System.Timers
+@inject IJSRuntime JSRuntime
+
+<main class="container-fluid mt-4">
+    <div class="row">
+        <!-- Left Side: Charts & Analytics -->
+        <div class="col-lg-8">
+            <!-- Top Section with Role Selection -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="fw-bold">Hi, Welcome Admin!</h2>
+                <div class="btn-group">
+                    @foreach (var role in roles)
+                    {
+                        <button class="btn @GetRoleButtonClass(role)"
+                                @onclick='() => FilterByRole(role)'>@role</button>
+                    }
+                </div>
+            </div>
+
+            <!-- Real-time Updates Alert -->
+            <div class="alert alert-info mb-3 d-flex align-items-center gap-2">
+                <div class="spinner-border spinner-border-sm"></div>
+                <span>Live data updates in @refreshCountdown seconds</span>
+            </div>
+
+            <!-- Voting Activity Chart -->
+            <div class="analytics-card p-4 mb-4 bg-white shadow rounded">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Voting Activity</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary"
+                                @onclick='() => ChangeTimeRange("24h")'>24H</button>
+                        <button class="btn btn-sm btn-outline-secondary"
+                                @onclick='() => ChangeTimeRange("7d")'>7D</button>
+                        <button class="btn btn-sm btn-outline-secondary"
+                                @onclick='() => ChangeTimeRange("30d")'>30D</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Voter Demographics Chart -->
+            <div class="analytics-card p-4 bg-white shadow rounded">
+                <h5 class="fw-bold mb-3">Voter Demographics</h5>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="demographicsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Summary Cards -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 20px;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-card bg-success text-white p-3 mb-3 shadow">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="fw-bold">Total Voters</h5>
+                                    <h3 class="mb-0">@TotalVoters.ToString("N0")</h3>
+                                </div>
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <div class="progress mt-2" style="height: 5px;">
+                                <div class="progress-bar" style="width: @(voterRegistrationProgress)%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="card mt-3 shadow">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Recent Activities</h5>
+                    </div>
+                    <div class="card-body recent-activities" style="max-height: 300px; overflow-y: auto;">
+                        @foreach (var activity in recentActivities)
+                        {
+                            <div class="activity-item mb-2">
+                                <small class="text-muted">@activity.Timestamp.ToString("HH:mm")</small>
+                                <div>@activity.Description</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@code {
+    private Random random = new();
+    private Timer? dataRefreshTimer;
+    private int refreshCountdown = 30;
+    private string selectedRole = "President";
+    private string timeRange = "24h";
+    private List<string> roles = new() { "President", "Vice President", "Secretary", "Treasurer", "Member" };
+
+    private int TotalVoters = 1500;
+    private double voterRegistrationProgress = 75;
+    private List<Activity> recentActivities = new();
+    private IJSObjectReference? chartModule;
+    private object? activityChart;
+    private object? demographicsChart;
+
+    protected override async Task OnInitializedAsync()
+    {
+        GenerateDummyData();
+        InitializeTimers();
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dashboardCharts.js");
+                await InitializeCharts();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading the charts: {ex.Message}");
+            }
+        }
+    }
+
+    private void GenerateDummyData()
+    {
+        TotalVoters += random.Next(-50, 100);
+        voterRegistrationProgress = random.Next(60, 95);
+        recentActivities.Insert(0, new Activity { Timestamp = DateTime.Now, Description = GetRandomActivity() });
+        if (recentActivities.Count > 15) recentActivities.RemoveAt(14);
+    }
+
+    private string GetRandomActivity() => random.Next(6) switch
+    {
+        0 => "New voter registration completed",
+        1 => "Vote cast in Presidential election",
+        2 => "System maintenance performed",
+        3 => "New election created",
+        4 => "Security audit completed",
+        _ => "Database backup executed"
+    };
+
+    private void InitializeTimers()
+    {
+        dataRefreshTimer = new Timer(1000);
+        dataRefreshTimer.Elapsed += async (sender, e) => await UpdateData();
+        dataRefreshTimer.Start();
+    }
+
+    private async Task UpdateData()
+    {
+        refreshCountdown--;
+        if (refreshCountdown <= 0)
+        {
+            refreshCountdown = 30;
+            GenerateDummyData();
+            await UpdateCharts();
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task InitializeCharts()
+    {
+        if (chartModule != null)
+        {
+            // Initialize Activity Chart 
+            await chartModule.InvokeVoidAsync("initializeActivityChart", "activityChart", GetTimeLabels(), GetVoteData());
+        
+            // Initialize Demographics Chart
+            await chartModule.InvokeVoidAsync("initializeDemographicsChart", "demographicsChart", new[] { "18-25", "26-35", "36-50", "51+" }, new[] { 25, 40, 25, 10 });
+        }
+    }
+
+    private async Task UpdateCharts()
+    {
+        if (chartModule != null && activityChart != null)
+        {
+            await chartModule.InvokeVoidAsync(
+                "updateActivityChart",
+                activityChart,
+                GetTimeLabels(),
+                GetVoteData()
+            );
+        }
+    }
+
+    private string[] GetTimeLabels() => timeRange switch
+    {
+        "24h" => Enumerable.Range(0, 24).Select(h => $"{h:00}:00").ToArray(),
+        "7d" => Enumerable.Range(0, 7).Select(d => DateTime.Now.AddDays(-d).ToString("ddd")).Reverse().ToArray(),
+        _ => Enumerable.Range(0, 30).Select(d => DateTime.Now.AddDays(-d).ToString("MMM dd")).Reverse().ToArray()
+    };
+
+    private int[] GetVoteData() => timeRange switch
+    {
+        "24h" => Enumerable.Range(0, 24).Select(_ => random.Next(50, 500)).ToArray(),
+        "7d" => Enumerable.Range(0, 7).Select(_ => random.Next(200, 2000)).ToArray(),
+        _ => Enumerable.Range(0, 30).Select(_ => random.Next(100, 1500)).ToArray()
+    };
+
+    private string GetRoleButtonClass(string role) =>
+        selectedRole == role ? "btn-primary" : "btn-outline-secondary";
+
+    private void FilterByRole(string role)
+    {
+        selectedRole = role;
+        // Logic to filter data based on selected role
+    }
+
+    private void ChangeTimeRange(string range)
+    {
+        timeRange = range;
+        UpdateCharts();
+    }
+
+    public void Dispose()
+    {
+        dataRefreshTimer?.Dispose();
+    }
+
+    private class Activity
+    {
+        public DateTime Timestamp { get; set; }
+        public string Description { get; set; } = "";
+    }
+}
