@@ -1,10 +1,16 @@
 using WebUI.Components;
 using Syncfusion.Blazor;
+using WebUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddHttpClient();
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5256/";
+builder.Services.AddHttpClient<IElectionsService, ElectionService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 

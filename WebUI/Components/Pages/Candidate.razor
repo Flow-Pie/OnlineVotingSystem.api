@@ -1,5 +1,8 @@
 @page "/candidates"
+@using OnlineVotingSystem.api.DTOs.Election
+@using WebUI.Services
 @rendermode InteractiveServer
+
 
 <main class="container mt-4">
     <h2 class="fw-bold mb-3">Registered Candidates</h2>
@@ -85,19 +88,11 @@
     private string SearchTerm { get; set; } = "";
     private List<CandidateModel> Candidates { get; set; } = new List<CandidateModel>();
     private Dictionary<string, List<CandidateModel>> GroupedCandidates { get; set; } = new();
-
     // Track pages per position
     private Dictionary<string, int> CurrentPages { get; set; } = new();
-
     // Pagination
-    private int PageSize { get; set; } = 3; // Show 3 candidates per page
-
-    protected override void OnInitialized()
-    {
-        LoadCandidates();
-        GroupCandidates();
-    }
-
+    private int PageSize { get; set; } = 3; // Show 3 candidates per page    
+    
     private void LoadCandidates()
     {
         Candidates = new List<CandidateModel>

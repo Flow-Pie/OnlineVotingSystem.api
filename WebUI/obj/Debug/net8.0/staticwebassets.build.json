@@ -1,11 +1,23 @@
 {
   "Version": 1,
-  "Hash": "4CGpYO+B0Bl9ivs973EdejAW72NW/28MV9mis3dJhjs=",
+  "Hash": "O0315ogSHaxFGg0K5SURAFHcrqsUYoSug1cNl5vg1r0=",
   "Source": "WebUI",
   "BasePath": "_content/WebUI",
   "Mode": "Default",
   "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [],
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "/home/jon/Documents/WebUI/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
+      "Version": 2,
+      "Source": "OnlineVotingSystem.api",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
+    }
+  ],
   "DiscoveryPatterns": [
     {
       "Name": "WebUI/wwwroot",
