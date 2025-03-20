@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using OnlineVotingSystem.api.DTOs.Election;
 using OnlineVotingSystem.api.DTOs.ElectionPosition;
 using OnlineVotingSystem.api.DTOs.Position;
@@ -32,13 +33,31 @@ public class ElectionService : IElectionsService
         throw new NotImplementedException();
     }
 
-    public async Task<ElectionDetailsDto> CreateElectionAsync(CreateElectionDto createElectionDto)
+    public async Task<ElectionDetailsDto> CreateElectionAsync(CreateElectionDto createElectionDto, string token)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync("/elections", createElectionDto);
-        if(!response.IsSuccessStatusCode) throw new HttpRequestException($"Error creating election: {response.ReasonPhrase}");
+        if (string.IsNullOrWhiteSpace(token))
+            throw new ArgumentException("Token cannot be null or empty", nameof(token));
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "/elections")
+        {
+            Content = JsonContent.Create(createElectionDto)
+        };
+    
+        //set authentication per request ie scoped service lifetime
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        HttpResponseMessage response = await httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error creating election ({response.StatusCode}): {response.ReasonPhrase}. Details: {errorContent}");
+        }
+
         return await response.Content.ReadFromJsonAsync<ElectionDetailsDto>()
                ?? throw new InvalidOperationException("Failed to deserialize election details.");
     }
+
     
     public async Task<ElectionPositionSerialized> CreateElectionPositionAsync(Guid electionId, CreateElectionPositionDto  createPositionDto)
     {
