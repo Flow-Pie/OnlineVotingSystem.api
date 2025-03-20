@@ -7,6 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5256/";
 
+builder.Services.AddCors(options => 
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod() 
+            .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddHttpClient<IElectionsService, ElectionService>(client =>
 {
@@ -18,6 +27,12 @@ builder.Services.AddHttpClient<IUsersService, UsersService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+builder.Services.AddHttpClient<IPositionsService, PositionsService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
+
 // Razor Components
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -26,6 +41,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSyncfusionBlazor();
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

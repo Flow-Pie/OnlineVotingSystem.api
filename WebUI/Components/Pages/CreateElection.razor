@@ -1,8 +1,23 @@
 @page "/create-election"
+@using OnlineVotingSystem.api.DTOs.Election
+@using OnlineVotingSystem.api.DTOs.ElectionPosition
+@using OnlineVotingSystem.api.DTOs.Position
 @rendermode InteractiveServer
 
 <main class="container mt-4">
     <h2 class="fw-bold mb-3">Create Election & Positions</h2>
+
+    <!-- Error Message Display -->
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    <!-- Success Message Display -->
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
 
     <div class="row">
         <!-- Left: Form Section -->
@@ -11,44 +26,63 @@
                 <form @onsubmit="HandleSubmit">
                     <!-- Election Details -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Election Name</label>
-                        <input type="text" class="form-control" @bind="ElectionName" placeholder="Enter election name" required>
+                        <label class="form-label fw-bold">Title</label>
+                        <input type="text" class="form-control" @bind="Title" placeholder="Election title" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Election Date</label>
-                        <input type="date" class="form-control" @bind="ElectionDate" required>
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea class="form-control" @bind="Description" placeholder="Election description" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Start Time</label>
+                            <input type="datetime-local" class="form-control" @bind="StartTime" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">End Time</label>
+                            <input type="datetime-local" class="form-control" @bind="EndTime" required>
+                        </div>
                     </div>
 
                     <hr>
 
-                    <!-- Positions Section -->
-                    <h5 class="fw-bold mb-3">Positions</h5>
-
+                    <!-- Position Selection -->
+                    <h5 class="fw-bold mb-3">Select Positions</h5>
                     <div class="mb-3">
-                        <button type="button" class="btn btn-primary" @onclick="AddPosition">
-                            <i class="bi bi-plus-circle"></i> Add Position
-                        </button>
-                    </div>
-
-                    <div class="position-list">
-                        @for (int i = 0; i < Positions.Count; i++)
+                        @if (availablePositions == null)
                         {
-                            <div class="input-group mb-2">
-                                <span class="input-group-text bg-secondary text-white">@(i + 1)</span>
-                                <input type="text" class="form-control" @bind="Positions[i]" placeholder="Enter position (e.g. President)" required>
-                                <button type="button" class="btn btn-danger" @onclick="() => RemovePosition(i)">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                            <p>Loading positions...</p>
+                        }
+                        else if (!availablePositions.Any())
+                        {
+                            <p>No positions available. Please create positions first.</p>
+                        }
+                        else
+                        {
+                            foreach (var position in availablePositions)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="@position.Id"
+                                           checked="@(SelectedPositions.Contains(position.Id))"
+                                           @onchange="() => TogglePosition(position.Id)">
+                                    <label class="form-check-label" for="@position.Id">
+                                        @position.Name
+                                    </label>
+                                </div>
+                            }
                         }
                     </div>
 
                     <hr>
 
                     <!-- Submit Button -->
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> Save Election
+                    <button type="submit" class="btn btn-success" disabled="@isLoading">
+                        <i class="bi bi-check-circle"></i>
+                        @(isLoading ? "Creating..." : "Create Election")
                     </button>
                 </form>
             </div>
@@ -58,48 +92,128 @@
         <div class="col-lg-4">
             <div class="card text-white bg-info mb-3 small-card">
                 <div class="card-body">
-                    <h6 class="card-title"><i class="bi bi-people-fill"></i> Total Elections</h6>
-                    <p class="card-text fs-4">5</p>
-                </div>
-            </div>
-            <div class="card text-white bg-warning mb-3 small-card">
-                <div class="card-body">
-                    <h6 class="card-title"><i class="bi bi-bar-chart-line-fill"></i> Active Positions</h6>
-                    <p class="card-text fs-4">@Positions.Count</p>
+                    <h6 class="card-title"><i class="bi bi-people-fill"></i> Selected Positions</h6>
+                    <p class="card-text fs-4">@SelectedPositions.Count</p>
                 </div>
             </div>
         </div>
     </div>
 </main>
 
-<style>
-    .small-card {
-        max-width: 250px; /* Adjust card size */
-    }
-</style>
-
 @code {
-    [Inject] public required IElectionsService ElectionsService { get; set; }
-    private string ElectionName { get; set; } = "";
-    private DateTime ElectionDate { get; set; } = DateTime.Today;
-    private List<string> Positions { get; set; } = new List<string>();
+    [Inject] public IElectionsService ElectionService { get; set; }
+    [Inject] public IPositionsService PositionsService { get; set; }
+    
+    // Form Fields
+    private string Title { get; set; } = "";
+    private string Description { get; set; } = "";
+    private DateTime StartTime { get; set; } = DateTime.Now;
+    private DateTime EndTime { get; set; } = DateTime.Now.AddHours(1);
 
-    private void AddPosition()
+    // Position Selection
+    private List<PositionDetails> availablePositions;
+    private List<Guid> SelectedPositions { get; set; } = new();
+
+    // State Management
+    private bool isLoading;
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    protected override async Task OnInitializedAsync()
     {
-        Positions.Add("");
+        await LoadPositions();
     }
 
-    private void RemovePosition(int index)
+    private async Task LoadPositions()
     {
-        if (index >= 0 && index < Positions.Count)
+        try
         {
-            Positions.RemoveAt(index);
+            availablePositions = (await PositionsService.GetPositionsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load positions: {ex.Message}";
         }
     }
 
-    private void HandleSubmit()
+    private void TogglePosition(Guid positionId)
     {
-        // TODO: Connect this logic to a database or API
-        Console.WriteLine($"Election: {ElectionName}, Date: {ElectionDate}, Positions: {string.Join(", ", Positions)}");
+        if (SelectedPositions.Contains(positionId))
+            SelectedPositions.Remove(positionId);
+        else
+            SelectedPositions.Add(positionId);
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = "";
+            successMessage = "";
+
+            var validationErrors = new List<string>();
+            
+            if (string.IsNullOrWhiteSpace(Title))
+                validationErrors.Add("Title is required");
+            
+            if (string.IsNullOrWhiteSpace(Description))
+                validationErrors.Add("Description is required");
+            
+            if (SelectedPositions.Count == 0)
+                validationErrors.Add("At least one position must be selected");
+            
+            if (EndTime <= StartTime)
+                validationErrors.Add("End time must be after start time");
+
+            if (validationErrors.Any())
+            {
+                errorMessage = string.Join(". ", validationErrors) + ".";
+                return;
+            }
+
+            var electionDto = new CreateElectionDto(
+                Title: Title.Trim(),
+                Description: Description.Trim(),
+                StartTime: StartTime,
+                EndTime: EndTime
+            );
+
+            var createdElection = await ElectionService.CreateElectionAsync(electionDto);
+
+            // Assign positions to the election
+            foreach (var positionId in SelectedPositions)
+            {
+                await ElectionService.CreateElectionPositionAsync(
+                    createdElection.Id,
+                    new CreateElectionPositionDto(positionId)
+                );
+            }
+
+            // Reset form
+            ResetForm();
+            successMessage = "Election created successfully!";
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"API Error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Unexpected Error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        Title = "";
+        Description = "";
+        StartTime = DateTime.Now;
+        EndTime = DateTime.Now.AddHours(1);
+        SelectedPositions.Clear();
     }
 }
