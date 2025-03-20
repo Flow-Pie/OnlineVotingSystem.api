@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="314ac5d5-7565-43f2-a446-94fb9172d22f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/Endpoints/ElectionsEndpoints.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/Endpoints/ElectionsEndpoints.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/OnlineVotingSystem.db" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/OnlineVotingSystem.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/bin/Debug/net8.0/OnlineVotingSystem.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/bin/Debug/net8.0/OnlineVotingSystem.api.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/bin/Debug/net8.0/OnlineVotingSystem.api.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/bin/Debug/net8.0/OnlineVotingSystem.api.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/elections.http" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/elections.http" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/OnlineVotingSystem.api.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/ref/OnlineVotingSystem.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/ref/OnlineVotingSystem.api.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/refint/OnlineVotingSystem.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/Debug/net8.0/refint/OnlineVotingSystem.api.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/OnlineVotingSystem.api.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/OnlineVotingSystem.api.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/OnlineVotingSystem.api/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/Components/Pages/CreateElection.razor" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/Components/Pages/CreateElection.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/Services/ElectionService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/Services/ElectionService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/Services/IPositionsService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/Services/IPositionsService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/WebUI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/WebUI.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/WebUI.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/bin/Debug/net8.0/WebUI.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/WebUI.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/ref/WebUI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/ref/WebUI.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/refint/WebUI.dll" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/Debug/net8.0/refint/WebUI.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/WebUI.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/WebUI.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebUI/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/WebUI/obj/rider.project.model.nuget.info" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/OnlineVotingSystem.api/DTOs/Position/PositionDetails.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/OnlineVotingSystem.api/Endpoints/ElectionsEndpoints.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/OnlineVotingSystem.api/Endpoints/PositionsEndpoints.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Components/Pages/ActiveElections.razor" root0="SKIP_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Components/Pages/Counter.razor" root0="SKIP_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Components/Pages/CreateElection.razor" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Components/Pages/Dashboard.razor" root0="SKIP_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Components/Routes.razor" root0="SKIP_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Program.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Services/ElectionService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Services/IElectionsService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Services/IPositionsService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WebUI/Services/PositionsService.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2uZHEquUAQB3qSnNvvwD5COFjPO" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.editor",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="314ac5d5-7565-43f2-a446-94fb9172d22f" name="Changes" comment="" />
+      <created>1742449073203</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1742449073203</updated>
+      <workItem from="1742449073205" duration="535000" />
+      <workItem from="1742449664563" duration="1413000" />
+      <workItem from="1742451929526" duration="314000" />
+      <workItem from="1742452278282" duration="3181000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

@@ -5,104 +5,256 @@
 @rendermode InteractiveServer
 
 <main class="container mt-4">
-    <h2 class="fw-bold mb-3">Create Election & Positions</h2>
+    <h2 class="fw-bold mb-3">Election Management</h2>
 
-    <!-- Error Message Display -->
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger">@errorMessage</div>
-    }
+    <!-- Status Messages -->
+    <div class="status-container">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        </div>
+        }
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @successMessage
+            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+        </div>
+        }
+    </div>
 
-    <!-- Success Message Display -->
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="alert alert-success">@successMessage</div>
-    }
-
-    <div class="row">
-        <!-- Left: Form Section -->
+    <div class="row g-4">
+        <!-- Main Form Column -->
         <div class="col-lg-8">
-            <div class="card shadow p-4 mb-4">
-                <form @onsubmit="HandleSubmit">
-                    <!-- Election Details -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Title</label>
-                        <input type="text" class="form-control" @bind="Title" placeholder="Election title" required>
-                    </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4"><i class="bi bi-clipboard-plus"></i> New Election</h4>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Description</label>
-                        <textarea class="form-control" @bind="Description" placeholder="Election description" required></textarea>
-                    </div>
+                    <form @onsubmit="HandleSubmit">
+                        <!-- Election Metadata -->
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Election Title</label>
+                                <input type="text"
+                                       class="form-control"
+                                       @bind="Title"
+                                       placeholder="Annual Student Council Election">
+                            </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Start Time</label>
-                            <input type="datetime-local" class="form-control" @bind="StartTime" required>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control"
+                                          @bind="Description"
+                                          rows="3"
+                                          placeholder="Describe the election purpose and scope"></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Start Date & Time</label>
+                                <input type="datetime-local"
+                                       class="form-control"
+                                       @bind="StartTime">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">End Date & Time</label>
+                                <input type="datetime-local"
+                                       class="form-control"
+                                       @bind="EndTime">
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">End Time</label>
-                            <input type="datetime-local" class="form-control" @bind="EndTime" required>
-                        </div>
-                    </div>
 
-                    <hr>
-
-                    <!-- Position Selection -->
-                    <h5 class="fw-bold mb-3">Select Positions</h5>
-                    <div class="mb-3">
-                        @if (availablePositions == null)
-                        {
-                            <p>Loading positions...</p>
-                        }
-                        else if (!availablePositions.Any())
-                        {
-                            <p>No positions available. Please create positions first.</p>
-                        }
-                        else
-                        {
-                            foreach (var position in availablePositions)
-                            {
-                                <div class="form-check">
-                                    <input class="form-check-input"
-                                           type="checkbox"
-                                           id="@position.Id"
-                                           checked="@(SelectedPositions.Contains(position.Id))"
-                                           @onchange="() => TogglePosition(position.Id)">
-                                    <label class="form-check-label" for="@position.Id">
-                                        @position.Name
-                                    </label>
+                        <!-- Position Selection -->
+                        <div class="mt-5">
+                            <h5 class="mb-3"><i class="bi bi-person-badge"></i> Available Positions</h5>
+                            <div class="positions-container bg-light p-3 rounded-2">
+                                @if (availablePositions == null)
+                                {
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
                                 </div>
-                            }
-                        }
-                    </div>
+                                }
+                                else if (!availablePositions.Any())
+                                {
+                                <div class="alert alert-warning mb-0">
+                                    No positions found. Create one first.
+                                </div>
+                                }
+                                else
+                                {
+                                <div class="row g-2">
+                                    @foreach (var position in availablePositions)
+                                    {
+                                    <div class="col-md-6">
+                                        <div class="form-check card card-hover">
+                                            <input class="form-check-input visually-hidden"
+                                                   type="checkbox"
+                                                   id="@($"pos-{position.Id}")"
+                                                   checked="@SelectedPositions.Contains(position.Id)"
+                                                   @onchange="() => TogglePosition(position.Id)">
+                                            <label class="form-check-label card-body"
+                                                   for="@($"pos-{position.Id}")">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-person-circle me-2 mt-4 text-primary"></i>
+                                                    <div>
+                                                        <div class="fw-semibold">@position.Name</div>
+                                                        @if (!string.IsNullOrEmpty(position.Name))
+                                                        {
+                                                        <div class="text-muted small">@position.Name</div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+                        </div>
 
-                    <hr>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn btn-success" disabled="@isLoading">
-                        <i class="bi bi-check-circle"></i>
-                        @(isLoading ? "Creating..." : "Create Election")
-                    </button>
-                </form>
+                        <!-- Form Actions -->
+                        <div class="mt-5 d-flex justify-content-end gap-2">
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    @onclick="ResetForm">
+                                Reset Form
+                            </button>
+                            <button type="submit"
+                                    class="btn btn-primary"
+                                    disabled="@isLoading">
+                                @if (isLoading)
+                                {
+                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                }
+                                Create Election
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Right: Cards Section -->
+        <!-- Sidebar: Position Creation -->
         <div class="col-lg-4">
-            <div class="card text-white bg-info mb-3 small-card">
-                <div class="card-body">
-                    <h6 class="card-title"><i class="bi bi-people-fill"></i> Selected Positions</h6>
-                    <p class="card-text fs-4">@SelectedPositions.Count</p>
+            <div class="sticky-top" style="top: 1rem">
+                <!-- Selected Positions Summary -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-check2-square"></i> Selected Positions
+                        </h5>
+                        <div class="selected-positions">
+                            @if (SelectedPositions.Count == 0)
+                            {
+                            <div class="text-muted">No positions selected</div>
+                            }
+                            else
+                            {
+                            <ul class="list-unstyled mb-0">
+                                @foreach (var posId in SelectedPositions)
+                                {
+                                var position = availablePositions?.FirstOrDefault(p => p.Id == posId);
+                                if (position != null)
+                                {
+                                <li class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>@position.Name</span>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            @onclick="() => TogglePosition(posId)">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </li>
+                                }
+                                }
+                            </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Position Creation -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-plus-circle-dotted"></i> Create New Position
+                        </h5>
+
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <input type="text"
+                                       class="form-control form-control-sm"
+                                       placeholder="Position title"
+                                       @bind="newPositionName">
+                            </div>                            
+                            <div class="col-12">
+                                <button class="btn btn-sm btn-success w-100"
+                                        @onclick="HandleCreatePosition"
+                                        disabled="@isCreatingPosition">
+                                    @if (isCreatingPosition)
+                                    {
+                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                    }
+                                    else
+                                    {
+                                    <i class="bi bi-plus-lg"></i>
+                                    }
+                                    Add Position
+                                </button>
+                            </div>
+                            @if (!string.IsNullOrEmpty(positionCreationError))
+                            {
+                            <div class="col-12">
+                                <div class="alert alert-danger alert-sm mb-0 py-1">
+                                    @positionCreationError
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
 
+<style>
+    .card-hover:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .selected-positions {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .positions-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+    }
+
+    .alert-sm {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .status-container {
+        position: sticky;
+        top: 1rem;
+        z-index: 1000;
+    }
+</style>
+
 @code {
     [Inject] public IElectionsService ElectionService { get; set; }
     [Inject] public IPositionsService PositionsService { get; set; }
+
+    private readonly string _bearerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJlbWFpbCI6ImFkbWluQHN5c3RlbS5jb20iLCJOYXRpb25hbElkIjoiMTAwMDAwMDEiLCJJc0FkbWluIjoidHJ1ZSIsIm5iZiI6MTc0MjQ2MTg3MCwiZXhwIjoxNzQyNDYzNjcwLCJpYXQiOjE3NDI0NjE4NzAsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYvIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NTI1NiJ9.RJwYW-Z7Ne6J4zJ74KgPAi3eTgwpNczR1lPj4QyHZ1q_I1Pe6qsVx8jXiM8N-F3yAkZ1avdG3v5l5aYjsQijtg"; 
     
     // Form Fields
     private string Title { get; set; } = "";
@@ -111,8 +263,13 @@
     private DateTime EndTime { get; set; } = DateTime.Now.AddHours(1);
 
     // Position Selection
-    private List<PositionDetails> availablePositions;
+    private  List<PositionDetails> availablePositions;    
     private List<Guid> SelectedPositions { get; set; } = new();
+	private string newPositionName = string.Empty;
+
+	private string newPositionDescription = string.Empty;
+	private bool isCreatingPosition = false;
+	private string positionCreationError = string.Empty;
 
     // State Management
     private bool isLoading;
@@ -128,7 +285,7 @@
     {
         try
         {
-            availablePositions = (await PositionsService.GetPositionsAsync()).ToList();
+            availablePositions =(await PositionsService.GetPositionsAsync()).ToList();
         }
         catch (Exception ex)
         {
@@ -179,7 +336,7 @@
                 EndTime: EndTime
             );
 
-            var createdElection = await ElectionService.CreateElectionAsync(electionDto);
+            var createdElection = await ElectionService.CreateElectionAsync(electionDto, _bearerToken);
 
             // Assign positions to the election
             foreach (var positionId in SelectedPositions)
@@ -197,10 +354,12 @@
         catch (HttpRequestException ex)
         {
             errorMessage = $"API Error: {ex.Message}";
+            Console.WriteLine(ex.Message);
         }
         catch (Exception ex)
         {
             errorMessage = $"Unexpected Error: {ex.Message}";
+			Console.WriteLine(ex.Message);
         }
         finally
         {
@@ -216,4 +375,46 @@
         EndTime = DateTime.Now.AddHours(1);
         SelectedPositions.Clear();
     }
+
+
+	private async Task HandleCreatePosition()
+    {
+        try
+        {
+            isCreatingPosition = true;
+            positionCreationError = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(newPositionName))
+            {
+                positionCreationError = "Position title is required";
+                return;
+            }
+
+            var newPosition = new CreatePositionDto(
+                Name: newPositionName.Trim()                
+            );
+
+            var createdPosition = await PositionsService.CreatePositionAsync(newPosition, _bearerToken);
+            
+            // Update local state
+            availablePositions ??= new List<PositionDetails>();
+            availablePositions.Add(createdPosition);
+            SelectedPositions.Add(createdPosition.Id);
+
+            // Reset form
+            newPositionName = string.Empty;
+            newPositionDescription = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            positionCreationError = ex.Message.Contains("409") 
+                ? "Position with this name already exists" 
+                : $"Error creating position: {ex.Message}";
+        }
+        finally
+        {
+            isCreatingPosition = false;
+        }
+    }
+
 }

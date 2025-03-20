@@ -2,10 +2,11 @@ using WebUI.Components;
 using Syncfusion.Blazor;
 using WebUI.Services;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5256/";
+// Ensure API base URL is correctly formatted
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"]?.TrimEnd('/') + "/" ?? "http://localhost:5256/";
 
 builder.Services.AddCors(options => 
 {
@@ -17,6 +18,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Register HttpClient services
 builder.Services.AddHttpClient<IElectionsService, ElectionService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -32,7 +34,6 @@ builder.Services.AddHttpClient<IPositionsService, PositionsService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-
 // Razor Components
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -42,6 +43,8 @@ builder.Services.AddSyncfusionBlazor();
 
 var app = builder.Build();
 
+// Ensure routing before CORS
+app.UseRouting();
 app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
@@ -59,10 +62,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+// Blazor server setup
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 // Register Syncfusion License
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc2NTEwOUAzMjM4MmUzMDJlMzBMMmV5c0wrUmdFUFIyOEVScDJXcUExT005YjRMUlZEOHkzdkcwRjY4MzMwPQ==");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("EMPTYFORNOW");
 
 app.Run();

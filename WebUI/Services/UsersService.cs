@@ -26,11 +26,16 @@ public class UsersService : IUsersService
 
     public async Task<bool> DeleteUserAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.DeleteAsync($"/users/{id}");
+
+        return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> NukeUsersAsync()
     {
-        throw new NotImplementedException();
+        var response = await httpClient.DeleteAsync("/users/nuke");
+
+        return response.IsSuccessStatusCode;
     }
+
 }

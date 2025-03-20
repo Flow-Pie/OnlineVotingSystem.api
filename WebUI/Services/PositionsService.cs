@@ -1,4 +1,6 @@
+using OnlineVotingSystem.api.DTOs.Election;
 using OnlineVotingSystem.api.DTOs.Position;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace WebUI.Services;
@@ -11,6 +13,26 @@ public class PositionsService : IPositionsService
     {
         this.httpClient = httpClient;
     }
+
+
+    public async Task<PositionDetails> CreatePositionAsync(CreatePositionDto createPositionDto, string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            throw new ArgumentException("Token cannot be null or empty", nameof(token));
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "/positions/create")
+        {
+            Content = JsonContent.Create(createPositionDto),
+            Headers = { Authorization = new AuthenticationHeaderValue("Bearer", token) }
+        };
+
+        var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode(); 
+
+        return await response.Content.ReadFromJsonAsync<PositionDetails>()
+            ?? throw new InvalidOperationException("Failed to deserialize position details.");
+    }
+
 
     public async Task<IEnumerable<PositionDetails>> GetPositionsAsync()
     {
