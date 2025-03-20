@@ -254,7 +254,7 @@
     [Inject] public IElectionsService ElectionService { get; set; }
     [Inject] public IPositionsService PositionsService { get; set; }
 
-    private readonly string _bearerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJlbWFpbCI6ImFkbWluQHN5c3RlbS5jb20iLCJOYXRpb25hbElkIjoiMTAwMDAwMDEiLCJJc0FkbWluIjoidHJ1ZSIsIm5iZiI6MTc0MjQ2MTg3MCwiZXhwIjoxNzQyNDYzNjcwLCJpYXQiOjE3NDI0NjE4NzAsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYvIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NTI1NiJ9.RJwYW-Z7Ne6J4zJ74KgPAi3eTgwpNczR1lPj4QyHZ1q_I1Pe6qsVx8jXiM8N-F3yAkZ1avdG3v5l5aYjsQijtg"; 
+    public readonly string bearerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJlbWFpbCI6ImFkbWluQHN5c3RlbS5jb20iLCJOYXRpb25hbElkIjoiMTAwMDAwMDEiLCJJc0FkbWluIjoidHJ1ZSIsIm5iZiI6MTc0MjQ5OTIyNSwiZXhwIjoxNzQyNTAxMDI1LCJpYXQiOjE3NDI0OTkyMjUsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYvIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NTI1NiJ9.tTW1U1BEKFsv3VRGbRiUp1JkoDWwKyG9FJlEyTit663-2_78r13AS285IqNRwp49wVbqesNJ66dydempHUeVlA"; 
     
     // Form Fields
     private string Title { get; set; } = "";
@@ -336,7 +336,7 @@
                 EndTime: EndTime
             );
 
-            var createdElection = await ElectionService.CreateElectionAsync(electionDto, _bearerToken);
+            var createdElection = await ElectionService.CreateElectionAsync(electionDto, bearerToken);
 
             // Assign positions to the election
             foreach (var positionId in SelectedPositions)
@@ -394,7 +394,7 @@
                 Name: newPositionName.Trim()                
             );
 
-            var createdPosition = await PositionsService.CreatePositionAsync(newPosition, _bearerToken);
+            var createdPosition = await PositionsService.CreatePositionAsync(newPosition, bearerToken);
             
             // Update local state
             availablePositions ??= new List<PositionDetails>();

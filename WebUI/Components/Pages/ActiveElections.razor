@@ -1,44 +1,134 @@
 @page "/active-elections"
 @using OnlineVotingSystem.api.DTOs
 @using OnlineVotingSystem.api.DTOs.Election
+@using OnlineVotingSystem.api.DTOs.Position
 @rendermode InteractiveServer
 
-<main class="container mt-4">
-    <h2 class="fw-bold mb-3">Active Elections</h2>
+<main class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold display-6 text-primary">Active Elections</h2>
+        <div class="bg-primary-subtle rounded-circle p-3">
+            <i class="bi bi-megaphone-fill fs-4 text-primary"></i>
+        </div>
+    </div>
 
     @if (ElectionsModel == null)
     {
-        <div class="alert alert-info text-center">Loading elections...</div>
+        <div class="d-flex justify-content-center my-5 py-5">
+            <div class="spinner-grow text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     }
     else if (ElectionsModel.Count == 0)
     {
-        <div class="alert alert-warning text-center">No active elections at the moment.</div>
+        <div class="alert alert-gradient alert-dismissible fade show border-0 shadow-lg" role="alert">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-info-circle-fill fs-3 text-primary"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">No active elections</h5>
+                    <p class="mb-0">Check back later for upcoming elections</p>
+                </div>
+            </div>
+        </div>
     }
     else
     {
-        <div class="row">
+        <div class="row g-4">
             @foreach (var election in ElectionsModel)
             {
-                <div class="col-md-6">
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <h5 class="fw-bold">@election.Title</h5>
-                            <p><strong>Start Date:</strong> @election.StartTime.ToShortDateString()</p>
-                            <p><strong>End Date:</strong> @election.EndTime.ToShortDateString()</p>
-                            <p><strong>Description:</strong> @string.Join(", ", election.Description)</p>
-                            <p><strong>Total Candidates:</strong> TODO!! </p>
-                            <p><strong>Total Voters:</strong> TODO!! </p>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card border-0 shadow-lg hover-shadow-lg transition-all position-relative h-100">
+                        <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h3 class="h5 fw-bold mb-0 text-truncate">@election.Title</h3>
+                                <button class="btn btn-link text-danger p-0"
+                                        @onclick="() => ConfirmDeleteElection(election.Id)">
+                                    <i class="bi bi-trash fs-5"></i>
+                                </button>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                <i class="bi bi-calendar-week me-1"></i>
+                                @election.StartTime.ToString("MMM dd") - @election.EndTime.ToString("MMM dd")
+                            </div>
+                        </div>
+
+                        <div class="card-body pt-3">
+                            <p class="text-secondary mb-3">@election.Description</p>
                             
-                            <button class="btn btn-primary btn-sm"
-                               @onclick="() => ToggleDetails(election.Id)">
-                                <i class="bi bi-eye"></i>
-                                @(ElectionDetailsState.GetValueOrDefault(election.Id, false) ? "Hide Details" : "View Details")
+                            <div class="d-grid gap-2">
+                                <div class="justify-content-between gap-3 align-items-center">
+                                    <div class="badge bg-primary bg-opacity-10 text-primary">
+                                        <i class="bi bi-people me-2"></i>
+                                        TODO "Count" Candidates
+                                    </div>
+                                    <div class="badge bg-success bg-opacity-10 text-success">
+                                        <i class="bi bi-person-check me-2"></i>
+                                        TODO "count" Voters
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-link w-100 text-decoration-none mt-3"
+                                    @onclick="() => ToggleDetails(election.Id)">
+                                <i class="bi @(ElectionDetailsState.GetValueOrDefault(election.Id, false) ? "bi-chevron-up" : "bi-chevron-down") me-2"></i>
+                                @(ElectionDetailsState.GetValueOrDefault(election.Id, false) ? "Less Details" : "More Details")
                             </button>
 
                             @if (ElectionDetailsState.GetValueOrDefault(election.Id, false))
                             {
-                                <div class="mt-3 p-2 bg-primary text-black">
-                                    <p><strong>Created By:</strong> @GetCreatorName(election.CreatedBy)</p>
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+                                            <i class="bi bi-person-circle fs-5 text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small">Created by</div>
+                                            <div class="fw-medium">@GetCreatorName(election.CreatedBy)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+                                            <i class="bi bi-envelope fs-5 text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small">Email</div>
+                                            <div class="fw-medium">@GetCreatorEmail(election.CreatedBy)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="small text-muted mb-2">Election Positions</div>
+                                    @if (ElectionPositions.TryGetValue(election.Id, out var positions))
+                                    {
+                                        @if (positions.Any())
+                                        {
+                                            <div class="d-flex flex-column gap-2">
+                                                @foreach (var position in positions)
+                                                {
+                                                    <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
+                                                        <div>@position.Name</div>
+                                                        <div class="text-muted small">
+                                                            seat(s)
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-muted small">No positions configured</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-2">
+                                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                                            <span class="visually-hidden">Loading positions...</span>
+                                        </div>
+                                    }
                                 </div>
                             }
                         </div>
@@ -46,55 +136,171 @@
                 </div>
             }
         </div>
+
+        <!-- Delete Modal -->
+        @if (ShowDeleteModal)
+        {
+            <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5)" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-octagon-fill text-danger me-2"></i>
+                                Confirm Deletion
+                            </h5>
+                            <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="lead">Are you sure you want to permanently delete this election?</p>
+                            <p class="text-muted small">All associated data including votes and candidates will be removed.</p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button class="btn btn-link text-muted text-decoration-none" @onclick="CloseDeleteModal">
+                                Cancel
+                            </button>
+                            <button class="btn btn-danger px-4" @onclick="() => DeleteElection(SelectedElectionId)">
+                                <i class="bi bi-trash me-2"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     }
 </main>
 
+<style>
+    .hover-shadow-lg {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hover-shadow-lg:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important;
+    }
+
+    .alert-gradient {
+        background: linear-gradient(15deg, #fff, #f8f9fa);
+        border-left: 4px solid var(--bs-primary) !important;
+    }
+
+    .modal-content {
+        border-radius: 1rem;
+    }
+</style>
+
 @code {
     [Inject]
-    public required IElectionsService ElectionsService { get; set;}
+    public required IElectionsService ElectionsService { get; set; }
+
     [Inject]
     public required IUsersService UsersService { get; set; }
 
     private Dictionary<Guid, string> UserNames = new();
-    public required List<ElectionDetailsDto> ElectionsModel { get; set; }
-    
+    private Dictionary<Guid, string> UserEmails = new();
+    public required List<ElectionDetailsDto> ElectionsModel { get; set; } = new();
+    public required List<UserDetailsDto> UsersModel { get; set; } = new();
     private Dictionary<Guid, bool> ElectionDetailsState = new();
+    private Dictionary<Guid, List<PositionDetails>> ElectionPositions = new();
+    private Dictionary<Guid, string> PositionErrors = new();
+
+    private bool ShowDeleteModal = false;
+    private Guid SelectedElectionId;
+    private string? SuccessMessage;
+    private string? ErrorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        ElectionsModel = (await ElectionsService.GetElectionsAsync()).ToList();
-        
-        foreach (var election in ElectionsModel)
-        {
-            ElectionDetailsState[election.Id] = false;
-        }
-
-        var userIds = ElectionsModel.Select(e => e.CreatedBy).Distinct();
-        var fetchTasks = userIds.Select(FetchUserAndStoreNameAsync);
-        await Task.WhenAll(fetchTasks);
-    }
-
-    private async Task FetchUserAndStoreNameAsync(Guid userId)
-    {
         try
         {
-            var user = await UsersService.GetUserByIdAsync(userId);
-            UserNames[userId] = user?.Name ?? "Unknown";
-        }
-        catch
-        {
-            UserNames[userId] = "Error";
-        }
-    }
+            ElectionsModel = (await ElectionsService.GetElectionsAsync()).ToList();
+            UsersModel = (await UsersService.GetUsersAsync()).ToList();
 
-    
-    private void ToggleDetails(Guid electionId)
-    {
-        ElectionDetailsState[electionId] = !ElectionDetailsState.GetValueOrDefault(electionId, false);
+            foreach (var election in ElectionsModel)
+            {
+                ElectionDetailsState[election.Id] = false;
+            }
+
+            foreach (var user in UsersModel)
+            {
+                UserNames[user.Id] = user.Name;
+                UserEmails[user.Id] = user.Email;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to load data: {ex.Message}";
+        }
     }
 
     private string GetCreatorName(Guid userId)
     {
         return UserNames.TryGetValue(userId, out var name) ? name : "Unknown";
+    }
+
+    private string GetCreatorEmail(Guid userId)
+    {
+        return UserEmails.TryGetValue(userId, out var email) ? email : "Unknown";
+    }
+
+    private async Task ToggleDetails(Guid electionId)
+    {
+        var currentState = ElectionDetailsState.GetValueOrDefault(electionId, false);
+        ElectionDetailsState[electionId] = !currentState;
+
+        if (!currentState && !ElectionPositions.ContainsKey(electionId))
+        {
+            try
+            {
+                var positions = await ElectionsService.GetElectionPositionsAsync(electionId);
+                ElectionPositions[electionId] = positions.ToList();
+                PositionErrors.Remove(electionId); 
+            }
+            catch (Exception ex)
+            {
+                PositionErrors[electionId] = $"Failed to load positions: {ex.Message}";
+            }
+        }
+    }
+
+    private async Task RefreshPositions(Guid electionId)
+    {
+        ElectionPositions.Remove(electionId);
+        PositionErrors.Remove(electionId);
+        await ToggleDetails(electionId); // Force reload
+    }
+
+    private void ConfirmDeleteElection(Guid electionId)
+    {
+        SelectedElectionId = electionId;
+        ShowDeleteModal = true;
+    }
+
+    private void CloseDeleteModal()
+    {
+        ShowDeleteModal = false;
+        SelectedElectionId = Guid.Empty;
+    }
+
+    private async Task DeleteElection(Guid electionId)
+    {
+        try
+        {
+            await ElectionsService.DeleteElectionAsync(electionId);
+            ElectionsModel.RemoveAll(e => e.Id == electionId);
+            ElectionPositions.Remove(electionId);
+            PositionErrors.Remove(electionId); 
+            SuccessMessage = "Election deleted successfully!";
+            ErrorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to delete election: {ex.Message}";
+            SuccessMessage = null;
+        }
+        finally
+        {
+            CloseDeleteModal();
+        }
     }
 }

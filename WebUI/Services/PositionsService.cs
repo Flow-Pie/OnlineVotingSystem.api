@@ -31,7 +31,7 @@ public class PositionsService : IPositionsService
 
         return await response.Content.ReadFromJsonAsync<PositionDetails>()
             ?? throw new InvalidOperationException("Failed to deserialize position details.");
-    }
+    }  
 
 
     public async Task<IEnumerable<PositionDetails>> GetPositionsAsync()
