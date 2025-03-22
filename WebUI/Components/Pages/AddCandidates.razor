@@ -1,11 +1,13 @@
 @page "/add-candidate"
 @using OnlineVotingSystem.api.DTOs.Candidate
+@using OnlineVotingSystem.api.DTOs.Position
 @using WebUI.Services
 @using OnlineVotingSystem.api.DTOs.ElectionPosition
 @using OnlineVotingSystem.api.DTOs.User
 @inject ICandidatesService CandidatesService
 @inject IUsersService UsersService
 @inject IElectionsService ElectionsService
+@inject IPositionsService PositionsService
 @rendermode InteractiveServer
 
 <main class="container mt-4 scrollable-container">
@@ -54,7 +56,7 @@
                             <option value="">Select a User</option>
                             @foreach (var user in Users)
                             {
-                                <option value="@user.Id">@user.FullName</option>
+                                <option value="@user.Id">@user.Name</option>
                             }
                         </select>
                         <label for="userId" class="text-muted">User</label>
@@ -68,7 +70,7 @@
                                 id="electionPositionId"
                                 @bind="SelectedElectionPositionId">
                             <option value="">Select a Position</option>
-                            @foreach (var position in ElectionPositions)
+                            @foreach (var position in Positions)
                             {
                                 <option value="@position.Id">@position.Name</option>
                             }
@@ -91,6 +93,7 @@
                 </div>
 
                 <!-- Bio -->
+    using OnlineVotingSystem.api.DTOs.Position;
                 <div class="mb-4">
                     <div class="form-floating">
                         <textarea class="form-control border-primary-subtle"
@@ -153,7 +156,7 @@
 
     // Dropdown data
     private List<UserDetailsDto> Users = new();
-    private List<ElectionPositionSerialized> ElectionPositions = new();
+    private List<PositionDetails> Positions = new();
 
     // Status messages
     private string errorMessage = "";
@@ -172,8 +175,8 @@
         try
         {
             // Fetch users and election positions
-            Users = await UsersService.GetUsersAsync();
-            ElectionPositions = await ElectionsService.GetElectionPositionsAsync();
+            Users = (await UsersService.GetUsersAsync()).ToList();
+            Positions = (await PositionsService.GetPositionsAsync()).ToList();
         }
         catch (Exception ex)
         {
