@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "Name": "Kyle Mutua",
-  "NationalId": 12345678,
+  "NationalId": 12345679,
   "Email": "email5@example.com",
   "Password": "Passwords1!"
 }
@@ -14,8 +14,8 @@ POST localhost:5256/auth/login
 Content-Type: application/json
 
 {
-  "Identifier": "email5@example.com",
-  "Password": "Passwords1!"
+  "Identifier": "user1@example.com",
+  "Password": "User1Password!"
 }
 
 ### Login with NationalId.
@@ -24,7 +24,7 @@ Content-Type: application/json
 
 {
   "Identifier": "12345678",
-  "Password": "Passwords1!"
+  "Password": "User1Password!"
 }
 
 ### Login Admin

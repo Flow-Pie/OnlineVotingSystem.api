@@ -1,4 +1,4 @@
-namespace OnlineVotingSystem.api.DTOs;
+namespace OnlineVotingSystem.api.DTOs.User;
 
 public record LoginResponseDto(
     UserDetailsDto User,

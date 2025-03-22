@@ -1,0 +1,23 @@
+@route = positions
+@positionId = 699CDE80-953E-4331-BBF6-6387678EDED4
+
+### GET request to example server
+GET localhost:5256/{{route}}
+
+### POST positions
+@auth_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOlsiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiVGhlIEFkbWluIl0sImVtYWlsIjoiYWRtaW5Ac3lzdGUuY29tIiwibmF0aW9uYWxJZCI6IjEwMDAwMDAxIiwiaXNBZG1pbiI6InRydWUiLCJuYmYiOjE3NDI2NDIzNTcsImV4cCI6MTc0MjY0NDE1NywiaWF0IjoxNzQyNjQyMzU3LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MjU2LyIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYifQ.k-93H71zZj3nv7bPk74-xx3mc4G6tRgNrPcMyqxQpBtqsm62qYLOqMu8w7jfvo4ObmquBTyBXzy1IueGOCNmcA
+POST localhost:5256/{{route}}/create
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "Name":"President"
+}
+
+### PATCH position Name
+PATCH localhost:5256/{{route}}/{{positionId}}
+Content-Type: application/json
+
+{
+  "Name": "President"
+}

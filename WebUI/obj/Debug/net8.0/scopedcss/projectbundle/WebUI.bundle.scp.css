@@ -187,17 +187,3 @@ main[b-jm9zh02tux] {
     display: block;
 }
 
-@media (min-width: 641px) {
-    .navbar-toggler[b-7a3jjhmv9o] {
-        display: none;
-    }
-
-    .nav-scrollable[b-7a3jjhmv9o] {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
-
-        /* Allow sidebar to scroll for tall menus */
-        height: calc(100vh - 3.5rem);
-        overflow-y: auto;
-    }
-}

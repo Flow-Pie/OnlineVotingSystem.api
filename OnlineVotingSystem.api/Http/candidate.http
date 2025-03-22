@@ -1,0 +1,34 @@
+@route = candidates
+@candidateId = D966DE4D-1239-4942-B84A-778C56B89C84
+@auth_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOlsiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiVGhlIEFkbWluIl0sImVtYWlsIjoiYWRtaW5Ac3lzdGUuY29tIiwibmF0aW9uYWxJZCI6IjEwMDAwMDAxIiwiaXNBZG1pbiI6InRydWUiLCJuYmYiOjE3NDI2Njk4NDgsImV4cCI6MTc0MjY3MTY0OCwiaWF0IjoxNzQyNjY5ODQ4LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MjU2LyIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYifQ.4RZQVRgp7c9E8vnH7q1FMkL0sj8hXEOCgBfPyG6v4GislHTmc_PrBt9KUrgWVxDP7u8Kjg1E97IwklWC5eN6ug
+### Get candidates
+GET http://localhost:5256/{{route}}
+
+### Get candidate by id
+GET http://localhost:5256/{{route}}/{{candidateId}}
+
+### Create Candidate
+@User_Id = A977B58A-651D-474C-B0F4-36A97142D8E1
+@ElectionPositionId = FFB622FB-F615-44F8-80F9-564DA88FCB65
+POST http://localhost:5256/{{route}}
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+ "UserId": "{{User_Id}}",
+ "ElectionPositionId": "{{ElectionPositionId}}",
+ "Bio" : "Biopics and Death"
+}
+
+### Edit Candidate
+PATCH http://localhost:5256/{{route}}/{{candidateId}}
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "Bio":"ghfgkuhjnhvgh"
+}
+
+### Delete Candidate
+DELETE http://localhost:5256/{{route}}/{{candidateId}}
+Authorization: Bearer {{auth_token}}

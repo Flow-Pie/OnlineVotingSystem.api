@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OnlineVotingSystem.api.Data;
-using OnlineVotingSystem.api.DTOs;
+using OnlineVotingSystem.api.DTOs.User;
 using OnlineVotingSystem.api.Mapping;
 using OnlineVotingSystem.api.Services;
 

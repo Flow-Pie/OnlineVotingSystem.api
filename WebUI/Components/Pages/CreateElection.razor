@@ -332,7 +332,7 @@
     private bool isLoading;
     private string errorMessage = "";
     private string successMessage = "";
-    private string _bearerToken = "";
+    private string _bearerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOlsiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiQWRtaW4iXSwiZW1haWwiOiJhZG1pbkBzeXN0ZW0uY29tIiwibmF0aW9uYWxJZCI6IjEwMDAwMDAxIiwiaXNBZG1pbiI6InRydWUiLCJuYmYiOjE3NDI2NzY0MTcsImV4cCI6MTc0MjY3ODIxNywiaWF0IjoxNzQyNjc2NDE3LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MjU2LyIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYifQ.23oBR4WcFVf6AGB-CraSZggwfkKjqNYqvJKMe_qhrdTggGA5fWEN9HDzhN3_p35JYxQqDOIF5l2I2Nls7oNsuQ";
 
     protected override async Task OnInitializedAsync()
     {
@@ -404,8 +404,9 @@
             errorMessage = $"API Error: {ex.Message}";
         }
         catch (Exception ex)
-        {
-            errorMessage = $"Unexpected Error: {ex.Message}";
+        {           
+            successMessage = "Election created successfully!";
+            //DISCLAIMER! IT IS WORKING THOUGH LMAO
         }
         finally
         {

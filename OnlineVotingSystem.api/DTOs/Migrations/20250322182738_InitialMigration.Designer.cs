@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineVotingSystem.api.Data;
 
@@ -10,9 +11,11 @@ using OnlineVotingSystem.api.Data;
 namespace OnlineVotingSystem.api.Migrations
 {
     [DbContext(typeof(OnlineVotingSystemContext))]
-    partial class OnlineVotingSystemContextModelSnapshot : ModelSnapshot
+    [Migration("20250322182738_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
@@ -163,16 +166,6 @@ namespace OnlineVotingSystem.api.Migrations
                             Name = "Admin",
                             NationalId = 10000001,
                             Password = "$2a$11$McDzAqqk04VkMTWMQmZnw.DR.uCHl/wj23tAKPZBJNSygN2koP8gK"
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-111111111111"),
-                            CreatedAt = new DateTime(2024, 2, 11, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "jon@gmail.com",
-                            IsAdmin = true,
-                            Name = "Jon",
-                            NationalId = 42424242,
-                            Password = "$2a$11$.3uav6eCFqwMkvAQsdvQoeqIhGwly.MskOqZd9uGGHQomcPtagFkS"
                         });
                 });
 
@@ -183,9 +176,6 @@ namespace OnlineVotingSystem.api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("CandidateId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ElectionId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("ElectionPositionId")
@@ -200,8 +190,6 @@ namespace OnlineVotingSystem.api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CandidateId");
-
-                    b.HasIndex("ElectionId");
 
                     b.HasIndex("ElectionPositionId");
 
@@ -267,12 +255,6 @@ namespace OnlineVotingSystem.api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OnlineVotingSystem.api.Entities.Election", "Election")
-                        .WithMany()
-                        .HasForeignKey("ElectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("OnlineVotingSystem.api.Entities.ElectionPosition", "ElectionPosition")
                         .WithMany()
                         .HasForeignKey("ElectionPositionId")
@@ -286,8 +268,6 @@ namespace OnlineVotingSystem.api.Migrations
                         .IsRequired();
 
                     b.Navigation("Candidate");
-
-                    b.Navigation("Election");
 
                     b.Navigation("ElectionPosition");
 

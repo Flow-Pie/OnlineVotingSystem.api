@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using OnlineVotingSystem.api.Data;
 using OnlineVotingSystem.api.DTOs.Election;
 using OnlineVotingSystem.api.DTOs.ElectionPosition;
-using OnlineVotingSystem.api.Entities;
 using OnlineVotingSystem.api.Mapping;
 
 namespace OnlineVotingSystem.api.Endpoints;

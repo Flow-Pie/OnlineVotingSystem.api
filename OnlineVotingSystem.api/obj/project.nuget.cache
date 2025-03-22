@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "NjLJI55c60JQJU4eowmH4gLwKiWE2OiSY4QUSPpNzEcRpbfwXXAQJ42b2vhV0oBzAwkZHYBU3575MW0JbqUNbQ==",
+  "dgSpecHash": "0e180AsyvZLZ8QfecfpUgXm2PR056NtxYENUlZ3G7GmMQn6DUL4g6dycNIzCiilmnrDjBAUbvkZeMdifRqagng==",
   "success": true,
   "projectFilePath": "/home/jon/Documents/WebUI/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
   "expectedPackageFiles": [
@@ -45,6 +45,8 @@
     "/home/jon/.nuget/packages/minimalapis.extensions/0.11.0/minimalapis.extensions.0.11.0.nupkg.sha512",
     "/home/jon/.nuget/packages/minivalidation/0.8.0/minivalidation.0.8.0.nupkg.sha512",
     "/home/jon/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
+    "/home/jon/.nuget/packages/npgsql/9.0.3/npgsql.9.0.3.nupkg.sha512",
+    "/home/jon/.nuget/packages/npgsql.entityframeworkcore.postgresql/9.0.4/npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
     "/home/jon/.nuget/packages/sqlitepclraw.bundle_e_sqlite3/2.1.10/sqlitepclraw.bundle_e_sqlite3.2.1.10.nupkg.sha512",
     "/home/jon/.nuget/packages/sqlitepclraw.core/2.1.10/sqlitepclraw.core.2.1.10.nupkg.sha512",
     "/home/jon/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.10/sqlitepclraw.lib.e_sqlite3.2.1.10.nupkg.sha512",

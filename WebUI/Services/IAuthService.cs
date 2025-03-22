@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using OnlineVotingSystem.api.DTOs;
+using OnlineVotingSystem.api.DTOs.User;
 
 namespace WebUI.Services;
 

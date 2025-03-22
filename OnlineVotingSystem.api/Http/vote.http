@@ -1,0 +1,11 @@
+@route = votes
+
+### Vote
+POST http://localhost:5256/{{route}}
+Content-Type: application/json
+
+{
+  "userId": "A977B58A-651D-474C-B0F4-36A97142D8E1",
+  "electionPositionId": "FFB622FB-F615-44F8-80F9-564DA88FCB65",
+  "candidateId": "D966DE4D-1239-4942-B84A-778C56B89C84"
+}

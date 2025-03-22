@@ -2,7 +2,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using OnlineVotingSystem.api.DTOs;
+using OnlineVotingSystem.api.DTOs.User;
 
 namespace WebUI.Services;
 

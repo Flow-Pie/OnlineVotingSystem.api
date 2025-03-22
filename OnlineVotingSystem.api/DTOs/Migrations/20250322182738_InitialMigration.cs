@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlineVotingSystem.api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -121,7 +121,6 @@ namespace OnlineVotingSystem.api.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ElectionId = table.Column<Guid>(type: "TEXT", nullable: false),
                     ElectionPositionId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CandidateId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false)
@@ -139,12 +138,6 @@ namespace OnlineVotingSystem.api.Migrations
                         name: "FK_Votes_ElectionPositions_ElectionPositionId",
                         column: x => x.ElectionPositionId,
                         principalTable: "ElectionPositions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Votes_Elections_ElectionId",
-                        column: x => x.ElectionId,
-                        principalTable: "Elections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -189,11 +182,6 @@ namespace OnlineVotingSystem.api.Migrations
                 name: "IX_Votes_CandidateId",
                 table: "Votes",
                 column: "CandidateId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Votes_ElectionId",
-                table: "Votes",
-                column: "ElectionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Votes_ElectionPositionId",

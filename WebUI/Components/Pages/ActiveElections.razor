@@ -1,5 +1,5 @@
 @page "/active-elections"
-@using OnlineVotingSystem.api.DTOs
+@using OnlineVotingSystem.api.DTOs.User
 @using OnlineVotingSystem.api.DTOs.Election
 @using OnlineVotingSystem.api.DTOs.Position
 @rendermode InteractiveServer
@@ -17,7 +17,7 @@
  <!-- Search & Filter -->
     <div class="mb-4 d-flex gap-2">
         <input type="text" class="form-control" @bind="SearchTerm" 
-               placeholder="Search elections...">
+               placeholder="Search elections...click the Search button to search">
         <button class="btn btn-primary" @onclick="FilterElections">
             <i class="bi bi-search"></i> Search
         </button>

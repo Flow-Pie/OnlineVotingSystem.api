@@ -1,4 +1,4 @@
-using OnlineVotingSystem.api.DTOs;
+using OnlineVotingSystem.api.DTOs.User;
 using OnlineVotingSystem.api.Entities;
 
 namespace OnlineVotingSystem.api.Mapping;
@@ -12,6 +12,7 @@ public static class UserMapping
             user.Id,
             user.Name,
             user.Email,
+            user.NationalId,
             user.IsAdmin,
             user.CreatedAt
         );
@@ -26,5 +27,13 @@ public static class UserMapping
             Email = user.Email,
             Password = BCrypt.Net.BCrypt.HashPassword(user.Password)
         };
+    }
+    
+    public static void ApplyUpdates(this User user, UpdateUserDto updateUser)
+    {
+        if (!string.IsNullOrWhiteSpace(updateUser.Name)) user.Name = updateUser.Name!;
+        if (!string.IsNullOrWhiteSpace(updateUser.Email)) user.Email = updateUser.Email!;
+        if (!string.IsNullOrWhiteSpace(updateUser.Password)) user.Password = updateUser.Password!;
+        
     }
 }

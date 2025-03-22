@@ -9,11 +9,26 @@ using OnlineVotingSystem.api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connString =
-    builder.Configuration.GetConnectionString("OnlineVotingSystem"); // Connection string from appsettings.json
-builder.Services
-    .AddSqlite<
-        OnlineVotingSystemContext>(connString); // Add SQLite database context from OnlineVotingSystemContext.cs file
+// Load connection string based on environment
+var env = builder.Environment.EnvironmentName;
+var connString = env == "Development"
+    ? builder.Configuration.GetConnectionString("Development")
+    : builder.Configuration.GetConnectionString("Production");
+
+if (string.IsNullOrEmpty(connString))
+{
+    throw new InvalidOperationException("Database connection string is missing.");
+}
+
+// Configure Database (SQLite for Dev, PostgreSQL for Prod)
+if (env == "Development")
+{
+    builder.Services.AddSqlite<OnlineVotingSystemContext>(connString);
+}
+else
+{
+    builder.Services.AddNpgsql<OnlineVotingSystemContext>(connString);
+}
 
 // Add JWT authentication
 builder.Services.AddAuthentication(options =>
@@ -39,20 +54,27 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
     };
 });
-builder.Services.AddAuthorization(); // Add authorization services
-builder.Services.AddScoped<JwtService>(); // Add JWT service for generating and validating JWT tokens
 
-// Add authorization policy for admin-only access
+builder.Services.AddAuthorization();
+builder.Services.AddScoped<JwtService>();
+
+// Define authorization policies
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminOnly", policy => policy.RequireClaim("IsAdmin", "true"));
 
-// Add swagger services
-builder.Services.AddEndpointsApiExplorer();
+// Enable CORS (for Swagger & frontend requests)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
 
-// Configure swagger
+// Add Swagger
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // Add a security definition for JWT
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Online Voting System API",
@@ -60,7 +82,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for managing elections, candidates, and votes."
     });
 
-    // Add a security definition for JWT to the swagger document
+    // Configure Swagger to use JWT Authentication
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Enter 'Bearer {your JWT token}'",
@@ -70,7 +92,6 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer"
     });
 
-    // Add a security requirement for JWT to the swagger document
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -85,23 +106,38 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Create swagger endpoint for development environment
+// Enable Swagger only in development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Online Voting System API v1");
+        c.RoutePrefix = string.Empty; // Make Swagger available at root (`/`)
+        c.DocumentTitle = "Online Voting System API";
+    });
 }
 
-app.MapUsersEndpoints(); // Map users endpoints
-app.MapElectionEndpoints(); // Map elections endpoints
-app.MapPositionEndpoints(); // Map positions endpoints
+// Enable CORS
+app.UseCors("AllowAll");
 
-app.MapAuthEndpoints(); // Map authentication endpoints
-
-// Add authentication and authorization middleware for JWT
+// Enable authentication & authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-await app.MigrateDbAsync(); // Migrate the database to the latest version on app startup
+// Map endpoints
+app.MapAuthEndpoints();
+app.MapCandidateEndpoints();
+app.MapElectionEndpoints();
+app.MapPositionEndpoints();
+app.MapUsersEndpoints();
+app.MapVoteEndpoints();
 
-app.Run(); // Run the application
+// Apply pending migrations
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<OnlineVotingSystemContext>();
+    dbContext.Database.EnsureCreated(); // Ensure DB exists
+}
+
+app.Run();

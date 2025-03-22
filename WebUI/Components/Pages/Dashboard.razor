@@ -5,54 +5,42 @@
 
 <main class="container mt-4 scrollable-container">
     <!-- Header Section -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
-        <div>
-            <h1 class="display-6 fw-bold text-primary mb-1">Dashboard</h1>
-            <p class="text-muted mb-0">Real-time monitoring and insights</p>
-        </div>
-        <div class="d-flex gap-2 w-100 w-md-auto">
-            <div class="vr d-none d-md-block"></div>
-            <div class="btn-group shadow-sm" role="group">
-                @foreach (var role in roles)
-                {
-                    <input type="radio" class="btn-check" name="role-filter" id="@role" autocomplete="off"
-                           checked='@(selectedRole == role)' @onchange='() => FilterByRole(role)'>
-                    <label class="btn btn-outline-primary px-3 py-2" for="@role">
-                        <i class="bi bi-person-badge me-2"></i>@role
-                    </label>
-                }
+    <header class="mb-5">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <h1 class="fw-bold display-6 text-primary mb-1">Election Dashboard</h1>
+                <p class="text-muted mb-0">Real-time voting analytics and monitoring</p>
+            </div>
+            <div class="d-flex gap-2 w-100 w-md-auto">
+                <div class="vr d-none d-md-block"></div>
+                <div class="btn-group shadow-sm" role="group">
+                    @foreach (var role in roles)
+                    {
+                        <input type="radio" class="btn-check" name="role-filter" id="@role" autocomplete="off"
+                               checked='@(selectedRole == role)' @onchange='() => FilterByRole(role)'>
+                        <label class="btn btn-outline-primary px-3 py-2" for="@role">
+                            <i class="bi bi-person-badge me-2"></i>@role
+                        </label>
+                    }
+                </div>
             </div>
         </div>
-    </div>
-    
+        <hr class="border-primary opacity-50 mt-3" style="height: 2px">
+    </header>
+
     <div class="row g-4">
         <!-- Main Analytics Column -->
         <div class="col-xl-8">
             <!-- Voting Activity Card -->
-            <div class="card shadow-lg border-0 overflow-hidden">
-                <div class="card-header bg-transparent border-0 py-3">
+            <div class="card border-2 border-primary-subtle shadow-sm">
+                <div class="card-header bg-primary-subtle border-primary-subtle py-3">
                     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center">
-                        <h5 class="fw-bold  mb-lg-0">
-                            
-                            <!-- Real-time Alert -->
-                            <div class="toast-container position-absolute ">
-                                <div class="toast show border-0 fade" role="alert">
-                                    <div class="toast-body d-flex align-items-center gap-3">
-                                        <div class="spinner-grow spinner-grow-sm text-primary"></div>
-                                        <div>
-                                            <span class="fw-medium">Live updates enabled</span>
-                                            <div class="progress mt-1" style="height: 3px; width: 100px">
-                                                <div class="progress-bar progress-bar-animated"
-                                                     style="width: @((30 - refreshCountdown) * 3.33)%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+                        <h5 class="h5 fw-semibold mb-0">
+                            <i class="bi bi-graph-up me-2"></i>Voting Activity
+                            <span class="badge bg-primary bg-opacity-25 text-primary ms-2">Live</span>
                         </h5>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                        <div class="d-flex gap-2 mt-2 mt-lg-0">
+                            <button class="btn btn-sm btn-primary rounded-pill px-3"
                                     @onclick='() => ChangeTimeRange("24h")'>24H</button>
                             <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
                                     @onclick='() => ChangeTimeRange("7d")'>7D</button>
@@ -71,25 +59,24 @@
             <!-- Metrics Grid -->
             <div class="row g-4 mt-2">
                 <div class="col-md-6">
-                    <div class="card bg-primary bg-opacity-10 border-0 h-100">
+                    <div class="card border-2 border-primary-subtle h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="bg-primary p-3 rounded-circle">
-                                    <i class="bi bi-people-fill fs-3 text-white"></i>
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                    <i class="bi bi-people-fill fs-3 text-primary"></i>
                                 </div>
-                                <div>
+                                <div class="flex-grow-1">
                                     <h6 class="text-uppercase text-muted mb-1">Active Voters</h6>
                                     <h3 class="mb-0 fw-bold">@ActiveVoters.ToString("N0")</h3>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="d-flex justify-content-between small">
-                                    <span>Target: @VoterTarget.ToString("N0")</span>
-                                    <span>@voterRegistrationProgress%</span>
-                                </div>
-                                <div class="progress" style="height: 6px">
-                                    <div class="progress-bar bg-primary" role="progressbar"
-                                         style="width: @voterRegistrationProgress%"></div>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between small text-muted">
+                                            <span>Target: @VoterTarget.ToString("N0")</span>
+                                            <span>@voterRegistrationProgress%</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px">
+                                            <div class="progress-bar bg-primary" style="width: @voterRegistrationProgress%"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -97,25 +84,24 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="card bg-success bg-opacity-10 border-0 h-100">
+                    <div class="card border-2 border-success-subtle h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="bg-success p-3 rounded-circle">
-                                    <i class="bi bi-check-circle-fill fs-3 text-white"></i>
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                    <i class="bi bi-check-circle-fill fs-3 text-success"></i>
                                 </div>
-                                <div>
+                                <div class="flex-grow-1">
                                     <h6 class="text-uppercase text-muted mb-1">Completed Votes</h6>
                                     <h3 class="mb-0 fw-bold">@CompletedVotes.ToString("N0")</h3>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="d-flex justify-content-between small">
-                                    <span>Participation Rate</span>
-                                    <span>@participationRate%</span>
-                                </div>
-                                <div class="progress" style="height: 6px">
-                                    <div class="progress-bar bg-success" role="progressbar"
-                                         style="width: @participationRate%"></div>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between small text-muted">
+                                            <span>Participation Rate</span>
+                                            <span>@participationRate%</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px">
+                                            <div class="progress-bar bg-success" style="width: @participationRate%"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -124,9 +110,13 @@
             </div>
 
             <!-- Demographic Insights -->
-            <div class="card shadow-lg border-0 mt-4">
+            <div class="card border-2 border-primary-subtle mt-4">
+                <div class="card-header bg-primary-subtle border-primary-subtle py-3">
+                    <h5 class="h5 fw-semibold mb-0">
+                        <i class="bi bi-person-lines-fill me-2"></i>Voter Demographics
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="fw-bold mb-4">Voter Demographics</h5>
                     <div class="row g-4">
                         <div class="col-md-7">
                             <div class="ratio ratio-21x9">
@@ -139,15 +129,16 @@
                                     @foreach (var demo in demographics)
                                     {
                                         <div class="list-group-item border-0 d-flex align-items-center px-0">
-                                            <span class="badge bg-primary bg-opacity-25 text-primary fs-7 
-                                                     me-3">@demo.Percentage%</span>
+                                            <span class="badge bg-primary bg-opacity-25 text-primary fs-7 me-3">
+                                                @demo.Percentage%
+                                            </span>
                                             <div class="flex-fill">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>@demo.Category</span>
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="fw-medium">@demo.Category</span>
                                                     <span class="text-muted">@demo.Count.ToString("N0")</span>
                                                 </div>
                                                 <div class="progress" style="height: 4px">
-                                                    <div class="progress-bar" style="width: @demo.Percentage%"></div>
+                                                    <div class="progress-bar bg-primary" style="width: @demo.Percentage%"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -164,19 +155,20 @@
         <div class="col-xl-4">
             <div class="sticky-xl-top" style="top: 1rem">
                 <!-- Activity Stream -->
-                <div class="card shadow-lg border-0">
-                    <div class="card-header border-0 bg-white pt-3">
-                        <h5 class="fw-bold mb-0">Activity Stream</h5>
-                        <p class="text-muted small mb-0">Real-time system events</p>
+                <div class="card border-2 border-primary-subtle shadow-sm">
+                    <div class="card-header bg-primary-subtle border-primary-subtle py-3">
+                        <h5 class="h5 fw-semibold mb-0">
+                            <i class="bi bi-activity me-2"></i>Activity Stream
+                        </h5>
                     </div>
                     <div class="card-body p-0">
-                        <div class="list-group list-group-flush" style="max-height: 600px; overflow-y: auto;">
+                        <div class="list-group list-group-flush scrollable-list" style="max-height: 600px">
                             @foreach (var activity in recentActivities)
                             {
                                 <div class="list-group-item border-0 py-3 px-4">
                                     <div class="d-flex gap-3">
                                         <div class="bi @GetActivityIcon(activity.Type) fs-4 text-primary"></div>
-                                        <div>
+                                        <div class="flex-grow-1">
                                             <div class="d-flex justify-content-between mb-1">
                                                 <span class="fw-medium">@activity.Description</span>
                                                 <small class="text-muted">@activity.Timestamp.ToString("HH:mm")</small>
@@ -190,16 +182,20 @@
                     </div>
                 </div>
 
-                <!-- Quick Stats -->
-                <div class="card shadow-lg border-0 mt-4">
+                <!-- System Status -->
+                <div class="card border-2 border-primary-subtle mt-4">
+                    <div class="card-header bg-primary-subtle border-primary-subtle py-3">
+                        <h5 class="h5 fw-semibold mb-0">
+                            <i class="bi bi-heart-pulse me-2"></i>System Status
+                        </h5>
+                    </div>
                     <div class="card-body">
-                        <h6 class="text-uppercase text-muted mb-3">System Status</h6>
                         <div class="row g-3">
                             <div class="col-6">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="bi bi-server fs-4 text-success"></div>
                                     <div>
-                                        <div class="small">API Health</div>
+                                        <div class="small text-muted">API Health</div>
                                         <div class="fw-bold">@apiLatency ms</div>
                                     </div>
                                 </div>
@@ -208,7 +204,7 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="bi bi-shield-check fs-4 text-primary"></div>
                                     <div>
-                                        <div class="small">Security Level</div>
+                                        <div class="small text-muted">Security Level</div>
                                         <div class="fw-bold">High</div>
                                     </div>
                                 </div>
@@ -223,27 +219,39 @@
 
 <style>
     .card {
-        border-radius: 1rem;
-        transition: transform 0.2s, box-shadow 0.2s;
+        border-radius: 0.75rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.15);
     }
 
     .progress-bar {
         border-radius: 4px;
     }
 
+    .scrollable-container {
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .scrollable-list {
+        scrollbar-width: thin;
+        scrollbar-color: var(--bs-primary) rgba(13, 110, 253, 0.1);
+    }
+
     .list-group-item {
-        transition: background-color 0.2s;
-    } 
-     .scrollable-container {
-         max-height: calc(100vh - 100px);
-         overflow-y: auto;
-     }
+        transition: background-color 0.2s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: var(--bs-primary-bg-subtle);
+    }
 </style>
+
 
 @code {
     private static Random random = new();

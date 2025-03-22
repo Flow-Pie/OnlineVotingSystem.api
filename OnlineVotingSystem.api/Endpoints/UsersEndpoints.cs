@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OnlineVotingSystem.api.Data;
+using OnlineVotingSystem.api.DTOs.User;
 using OnlineVotingSystem.api.Mapping;
 
 namespace OnlineVotingSystem.api.Endpoints;
@@ -19,11 +20,29 @@ public static class UsersEndpoints
                 .ToListAsync();
         }).WithName("getUsers");
 
-        // Get specific User by id
-        group.MapGet("/{id:guid}", async (Guid id, OnlineVotingSystemContext dbContext) =>
+        // Get specific User by userId
+        group.MapGet("/{userId:guid}", async (Guid userId, OnlineVotingSystemContext dbContext) =>
         {
-            var user = await dbContext.Users.FindAsync(id);
+            var user = await dbContext.Users.FindAsync(userId);
             return user is null ? Results.NotFound() : Results.Ok(user.ToUserDetailsDto());
+        });
+
+        // Patch User by UserId
+        group.MapPatch("{userId:guid}", async (
+            Guid userId,
+            UpdateUserDto updateDto,
+            OnlineVotingSystemContext dbContext) =>
+        {
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user is null)
+            {
+                return Results.NotFound("User not found.");
+            }
+
+            user.ApplyUpdates(updateDto);
+            await dbContext.SaveChangesAsync();
+
+            return Results.Ok(user.ToUserDetailsDto());
         });
 
         // NUKE users
@@ -40,10 +59,10 @@ public static class UsersEndpoints
             return Results.Ok("NO SURVIVORS");
         }).RequireAuthorization("AdminOnly");
 
-        // delete user by id
-        group.MapDelete("/{id:guid}", async (Guid id, OnlineVotingSystemContext dbContext) =>
+        // delete user by userId
+        group.MapDelete("/{userId:guid}", async (Guid userId, OnlineVotingSystemContext dbContext) =>
         {
-            await dbContext.Users.Where(user => user.Id == id).ExecuteDeleteAsync();
+            await dbContext.Users.Where(user => user.Id == userId).ExecuteDeleteAsync();
 
             return Results.NoContent();
         }).RequireAuthorization("AdminOnly");

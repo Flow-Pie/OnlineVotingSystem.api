@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace OnlineVotingSystem.api.DTOs;
+namespace OnlineVotingSystem.api.DTOs.User;
 
 public record CreateUserDto(
     [Required, StringLength(100, MinimumLength = 6, ErrorMessage = "Name must be more than 6 chars")]

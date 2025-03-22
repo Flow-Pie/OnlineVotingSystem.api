@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "6AsWGh/bFsZJrDuxFxXG3l4nnielFHuruXDSk2qDdosDe5i2mRZ8/U28pnJept8/kMkgPSSgTLlYMrVIbYG+Rw==",
+  "dgSpecHash": "nz4Ba9D/nE0DihwuMS3ZSiA3o0cSbL4+0ONlTUC0ooFxAtBe1HJihXnaG4/hhyKkY2sOh+P2OqbApXlxfs3sIA==",
   "success": true,
   "projectFilePath": "/home/jon/Documents/WebUI/WebUI/WebUI.csproj",
   "expectedPackageFiles": [
@@ -47,6 +47,8 @@
     "/home/jon/.nuget/packages/microsoft.openapi/1.6.22/microsoft.openapi.1.6.22.nupkg.sha512",
     "/home/jon/.nuget/packages/minimalapis.extensions/0.11.0/minimalapis.extensions.0.11.0.nupkg.sha512",
     "/home/jon/.nuget/packages/minivalidation/0.8.0/minivalidation.0.8.0.nupkg.sha512",
+    "/home/jon/.nuget/packages/npgsql/9.0.3/npgsql.9.0.3.nupkg.sha512",
+    "/home/jon/.nuget/packages/npgsql.entityframeworkcore.postgresql/9.0.4/npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
     "/home/jon/.nuget/packages/sqlitepclraw.bundle_e_sqlite3/2.1.10/sqlitepclraw.bundle_e_sqlite3.2.1.10.nupkg.sha512",
     "/home/jon/.nuget/packages/sqlitepclraw.core/2.1.10/sqlitepclraw.core.2.1.10.nupkg.sha512",
     "/home/jon/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.10/sqlitepclraw.lib.e_sqlite3.2.1.10.nupkg.sha512",

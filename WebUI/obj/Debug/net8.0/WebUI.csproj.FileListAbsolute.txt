@@ -108,3 +108,5 @@
 /home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/WebUI.pdb
 /home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/WebUI.genruntimeconfig.cache
 /home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/ref/WebUI.dll
+/home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Npgsql.dll
+/home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll

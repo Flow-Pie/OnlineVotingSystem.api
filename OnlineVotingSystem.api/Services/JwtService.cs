@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OnlineVotingSystem.api.Data;
 using OnlineVotingSystem.api.DTOs;
+using OnlineVotingSystem.api.DTOs.User;
 
 namespace OnlineVotingSystem.api.Services;
 
@@ -40,9 +41,10 @@ public class JwtService
         {
             Subject = new ClaimsIdentity([
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim("NationalId", user.NationalId.ToString()),
-                new Claim("IsAdmin", user.IsAdmin.ToString().ToLower())
+                new Claim("nationalId", user.NationalId.ToString()),
+                new Claim("isAdmin", user.IsAdmin.ToString().ToLower())
             ]),
             Expires = tokenExpiryTimeStamp,
             Issuer = issuer,
@@ -56,6 +58,7 @@ public class JwtService
             user.Id,
             user.Name,
             user.Email,
+            user.NationalId,
             user.IsAdmin,
             user.CreatedAt
         );
