@@ -4,7 +4,7 @@
 @using System.Timers
 @inject IJSRuntime JSRuntime
 
-<main class="container mt-4">
+<main class="container mt-4 scrollable-container">
     <h2 class="fw-bold mb-3 text-center">📊 Election Analytics</h2>
 
     <!-- Filters -->
@@ -98,7 +98,12 @@
         </div>
     </div>
 </main>
-
+<style>
+    .scrollable-container {
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+</style>
 @code {
     private List<CandidateResult> ChartData = new();
     private List<RegionResult> RegionalData = new();
@@ -106,7 +111,7 @@
     private string activeTab = "age";
     private int refreshCountdown = 30;
     private Timer? refreshTimer;
-    private List<string> Regions = new() { "North", "South", "East", "West" };
+    private List<string> Regions = new() { "Northern Kenya", "South", "Central", "Metrapolitan" };
     private IJSObjectReference? chartModule;
     private object? resultsChartInstance;
     private object? demographicChartInstance;

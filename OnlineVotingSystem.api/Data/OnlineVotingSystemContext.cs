@@ -24,6 +24,16 @@ public class OnlineVotingSystemContext(DbContextOptions<OnlineVotingSystemContex
                 Password = "$2a$11$McDzAqqk04VkMTWMQmZnw.DR.uCHl/wj23tAKPZBJNSygN2koP8gK", // AdminPassword!1234
                 IsAdmin = true,
                 CreatedAt = new DateTime(2024, 2, 11, 12, 0, 0, DateTimeKind.Utc)
+            },
+            new User()
+            {
+                Id = new Guid("22222222-2222-2222-2222-111111111111"), // Hardcoded UUID
+                Name = "Jon",
+                NationalId = 42424242,
+                Email = "jon@gmail.com",
+                Password = "$2a$11$.3uav6eCFqwMkvAQsdvQoeqIhGwly.MskOqZd9uGGHQomcPtagFkS", // Admin1234!
+                IsAdmin = true,
+                CreatedAt = new DateTime(2024, 2, 11, 12, 0, 0, DateTimeKind.Utc)
             }
         );
     }

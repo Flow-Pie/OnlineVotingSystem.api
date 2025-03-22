@@ -40,10 +40,8 @@ public static class ElectionsEndpoints
                 dbContext.Elections.Add(election); // add election to database
                 await dbContext.SaveChangesAsync(); // save changes to the database
 
-                return Results.Created(
-                    uri: $"/elections/{election.Id}",  // URL to fetch the new election
-                    value: election.ToElectionDetailsDto()  // Explicit JSON response
-                );
+                return Results.CreatedAtRoute("getElections", new { id = election.Id },
+                    election.ToElectionDetailsDto()); // return created election
             }).RequireAuthorization("AdminOnly");
 
         // Get election by id - "http://localhost:PORT/elections/{id}"

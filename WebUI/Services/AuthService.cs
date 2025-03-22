@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using OnlineVotingSystem.api.DTOs;
@@ -16,7 +17,14 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponseDto> LoginAsync(LoginUserDto loginRequest)
     {
-        var response = await _httpClient.PostAsJsonAsync("/auth/login", loginRequest);
+        var jsonContent = JsonContent.Create(loginRequest);
+        var request = new HttpRequestMessage(HttpMethod.Post, "/auth/login")
+        {
+            Content = jsonContent
+        };
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        var response = await _httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -24,8 +32,8 @@ public class AuthService : IAuthService
             throw new HttpRequestException($"Login failed: {response.StatusCode} - {errorMessage}");
         }
 
-        return await response.Content.ReadFromJsonAsync<LoginResponseDto>() 
-               ?? throw new InvalidOperationException("Invalid response received from login.");
+        return await response.Content.ReadFromJsonAsync<LoginResponseDto>()
+               ?? throw new InvalidOperationException("Invalid login response");
     }
 
     public async Task<UserDetailsDto> RegisterAsync(CreateUserDto registerRequest)

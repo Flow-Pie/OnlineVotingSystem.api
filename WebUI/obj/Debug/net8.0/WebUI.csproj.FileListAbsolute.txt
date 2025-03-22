@@ -10,6 +10,7 @@
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/WebUI.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/WebUI.pdb
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/BCrypt.Net-Next.dll
+/home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Blazored.LocalStorage.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Authorization.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.dll

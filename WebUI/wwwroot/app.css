@@ -1,9 +1,24 @@
-html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;  
 }
+
 
 a, .btn-link {
     color: #006bb7;
+    
 }
 
 .btn-primary {
@@ -78,16 +93,6 @@ h1:focus {
     border-left: 3px solid #4e73df;
 }
 
-/*nav menu*/
-
-.card-info-hover {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.card-info-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05);
-}
-
 /*elections cards*/
 .fade-in {
     opacity: 1;
@@ -98,3 +103,57 @@ h1:focus {
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
 }
+
+
+
+
+  /* Hover Effects */
+ .hover-scale {
+     transition: transform 0.3s ease, background-color 0.3s ease;
+ }
+.hover-scale:hover {
+    transform: scale(1.02);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+.nav-link.active-nav-link {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #1e2a5a;
+    color: #ffffff; 
+}
+
+
+.backdrop-blur {
+    backdrop-filter: blur(10px);
+}
+
+
+
+ .hover-item {
+     transition: all 0.2s ease;
+ }
+
+.hover-item:hover {
+    background-color: #2d3339;
+    padding-left: 1.5rem !important;
+}
+
+.active-nav-item {
+    background-color: #2d3339 !important;
+    border-left: 4px solid #0dcaf0 !important;
+    padding-left: 1.5rem !important;
+}
+
+.dot-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(32, 201, 151, 0.4); }
+    90% { box-shadow: 0 0 0 8px rgba(32, 201, 151, 0); }
+}
+

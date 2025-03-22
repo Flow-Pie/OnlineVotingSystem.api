@@ -1,66 +1,108 @@
-﻿<div class="d-flex flex-column vh-100">
-    <!-- Top Navbar -->
-    <div class="top-row ps-3 navbar navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand text-white fw-bold" href="">E-Voting System</a>
+﻿<div class="d-flex flex-column vh-100" style="background-color: #1a1d20;">
+    <!-- Top Header -->
+    <div class="sticky-top border-bottom" style="background-color: #212529; border-color: #2d3339 !important;">
+        <div class="d-flex align-items-center justify-content-between p-3">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-shield-check fs-4 me-2" style="color: #20c997;"></i>
+                <span class="h5 mb-0" style="color: #f8f9fa;">
+                    <span class="fw-medium">E</span>-Vote
+                    <span class="fw-light" style="color: #adb5bd;">Console</span>
+                </span>
+            </div>
+            <!-- Toggle Button for Mobile -->
+            <button class="btn btn-outline-light d-lg-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#sidebar">
+                <i class="bi bi-list"></i>
+            </button>
         </div>
     </div>
 
-    <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-    <!-- Sidebar Navigation -->
-    <div class="nav-scrollable flex-grow-1" onclick="document.querySelector('.navbar-toggler').click()">
-        <nav class="nav flex-column">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="dashboard">
-                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+    <!-- Main Container -->
+    <div class="d-flex flex-grow-1">
+        <!-- Sidebar Navigation -->
+        <div class="collapse d-lg-block flex-grow-1 overflow-auto vh-100 p-2" id="sidebar" style="background-color: #212529;">
+            <nav class="nav flex-column gap-1">
+                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                         style="color: #e9ecef;"
+                         href="dashboard"
+                         ActiveClass="active-nav-item"
+                         Match="NavLinkMatch.All">
+                    <i class="bi bi-speedometer2 fs-5 me-3" style="color: #0dcaf0;"></i>
+                    <span class="fw-light">Dashboard</span>
                 </NavLink>
-            </div>
 
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="create-election">
-                    <i class="bi bi-clipboard-plus-fill me-2"></i> Add Election
+                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                         style="color: #e9ecef;"
+                         href="create-election"
+                         ActiveClass="active-nav-item"
+                         Match="NavLinkMatch.All">
+                    <i class="bi bi-clipboard-plus fs-5 me-3" style="color: #0dcaf0;"></i>
+                    <span class="fw-light">Election Creation</span>
                 </NavLink>
-            </div>
 
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="active-elections">
-                    <i class="bi bi-calendar-check me-2"></i> Active Election
+                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                         style="color: #e9ecef;"
+                         href="add-candidate"
+                         ActiveClass="active-nav-item"
+                         Match="NavLinkMatch.All">
+                    <i class="bi bi-person-add fs-5 me-3" style="color: #0dcaf0;"></i>
+                    <span class="fw-light">Candidate Management</span>
                 </NavLink>
-            </div>
 
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="candidates">
-                    <i class="bi bi-person-badge-fill me-2"></i> Candidates
+                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                         style="color: #e9ecef;"
+                         href="active-elections"
+                         ActiveClass="active-nav-item"
+                         Match="NavLinkMatch.All">
+                    <i class="bi bi-clock-history fs-5 me-3" style="color: #0dcaf0;"></i>
+                    <span class="fw-light">Active Elections</span>
                 </NavLink>
-            </div>
 
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="results">
-                    <i class="bi bi-bar-chart-fill me-2"></i> Results
+                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                         style="color: #e9ecef;"
+                         href="candidates"
+                         ActiveClass="active-nav-item"
+                         Match="NavLinkMatch.All">
+                    <i class="bi bi-people fs-5 me-3" style="color: #0dcaf0;"></i>
+                    <span class="fw-light">Candidate Directory</span>
                 </NavLink>
-            </div>
-        </nav>
-    </div>
 
-    <!-- Info Box -->
-    <div class="card bg-dark border-secondary border-1 mx-3 mb-3 p-3 rounded-3 shadow-sm mt-auto card-dark-hover">
-        <div class="d-flex align-items-start">
-            <i class="bi bi-info-circle-fill text-info fs-5 mt-1 me-2"></i>
-            <div>
-                <h6 class="fw-semibold mb-1 text-light">System Information</h6>
-                <div class="d-flex flex-column">
-                <span class="small text-light mb-1">
-                    <span class="fw-medium">Version:</span> 1.0.0
-                </span>
-                    <span class="small text-light">
-                    <span class="fw-medium">Status:</span> 
-                    <span class="badge bg-success bg-opacity-25 text-success fs-xxsmall">Operational</span>
-                </span>
+                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                         style="color: #e9ecef;"
+                         href="results"
+                         ActiveClass="active-nav-item"
+                         Match="NavLinkMatch.All">
+                    <i class="bi bi-bar-chart-line fs-5 me-3" style="color: #0dcaf0;"></i>
+                    <span class="fw-light">Voting Analytics</span>
+                </NavLink>
+            </nav>
+
+            <!-- System Status Box -->
+            <div class="mt-auto p-3 d-lg-block mb-5 d-none">
+                <div class="p-3 rounded-3" style="background-color: #1a1d20; border: 1px solid #2d3339;">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-hexagon-fill fs-5 me-2" style="color: #0dcaf0;"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 fw-medium" style="color: #f8f9fa;">System Status</h6>
+                            <div class="small" style="color: #adb5bd;">v2.1.0 Enterprise</div>
+                        </div>
+                        <div class="dot-pulse" style="background-color: #20c997;"></div>
+                    </div>
+
+                    <div class="border-top pt-3" style="border-color: #2d3339 !important;">
+                        <div class="text-center small">
+                            <div class="mb-1" style="color: #adb5bd;">&copy; 2025 SecureVote</div>
+                            <div class="small" style="color: #f8f9fa;">
+                                <i class="bi bi-shield-check"></i>
+                                Blockchain Secured
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <hr class="my-2 text-secondary opacity-25">
-        <p class="small text-light opacity-75 mb-0">&copy; 2025 E-Vote Engine. <br/> All rights reserved.</p>
     </div>
 </div>
+

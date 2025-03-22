@@ -1,0 +1,231 @@
+.
+├── appsettings.Development.json
+├── appsettings.json
+├── bin
+│   └── Debug
+│       └── net8.0
+│           ├── appsettings.Development.json
+│           ├── appsettings.json
+│           ├── BCrypt.Net-Next.dll
+│           ├── Microsoft.AspNetCore.Authentication.JwtBearer.dll
+│           ├── Microsoft.AspNetCore.Authorization.dll
+│           ├── Microsoft.AspNetCore.Components.dll
+│           ├── Microsoft.AspNetCore.Components.Forms.dll
+│           ├── Microsoft.AspNetCore.Components.Web.dll
+│           ├── Microsoft.AspNetCore.Metadata.dll
+│           ├── Microsoft.Data.Sqlite.dll
+│           ├── Microsoft.EntityFrameworkCore.Abstractions.dll
+│           ├── Microsoft.EntityFrameworkCore.dll
+│           ├── Microsoft.EntityFrameworkCore.Relational.dll
+│           ├── Microsoft.EntityFrameworkCore.Sqlite.dll
+│           ├── Microsoft.Extensions.Caching.Abstractions.dll
+│           ├── Microsoft.Extensions.Caching.Memory.dll
+│           ├── Microsoft.Extensions.Configuration.Abstractions.dll
+│           ├── Microsoft.Extensions.DependencyInjection.Abstractions.dll
+│           ├── Microsoft.Extensions.DependencyInjection.dll
+│           ├── Microsoft.Extensions.DependencyModel.dll
+│           ├── Microsoft.Extensions.Logging.Abstractions.dll
+│           ├── Microsoft.Extensions.Logging.dll
+│           ├── Microsoft.Extensions.Options.dll
+│           ├── Microsoft.Extensions.Primitives.dll
+│           ├── Microsoft.IdentityModel.Abstractions.dll
+│           ├── Microsoft.IdentityModel.JsonWebTokens.dll
+│           ├── Microsoft.IdentityModel.Logging.dll
+│           ├── Microsoft.IdentityModel.Protocols.dll
+│           ├── Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+│           ├── Microsoft.IdentityModel.Tokens.dll
+│           ├── Microsoft.JSInterop.dll
+│           ├── Microsoft.OpenApi.dll
+│           ├── MinimalApis.Extensions.dll
+│           ├── MiniValidation.dll
+│           ├── OnlineVotingSystem.api
+│           ├── OnlineVotingSystem.api.deps.json
+│           ├── OnlineVotingSystem.api.dll
+│           ├── OnlineVotingSystem.api.pdb
+│           ├── OnlineVotingSystem.api.runtimeconfig.json
+│           ├── runtimes
+│           │   ├── browser
+│           │   │   └── lib
+│           │   │       └── net8.0
+│           │   │           └── System.Text.Encodings.Web.dll
+│           │   ├── browser-wasm
+│           │   │   └── nativeassets
+│           │   │       └── net8.0
+│           │   │           └── e_sqlite3.a
+│           │   ├── linux-arm
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-arm64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-armel
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-mips64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-musl-arm
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-musl-arm64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-musl-s390x
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-musl-x64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-ppc64le
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-s390x
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-x64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── linux-x86
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.so
+│           │   ├── maccatalyst-arm64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.dylib
+│           │   ├── maccatalyst-x64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.dylib
+│           │   ├── osx-arm64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.dylib
+│           │   ├── osx-x64
+│           │   │   └── native
+│           │   │       └── libe_sqlite3.dylib
+│           │   ├── win-arm
+│           │   │   └── native
+│           │   │       └── e_sqlite3.dll
+│           │   ├── win-arm64
+│           │   │   └── native
+│           │   │       └── e_sqlite3.dll
+│           │   ├── win-x64
+│           │   │   └── native
+│           │   │       └── e_sqlite3.dll
+│           │   └── win-x86
+│           │       └── native
+│           │           └── e_sqlite3.dll
+│           ├── SQLitePCLRaw.batteries_v2.dll
+│           ├── SQLitePCLRaw.core.dll
+│           ├── SQLitePCLRaw.provider.e_sqlite3.dll
+│           ├── Swashbuckle.AspNetCore.Swagger.dll
+│           ├── Swashbuckle.AspNetCore.SwaggerGen.dll
+│           ├── Swashbuckle.AspNetCore.SwaggerUI.dll
+│           ├── Syncfusion.Blazor.Charts.dll
+│           ├── Syncfusion.Blazor.Core.dll
+│           ├── Syncfusion.Blazor.Data.dll
+│           ├── Syncfusion.Blazor.DataVizCommon.dll
+│           ├── Syncfusion.ExcelExport.Net.dll
+│           ├── Syncfusion.Licensing.dll
+│           ├── Syncfusion.PdfExport.Net.dll
+│           ├── System.Diagnostics.DiagnosticSource.dll
+│           ├── System.IdentityModel.Tokens.Jwt.dll
+│           ├── System.IO.Pipelines.dll
+│           ├── System.Text.Encodings.Web.dll
+│           ├── System.Text.Json.dll
+│           ├── WebUI
+│           ├── WebUI.deps.json
+│           ├── WebUI.dll
+│           ├── WebUI.pdb
+│           ├── WebUI.runtimeconfig.json
+│           └── WebUI.staticwebassets.runtime.json
+├── Components
+│   ├── App.razor
+│   ├── _Imports.razor
+│   ├── Layout
+│   │   ├── MainLayout.razor
+│   │   ├── MainLayout.razor.css
+│   │   ├── NavMenu.razor
+│   │   └── NavMenu.razor.css
+│   ├── Pages
+│   │   ├── ActiveElections.razor
+│   │   ├── AddCandidate.razor
+│   │   ├── Candidate.razor
+│   │   ├── Counter.razor
+│   │   ├── CreateElection.razor
+│   │   ├── Dashboard.razor
+│   │   ├── Error.razor
+│   │   ├── Home.razor
+│   │   ├── Login.razor
+│   │   ├── Result.razor
+│   │   └── Weather.razor
+│   └── Routes.razor
+├── obj
+│   ├── Debug
+│   │   └── net8.0
+│   │       ├── apphost
+│   │       ├── ref
+│   │       │   └── WebUI.dll
+│   │       ├── refint
+│   │       │   └── WebUI.dll
+│   │       ├── scopedcss
+│   │       │   ├── bundle
+│   │       │   │   └── WebUI.styles.css
+│   │       │   ├── Components
+│   │       │   │   └── Layout
+│   │       │   │       ├── MainLayout.razor.rz.scp.css
+│   │       │   │       └── NavMenu.razor.rz.scp.css
+│   │       │   └── projectbundle
+│   │       │       └── WebUI.bundle.scp.css
+│   │       ├── staticwebassets
+│   │       │   ├── msbuild.buildMultiTargeting.WebUI.props
+│   │       │   ├── msbuild.buildTransitive.WebUI.props
+│   │       │   ├── msbuild.build.WebUI.props
+│   │       │   └── msbuild.WebUI.Microsoft.AspNetCore.StaticWebAssets.props
+│   │       ├── staticwebassets.build.json
+│   │       ├── staticwebassets.development.json
+│   │       ├── staticwebassets.pack.json
+│   │       ├── WebUI.AssemblyInfo.cs
+│   │       ├── WebUI.AssemblyInfoInputs.cache
+│   │       ├── WebUI.assets.cache
+│   │       ├── WebUI.csproj.AssemblyReference.cache
+│   │       ├── WebUI.csproj.CopyComplete
+│   │       ├── WebUI.csproj.CoreCompileInputs.cache
+│   │       ├── WebUI.csproj.FileListAbsolute.txt
+│   │       ├── WebUI.dll
+│   │       ├── WebUI.GeneratedMSBuildEditorConfig.editorconfig
+│   │       ├── WebUI.genruntimeconfig.cache
+│   │       ├── WebUI.GlobalUsings.g.cs
+│   │       ├── WebUI.MvcApplicationPartsAssemblyInfo.cache
+│   │       ├── WebUI.MvcApplicationPartsAssemblyInfo.cs
+│   │       └── WebUI.pdb
+│   ├── project.assets.json
+│   ├── project.nuget.cache
+│   ├── project.packagespec.json
+│   ├── rider.project.model.nuget.info
+│   ├── rider.project.restore.info
+│   ├── WebUI.csproj.nuget.dgspec.json
+│   ├── WebUI.csproj.nuget.g.props
+│   └── WebUI.csproj.nuget.g.targets
+├── Program.cs
+├── Properties
+│   └── launchSettings.json
+├── Services
+│   ├── AuthService.cs
+│   ├── ElectionService.cs
+│   ├── IAuthService.cs
+│   ├── IElectionsService.cs
+│   ├── IPositionsService.cs
+│   ├── IUsersService.cs
+│   ├── PositionsService.cs
+│   └── UsersService.cs
+├── structure.txt
+├── WebUI.csproj
+└── wwwroot
+    ├── app.css
+    ├── bootstrap
+    │   ├── bootstrap.min.css
+    │   └── bootstrap.min.css.map
+    ├── favicon.png
+    └── js
+        ├── charts.js
+        └── dashboardCharts.js
+
+70 directories, 159 files

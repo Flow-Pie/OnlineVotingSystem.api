@@ -1,3 +1,5 @@
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using WebUI.Components;
 using Syncfusion.Blazor;
 using WebUI.Services;
@@ -18,7 +20,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 // Register HttpClient services
+builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
 builder.Services.AddHttpClient<IElectionsService, ElectionService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -40,6 +48,13 @@ builder.Services.AddRazorComponents()
 
 // Syncfusion Charts
 builder.Services.AddSyncfusionBlazor();
+
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>(); 
+
+builder.Logging.SetMinimumLevel(LogLevel.Debug);  // Log everything from Debug level
+builder.Logging.AddConsole();
 
 var app = builder.Build();
 

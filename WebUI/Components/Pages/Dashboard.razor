@@ -3,88 +3,217 @@
 @using System.Timers
 @inject IJSRuntime JSRuntime
 
-<main class="container-fluid mt-4">
-    <div class="row">
-        <!-- Left Side: Charts & Analytics -->
-        <div class="col-lg-8">
-            <!-- Top Section with Role Selection -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="fw-bold">Hi, Welcome Admin!</h2>
-                <div class="btn-group">
-                    @foreach (var role in roles)
-                    {
-                        <button class="btn @GetRoleButtonClass(role)"
-                                @onclick='() => FilterByRole(role)'>@role</button>
-                    }
-                </div>
-            </div>
-
-            <!-- Real-time Updates Alert -->
-            <div class="alert alert-info mb-3 d-flex align-items-center gap-2">
-                <div class="spinner-border spinner-border-sm"></div>
-                <span>Live data updates in @refreshCountdown seconds</span>
-            </div>
-
-            <!-- Voting Activity Chart -->
-            <div class="analytics-card p-4 mb-4 bg-white shadow rounded">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0">Voting Activity</h5>
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-outline-secondary"
-                                @onclick='() => ChangeTimeRange("24h")'>24H</button>
-                        <button class="btn btn-sm btn-outline-secondary"
-                                @onclick='() => ChangeTimeRange("7d")'>7D</button>
-                        <button class="btn btn-sm btn-outline-secondary"
-                                @onclick='() => ChangeTimeRange("30d")'>30D</button>
-                    </div>
-                </div>
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="activityChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Voter Demographics Chart -->
-            <div class="analytics-card p-4 bg-white shadow rounded">
-                <h5 class="fw-bold mb-3">Voter Demographics</h5>
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="demographicsChart"></canvas>
-                </div>
+<main class="container mt-4 scrollable-container">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="display-6 fw-bold text-primary mb-1">Dashboard</h1>
+            <p class="text-muted mb-0">Real-time monitoring and insights</p>
+        </div>
+        <div class="d-flex gap-2 w-100 w-md-auto">
+            <div class="vr d-none d-md-block"></div>
+            <div class="btn-group shadow-sm" role="group">
+                @foreach (var role in roles)
+                {
+                    <input type="radio" class="btn-check" name="role-filter" id="@role" autocomplete="off"
+                           checked='@(selectedRole == role)' @onchange='() => FilterByRole(role)'>
+                    <label class="btn btn-outline-primary px-3 py-2" for="@role">
+                        <i class="bi bi-person-badge me-2"></i>@role
+                    </label>
+                }
             </div>
         </div>
-
-        <!-- Right Side: Summary Cards -->
-        <div class="col-lg-4">
-            <div class="sticky-top" style="top: 20px;">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="info-card bg-success text-white p-3 mb-3 shadow">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="fw-bold">Total Voters</h5>
-                                    <h3 class="mb-0">@TotalVoters.ToString("N0")</h3>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Main Analytics Column -->
+        <div class="col-xl-8">
+            <!-- Voting Activity Card -->
+            <div class="card shadow-lg border-0 overflow-hidden">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center">
+                        <h5 class="fw-bold  mb-lg-0">
+                            
+                            <!-- Real-time Alert -->
+                            <div class="toast-container position-absolute ">
+                                <div class="toast show border-0 fade" role="alert">
+                                    <div class="toast-body d-flex align-items-center gap-3">
+                                        <div class="spinner-grow spinner-grow-sm text-primary"></div>
+                                        <div>
+                                            <span class="fw-medium">Live updates enabled</span>
+                                            <div class="progress mt-1" style="height: 3px; width: 100px">
+                                                <div class="progress-bar progress-bar-animated"
+                                                     style="width: @((30 - refreshCountdown) * 3.33)%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <i class="fas fa-users fa-2x"></i>
                             </div>
-                            <div class="progress mt-2" style="height: 5px;">
-                                <div class="progress-bar" style="width: @(voterRegistrationProgress)%"></div>
+
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                    @onclick='() => ChangeTimeRange("24h")'>24H</button>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                    @onclick='() => ChangeTimeRange("7d")'>7D</button>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                    @onclick='() => ChangeTimeRange("30d")'>30D</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="ratio ratio-21x9">
+                        <canvas id="activityChart" class="p-3"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="row g-4 mt-2">
+                <div class="col-md-6">
+                    <div class="card bg-primary bg-opacity-10 border-0 h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary p-3 rounded-circle">
+                                    <i class="bi bi-people-fill fs-3 text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-uppercase text-muted mb-1">Active Voters</h6>
+                                    <h3 class="mb-0 fw-bold">@ActiveVoters.ToString("N0")</h3>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between small">
+                                    <span>Target: @VoterTarget.ToString("N0")</span>
+                                    <span>@voterRegistrationProgress%</span>
+                                </div>
+                                <div class="progress" style="height: 6px">
+                                    <div class="progress-bar bg-primary" role="progressbar"
+                                         style="width: @voterRegistrationProgress%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Activities -->
-                <div class="card mt-3 shadow">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">Recent Activities</h5>
-                    </div>
-                    <div class="card-body recent-activities" style="max-height: 300px; overflow-y: auto;">
-                        @foreach (var activity in recentActivities)
-                        {
-                            <div class="activity-item mb-2">
-                                <small class="text-muted">@activity.Timestamp.ToString("HH:mm")</small>
-                                <div>@activity.Description</div>
+                <div class="col-md-6">
+                    <div class="card bg-success bg-opacity-10 border-0 h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-success p-3 rounded-circle">
+                                    <i class="bi bi-check-circle-fill fs-3 text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-uppercase text-muted mb-1">Completed Votes</h6>
+                                    <h3 class="mb-0 fw-bold">@CompletedVotes.ToString("N0")</h3>
+                                </div>
                             </div>
-                        }
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between small">
+                                    <span>Participation Rate</span>
+                                    <span>@participationRate%</span>
+                                </div>
+                                <div class="progress" style="height: 6px">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         style="width: @participationRate%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demographic Insights -->
+            <div class="card shadow-lg border-0 mt-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-4">Voter Demographics</h5>
+                    <div class="row g-4">
+                        <div class="col-md-7">
+                            <div class="ratio ratio-21x9">
+                                <canvas id="demographicsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="h-100 d-flex flex-column justify-content-center">
+                                <div class="list-group list-group-flush">
+                                    @foreach (var demo in demographics)
+                                    {
+                                        <div class="list-group-item border-0 d-flex align-items-center px-0">
+                                            <span class="badge bg-primary bg-opacity-25 text-primary fs-7 
+                                                     me-3">@demo.Percentage%</span>
+                                            <div class="flex-fill">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>@demo.Category</span>
+                                                    <span class="text-muted">@demo.Count.ToString("N0")</span>
+                                                </div>
+                                                <div class="progress" style="height: 4px">
+                                                    <div class="progress-bar" style="width: @demo.Percentage%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-xl-4">
+            <div class="sticky-xl-top" style="top: 1rem">
+                <!-- Activity Stream -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-header border-0 bg-white pt-3">
+                        <h5 class="fw-bold mb-0">Activity Stream</h5>
+                        <p class="text-muted small mb-0">Real-time system events</p>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" style="max-height: 600px; overflow-y: auto;">
+                            @foreach (var activity in recentActivities)
+                            {
+                                <div class="list-group-item border-0 py-3 px-4">
+                                    <div class="d-flex gap-3">
+                                        <div class="bi @GetActivityIcon(activity.Type) fs-4 text-primary"></div>
+                                        <div>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="fw-medium">@activity.Description</span>
+                                                <small class="text-muted">@activity.Timestamp.ToString("HH:mm")</small>
+                                            </div>
+                                            <div class="text-muted small">@activity.Subtext</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card shadow-lg border-0 mt-4">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted mb-3">System Status</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="bi bi-server fs-4 text-success"></div>
+                                    <div>
+                                        <div class="small">API Health</div>
+                                        <div class="fw-bold">@apiLatency ms</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="bi bi-shield-check fs-4 text-primary"></div>
+                                    <div>
+                                        <div class="small">Security Level</div>
+                                        <div class="fw-bold">High</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,20 +221,55 @@
     </div>
 </main>
 
+<style>
+    .card {
+        border-radius: 1rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar {
+        border-radius: 4px;
+    }
+
+    .list-group-item {
+        transition: background-color 0.2s;
+    } 
+     .scrollable-container {
+         max-height: calc(100vh - 100px);
+         overflow-y: auto;
+     }
+</style>
+
 @code {
-    private Random random = new();
+    private static Random random = new();
     private Timer? dataRefreshTimer;
     private int refreshCountdown = 30;
     private string selectedRole = "President";
     private string timeRange = "24h";
     private List<string> roles = new() { "President", "Vice President", "Secretary", "Treasurer", "Member" };
 
+    // <summary>
+    //TODO!! fetch data from db instead
+    /// </summary>
     private int TotalVoters = 1500;
+    private int VoterTarget = 2000;
+    private int ActiveVoters => TotalVoters - random.Next(100, 300);
+    private int CompletedVotes => (int)(TotalVoters * (random.NextDouble() * 0.8));
+    private double participationRate => Math.Round((double)CompletedVotes / TotalVoters * 100, 1);
     private double voterRegistrationProgress = 75;
     private List<Activity> recentActivities = new();
+    private List<Demographic> demographics = new();
+    private int apiLatency = random.Next(50, 200);
+
+    // Chart Management
     private IJSObjectReference? chartModule;
-    private object? activityChart;
-    private object? demographicsChart;
+    private bool chartsInitialized;
+    private bool disposed;
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,37 +280,104 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !chartsInitialized)
         {
-            try
-            {
-                chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dashboardCharts.js");
-                await InitializeCharts();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading the charts: {ex.Message}");
-            }
+            await InitializeChartModule();
+            chartsInitialized = true;
+        }
+    }
+
+    private async Task InitializeChartModule()
+    {
+        try
+        {
+            chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                "import", 
+                "./js/dashboardCharts.js"
+            );
+            await InitializeCharts();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Chart initialization error: {ex.Message}");
         }
     }
 
     private void GenerateDummyData()
     {
-        TotalVoters += random.Next(-50, 100);
-        voterRegistrationProgress = random.Next(60, 95);
-        recentActivities.Insert(0, new Activity { Timestamp = DateTime.Now, Description = GetRandomActivity() });
+        TotalVoters = Math.Clamp(TotalVoters + random.Next(-50, 100), 100, 5000);
+        voterRegistrationProgress = Math.Clamp(voterRegistrationProgress + random.Next(-2, 5), 0, 100);
+        apiLatency = random.Next(50, 200);
+
+        recentActivities.Insert(0, new Activity { 
+            Timestamp = DateTime.Now, 
+            Description = GetRandomActivity(),
+            Type = GetRandomActivityType()
+        });
+        
         if (recentActivities.Count > 15) recentActivities.RemoveAt(14);
+
+        UpdateDemographicsData();
     }
 
-    private string GetRandomActivity() => random.Next(6) switch
+    private void UpdateDemographicsData()
     {
-        0 => "New voter registration completed",
-        1 => "Vote cast in Presidential election",
-        2 => "System maintenance performed",
-        3 => "New election created",
-        4 => "Security audit completed",
-        _ => "Database backup executed"
-    };
+        demographics = new List<Demographic>
+        {
+            new() { Category = "18-25", Percentage = random.Next(20, 35), Count = random.Next(300, 500) },
+            new() { Category = "26-35", Percentage = random.Next(25, 40), Count = random.Next(400, 600) },
+            new() { Category = "36-50", Percentage = random.Next(15, 30), Count = random.Next(200, 400) },
+            new() { Category = "51+", Percentage = random.Next(5, 20), Count = random.Next(100, 300) }
+        };
+    }
+
+    private async Task InitializeCharts()
+    {
+        if (chartModule == null) return;
+        
+        try
+        {
+            await chartModule.InvokeVoidAsync("initializeActivityChart", 
+                "activityChart",
+                GetTimeLabels(), 
+                GetVoteData()
+            );
+            
+            await chartModule.InvokeVoidAsync("initializeDemographicsChart",
+                "demographicsChart",
+                demographics.Select(d => d.Category).ToArray(),
+                demographics.Select(d => d.Percentage).ToArray()
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Chart init error: {ex.Message}");
+        }
+    }
+
+    private async Task UpdateCharts()
+    {
+        if (chartModule == null) return;
+        
+        try
+        {
+            await chartModule.InvokeVoidAsync("updateActivityChart",
+                "activityChart",
+                GetTimeLabels(),
+                GetVoteData()
+            );
+            
+            await chartModule.InvokeVoidAsync("updateDemographicsChart",
+                "demographicsChart",
+                demographics.Select(d => d.Category).ToArray(),
+                demographics.Select(d => d.Percentage).ToArray()
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Chart update error: {ex.Message}");
+        }
+    }
 
     private void InitializeTimers()
     {
@@ -157,6 +388,8 @@
 
     private async Task UpdateData()
     {
+        if (disposed) return;
+        
         refreshCountdown--;
         if (refreshCountdown <= 0)
         {
@@ -165,31 +398,6 @@
             await UpdateCharts();
         }
         await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task InitializeCharts()
-    {
-        if (chartModule != null)
-        {
-            // Initialize Activity Chart 
-            await chartModule.InvokeVoidAsync("initializeActivityChart", "activityChart", GetTimeLabels(), GetVoteData());
-        
-            // Initialize Demographics Chart
-            await chartModule.InvokeVoidAsync("initializeDemographicsChart", "demographicsChart", new[] { "18-25", "26-35", "36-50", "51+" }, new[] { 25, 40, 25, 10 });
-        }
-    }
-
-    private async Task UpdateCharts()
-    {
-        if (chartModule != null && activityChart != null)
-        {
-            await chartModule.InvokeVoidAsync(
-                "updateActivityChart",
-                activityChart,
-                GetTimeLabels(),
-                GetVoteData()
-            );
-        }
     }
 
     private string[] GetTimeLabels() => timeRange switch
@@ -207,28 +415,93 @@
     };
 
     private string GetRoleButtonClass(string role) =>
-        selectedRole == role ? "btn-primary" : "btn-outline-secondary";
+        selectedRole == role ? "btn-primary active" : "btn-outline-secondary";
 
     private void FilterByRole(string role)
     {
         selectedRole = role;
-        // Logic to filter data based on selected role
+        GenerateDummyData();
+        _ = UpdateCharts();
     }
 
     private void ChangeTimeRange(string range)
     {
         timeRange = range;
-        UpdateCharts();
+        _ = UpdateCharts();
     }
 
-    public void Dispose()
+    private string GetActivityIcon(ActivityType type) => type switch
     {
-        dataRefreshTimer?.Dispose();
+        ActivityType.Security => "bi-shield-check",
+        ActivityType.Vote => "bi-check-circle",
+        ActivityType.System => "bi-gear",
+        ActivityType.Registration => "bi-person-add",
+        _ => "bi-clipboard-data"
+    };
+
+    public async void Dispose()
+    {
+        if (disposed) return;
+        disposed = true;
+
+        try
+        {
+            dataRefreshTimer?.Stop();
+            dataRefreshTimer?.Dispose();
+            
+            if (chartModule != null)
+            {
+                await chartModule.InvokeVoidAsync("destroyCharts");
+                await chartModule.DisposeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Dispose error: {ex.Message}");
+        }
     }
 
     private class Activity
     {
         public DateTime Timestamp { get; set; }
         public string Description { get; set; } = "";
+        public ActivityType Type { get; set; }
+        public string Subtext => Type switch
+        {
+            ActivityType.Security => "Security subsystem update",
+            ActivityType.Vote => "Voting process activity",
+            ActivityType.System => "System maintenance",
+            ActivityType.Registration => "Voter management",
+            _ => "General operation"
+        };
     }
+
+    private class Demographic
+    {
+        public string Category { get; set; } = "";
+        public int Percentage { get; set; }
+        public int Count { get; set; }
+    }
+
+    private enum ActivityType { Security, Vote, System, Registration, Maintenance }
+    
+    private ActivityType GetRandomActivityType() => random.Next(5) switch
+    {
+        0 => ActivityType.Security,
+        1 => ActivityType.Vote,
+        2 => ActivityType.System,
+        3 => ActivityType.Registration,
+        _ => ActivityType.Maintenance
+    };
+
+    private string GetRandomActivity() => random.Next(6) switch
+    {
+        0 => "New voter registration completed",
+        1 => $"Vote cast in {selectedRole} election",
+        2 => "System maintenance performed",
+        3 => "New election configuration added",
+        4 => "Security audit completed",
+        _ => "Database backup executed"
+    };
+    
 }

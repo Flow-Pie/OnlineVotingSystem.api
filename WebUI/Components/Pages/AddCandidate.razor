@@ -1,5 +1,195 @@
-<h3>AddCandidate</h3>
+@page "/add-candidate"
+@using OnlineVotingSystem.api.DTOs.Election
+@using WebUI.Services
+@rendermode InteractiveServer
 
+<main class="container mt-4 scrollable-container">
+    <!-- Page Header -->
+    <header class="mb-5">
+        <h1 class="fw-bold display-6 text-primary">Add New Candidate</h1>
+        <hr class="border-primary opacity-50" style="height: 2px">
+    </header>
+
+    <!-- Status Messages -->
+    <div class="status-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger d-flex align-items-center shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div class="flex-grow-1">@errorMessage</div>
+                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success d-flex align-items-center shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <div class="flex-grow-1">@successMessage</div>
+                <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+            </div>
+        }
+    </div>
+
+    <!-- Candidate Form -->
+    <div class="card border-2 border-primary-subtle shadow-sm">
+        <div class="card-header bg-primary-subtle border-primary-subtle py-3">
+            <h2 class="h5 mb-0 fw-semibold">
+                <i class="bi bi-person-plus me-2"></i>Candidate Details
+            </h2>
+        </div>
+
+        <div class="card-body p-4">
+            <form @onsubmit="addCandidate">
+                <!-- Full Name -->
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <input type="text"
+                               class="form-control border-primary-subtle"
+                               id="fullName"
+                               @bind="NewCandidate.FullName"
+                               placeholder="Full Name">
+                        <label for="fullName" class="text-muted">Full Name</label>
+                    </div>
+                </div>
+
+                <!-- Party -->
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <input type="text"
+                               class="form-control border-primary-subtle"
+                               id="party"
+                               @bind="NewCandidate.Party"
+                               placeholder="Party">
+                        <label for="party" class="text-muted">Party</label>
+                    </div>
+                </div>
+
+                <!-- Position -->
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <input type="text"
+                               class="form-control border-primary-subtle"
+                               id="position"
+                               @bind="NewCandidate.Position"
+                               placeholder="Position">
+                        <label for="position" class="text-muted">Position</label>
+                    </div>
+                </div>
+
+                <!-- Election Name -->
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <input type="text"
+                               class="form-control border-primary-subtle"
+                               id="electionName"
+                               @bind="NewCandidate.ElectionName"
+                               placeholder="Election Name">
+                        <label for="electionName" class="text-muted">Election Name</label>
+                    </div>
+                </div>
+
+                <!-- Photo URL -->
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <input type="url"
+                               class="form-control border-primary-subtle"
+                               id="photoUrl"
+                               @bind="NewCandidate.PhotoUrl"
+                               placeholder="Photo URL">
+                        <label for="photoUrl" class="text-muted">Photo URL</label>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-3 justify-content-end border-top pt-4">
+                    <button type="reset"
+                            class="btn btn-outline-secondary px-4"
+                            @onclick="ResetForm">
+                        Reset
+                    </button>
+                    <button type="submit"
+                            class="btn btn-primary px-4"
+                            disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Add Candidate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<style>
+    .scrollable-container {
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+</style>
 @code {
-    
+    // Candidate object to bind form inputs
+    private Candidate NewCandidate = new();
+
+    // Status messages
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    // Loading state
+    private bool isLoading = false;
+
+    // Method to handle form submission
+    private async Task addCandidate()
+    {
+        isLoading = true; // Show loading spinner
+        try
+        {
+            // Simulate an API call to add a candidate (replace with actual logic)
+            await Task.Delay(1000); // Simulate network delay
+
+            // Validate required fields (optional, can be handled by HTML `required` attribute)
+            if (string.IsNullOrEmpty(NewCandidate.FullName) || string.IsNullOrEmpty(NewCandidate.Party) ||
+                string.IsNullOrEmpty(NewCandidate.Position) || string.IsNullOrEmpty(NewCandidate.ElectionName))
+            {
+                throw new Exception("Please fill in all required fields.");
+            }
+
+            // Add candidate logic (e.g., call an API or service)
+            // await CandidateService.AddCandidate(NewCandidate);
+
+            // Show success message
+            successMessage = "Candidate added successfully!";
+
+            // Reset the form
+            NewCandidate = new();
+        }
+        catch (Exception ex)
+        {
+            // Show error message
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false; // Hide loading spinner
+        }
+    }
+
+    // Method to reset the form
+    private void ResetForm()
+    {
+        NewCandidate = new();
+        errorMessage = "";
+        successMessage = "";
+    }
+
+    // Candidate class to hold form data
+    public class Candidate
+    {
+        public string FullName { get; set; } = "";
+        public string Party { get; set; } = "";
+        public string Position { get; set; } = "";
+        public string ElectionName { get; set; } = "";
+        public string PhotoUrl { get; set; } = "";
+    }
 }

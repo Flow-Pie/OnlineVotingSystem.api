@@ -30,7 +30,6 @@ public static class ElectionMapping
             CreatedBy = userId
         };
     }
-    
 
     public static void ApplyUpdates(this Election election, UpdateElectionDto updateElection)
     {
