@@ -1,6 +1,11 @@
 @page "/add-candidate"
-@using OnlineVotingSystem.api.DTOs.Election
+@using OnlineVotingSystem.api.DTOs.Candidate
 @using WebUI.Services
+@using OnlineVotingSystem.api.DTOs.ElectionPosition
+@using OnlineVotingSystem.api.DTOs.User
+@inject ICandidatesService CandidatesService
+@inject IUsersService UsersService
+@inject IElectionsService ElectionsService
 @rendermode InteractiveServer
 
 <main class="container mt-4 scrollable-container">
@@ -39,16 +44,36 @@
         </div>
 
         <div class="card-body p-4">
-            <form @onsubmit="addCandidate">
-                <!-- Full Name -->
+            <form @onsubmit="AddCandidate">
+                <!-- User Selection -->
                 <div class="mb-4">
                     <div class="form-floating">
-                        <input type="text"
-                               class="form-control border-primary-subtle"
-                               id="fullName"
-                               @bind="NewCandidate.FullName"
-                               placeholder="Full Name">
-                        <label for="fullName" class="text-muted">Full Name</label>
+                        <select class="form-select border-primary-subtle"
+                                id="userId"
+                                @bind="SelectedUserId">
+                            <option value="">Select a User</option>
+                            @foreach (var user in Users)
+                            {
+                                <option value="@user.Id">@user.FullName</option>
+                            }
+                        </select>
+                        <label for="userId" class="text-muted">User</label>
+                    </div>
+                </div>
+
+                <!-- Election Position Selection -->
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <select class="form-select border-primary-subtle"
+                                id="electionPositionId"
+                                @bind="SelectedElectionPositionId">
+                            <option value="">Select a Position</option>
+                            @foreach (var position in ElectionPositions)
+                            {
+                                <option value="@position.Id">@position.Name</option>
+                            }
+                        </select>
+                        <label for="electionPositionId" class="text-muted">Position</label>
                     </div>
                 </div>
 
@@ -58,33 +83,22 @@
                         <input type="text"
                                class="form-control border-primary-subtle"
                                id="party"
-                               @bind="NewCandidate.Party"
+    using OnlineVotingSystem.api.DTOs.ElectionPosition;
+                               @bind="Party"
                                placeholder="Party">
                         <label for="party" class="text-muted">Party</label>
                     </div>
                 </div>
 
-                <!-- Position -->
+                <!-- Bio -->
                 <div class="mb-4">
                     <div class="form-floating">
-                        <input type="text"
-                               class="form-control border-primary-subtle"
-                               id="position"
-                               @bind="NewCandidate.Position"
-                               placeholder="Position">
-                        <label for="position" class="text-muted">Position</label>
-                    </div>
-                </div>
-
-                <!-- Election Name -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <input type="text"
-                               class="form-control border-primary-subtle"
-                               id="electionName"
-                               @bind="NewCandidate.ElectionName"
-                               placeholder="Election Name">
-                        <label for="electionName" class="text-muted">Election Name</label>
+                        <textarea class="form-control border-primary-subtle"
+                                  id="bio"
+                                  @bind="Bio"
+                                  placeholder="Bio"
+                                  style="height: 100px"></textarea>
+                        <label for="bio" class="text-muted">Bio</label>
                     </div>
                 </div>
 
@@ -94,7 +108,7 @@
                         <input type="url"
                                class="form-control border-primary-subtle"
                                id="photoUrl"
-                               @bind="NewCandidate.PhotoUrl"
+                               @bind="PhotoUrl"
                                placeholder="Photo URL">
                         <label for="photoUrl" class="text-muted">Photo URL</label>
                     </div>
@@ -128,9 +142,18 @@
         overflow-y: auto;
     }
 </style>
+
 @code {
-    // Candidate object to bind form inputs
-    private Candidate NewCandidate = new();
+    // Form fields
+    private Guid SelectedUserId;
+    private Guid SelectedElectionPositionId;
+    private string Party = "";
+    private string Bio = "";
+    private string PhotoUrl = "";
+
+    // Dropdown data
+    private List<UserDetailsDto> Users = new();
+    private List<ElectionPositionSerialized> ElectionPositions = new();
 
     // Status messages
     private string errorMessage = "";
@@ -139,57 +162,72 @@
     // Loading state
     private bool isLoading = false;
 
-    // Method to handle form submission
-    private async Task addCandidate()
+    protected override async Task OnInitializedAsync()
     {
-        isLoading = true; // Show loading spinner
+        await LoadDropdownData();
+    }
+
+    private async Task LoadDropdownData()
+    {
         try
         {
-            // Simulate an API call to add a candidate (replace with actual logic)
-            await Task.Delay(1000); // Simulate network delay
+            // Fetch users and election positions
+            Users = await UsersService.GetUsersAsync();
+            ElectionPositions = await ElectionsService.GetElectionPositionsAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load data: {ex.Message}";
+        }
+    }
 
-            // Validate required fields (optional, can be handled by HTML `required` attribute)
-            if (string.IsNullOrEmpty(NewCandidate.FullName) || string.IsNullOrEmpty(NewCandidate.Party) ||
-                string.IsNullOrEmpty(NewCandidate.Position) || string.IsNullOrEmpty(NewCandidate.ElectionName))
+    private async Task AddCandidate()
+    {
+        isLoading = true;
+        errorMessage = "";
+        successMessage = "";
+
+        try
+        {
+            // Validate required fields
+            if (SelectedUserId == Guid.Empty || SelectedElectionPositionId == Guid.Empty || string.IsNullOrWhiteSpace(Bio))
             {
                 throw new Exception("Please fill in all required fields.");
             }
 
-            // Add candidate logic (e.g., call an API or service)
-            // await CandidateService.AddCandidate(NewCandidate);
+            // Create the candidate
+            var candidateDto = new CreateCandidateDto(
+                SelectedUserId,
+                SelectedElectionPositionId,
+                Party,
+                Bio,
+                string.IsNullOrWhiteSpace(PhotoUrl) ? null : new Uri(PhotoUrl)
+            );
+
+            var createdCandidate = await CandidatesService.CreateCandidateAsync(candidateDto);
 
             // Show success message
             successMessage = "Candidate added successfully!";
 
             // Reset the form
-            NewCandidate = new();
+            ResetForm();
         }
         catch (Exception ex)
         {
-            // Show error message
             errorMessage = ex.Message;
         }
         finally
         {
-            isLoading = false; // Hide loading spinner
+            isLoading = false;
         }
     }
 
-    // Method to reset the form
     private void ResetForm()
     {
-        NewCandidate = new();
-        errorMessage = "";
-        successMessage = "";
-    }
-
-    // Candidate class to hold form data
-    public class Candidate
-    {
-        public string FullName { get; set; } = "";
-        public string Party { get; set; } = "";
-        public string Position { get; set; } = "";
-        public string ElectionName { get; set; } = "";
-        public string PhotoUrl { get; set; } = "";
+        SelectedUserId = Guid.Empty;
+        SelectedElectionPositionId = Guid.Empty;
+        Party = "";
+        Bio = "";
+        PhotoUrl = "";
     }
 }

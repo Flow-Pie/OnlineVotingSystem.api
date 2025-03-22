@@ -42,6 +42,11 @@ builder.Services.AddHttpClient<IPositionsService, PositionsService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+builder.Services.AddHttpClient<ICandidatesService, CandidatesService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
 // Razor Components
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
