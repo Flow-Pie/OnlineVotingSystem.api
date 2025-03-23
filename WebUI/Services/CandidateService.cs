@@ -86,31 +86,57 @@ public class CandidatesService : ICandidatesService, IDisposable
         return await HandleResponseAsync<IEnumerable<CandidateDetailsDto>>(response);
     }
 
-    private async Task<T> HandleResponseAsync<T>(HttpResponseMessage response)
+   private async Task<T> HandleResponseAsync<T>(HttpResponseMessage response)
     {
-        if (response.IsSuccessStatusCode)
+        try
         {
-            return await response.Content.ReadFromJsonAsync<T>(_serializerOptions)!;
-        }
+            response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"API Error: {content}");
+            var result = await response.Content.ReadFromJsonAsync<T>(_serializerOptions);
 
-        var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content, _serializerOptions)
-            ?? new ProblemDetails
+            if (result == null)
             {
-                Title = "API Error",
-                Status = (int)response.StatusCode,
-                Detail = response.ReasonPhrase
-            };
+                throw new ApiException(new ProblemDetails
+                {
+                    Title = "API Error",
+                    Status = (int)HttpStatusCode.NoContent,
+                    Detail = "The API returned a null response."
+                });
+            }
 
-        throw new ApiException(problemDetails);
+            return result;
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new ApiException(new ProblemDetails
+            {
+                Title = "Network Error",
+                Status = (int)HttpStatusCode.ServiceUnavailable,
+                Detail = ex.Message
+            });
+        }
+        catch (JsonException ex)
+        {
+            throw new ApiException(new ProblemDetails
+            {
+                Title = "Deserialization Error",
+                Status = (int)HttpStatusCode.InternalServerError,
+                Detail = $"Failed to deserialize the API response: {ex.Message}"
+            });
+        }
+        catch (Exception ex)
+        {
+            throw new ApiException(new ProblemDetails
+            {
+                Title = "Unexpected Error",
+                Status = (int)HttpStatusCode.InternalServerError,
+                Detail = ex.Message
+            });
+        }
     }
-
     public void Dispose() => _httpClient?.Dispose();
 }
 
-// Custom Exception for API Errors
 public class ApiException : Exception
 {
     public ProblemDetails ProblemDetails { get; }

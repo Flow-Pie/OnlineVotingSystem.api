@@ -1,0 +1,319 @@
+@page "/candidates"
+@using OnlineVotingSystem.api.DTOs.Candidate
+@using OnlineVotingSystem.api.DTOs.Election
+@using WebUI.Services
+@rendermode InteractiveServer
+
+<main class="container mt-4 scrollable-container">
+    <style>
+        /* Scrollable container */
+        .scrollable-container {
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        /* Card styling */
+        .card {
+            border: 2px solid var(--bs-primary-subtle);
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--bs-primary-subtle);
+            border-bottom: 2px solid var(--bs-primary-subtle);
+        }
+
+        .position-card {
+            background-color: #ffffff;
+            border: 1px solid var(--bs-primary-subtle);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .position-card:hover {
+            background-color: var(--bs-primary-bg-subtle);
+            border-color: var(--bs-primary);
+        }
+    </style>
+
+    <!-- Page Header -->
+    <header class="mb-5">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="fw-bold display-6 text-primary">Registered Candidates</h1>
+            <div class="bg-primary-subtle rounded-circle p-3">
+                <i class="bi bi-person-lines-fill fs-4 text-primary"></i>
+            </div>
+        </div>
+        <hr class="border-primary opacity-50" style="height: 2px">
+    </header>
+
+    <!-- Status Messages -->
+    <div class="status-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+        @if (!string.IsNullOrEmpty(SuccessMessage))
+        {
+            <div class="alert alert-success d-flex align-items-center shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <div class="flex-grow-1">@SuccessMessage</div>
+                <button type="button" class="btn-close" @onclick="() => SuccessMessage = string.Empty"></button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger d-flex align-items-center shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div class="flex-grow-1">@ErrorMessage</div>
+                <button type="button" class="btn-close" @onclick="() => ErrorMessage = string.Empty"></button>
+            </div>
+        }
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="mb-4 d-flex gap-3">
+        <div class="form-floating flex-grow-1">
+            <input type="text" 
+                   class="form-control border-primary-subtle" 
+                   @bind="SearchTerm"
+                   placeholder="Search candidates...">
+            <label class="text-muted">Search candidates</label>
+        </div>
+        <button class="btn btn-primary px-4" @onclick="FilterCandidates">
+            <i class="bi bi-search me-2"></i>Search
+        </button>
+    </div>
+
+    @if (!GroupedCandidates.Any())
+    {
+        <div class="alert alert-warning text-center py-4">
+            <i class="bi bi-people fs-4 me-2"></i>
+            No candidates found
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var group in GroupedCandidates)
+            {
+                var position = group.Key;
+                var candidates = GetPagedCandidates(position);
+                var totalPages = GetTotalPages(position);
+
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary-subtle">
+                            <h3 class="h9 mb-3 text-primary text-center">@position</h3>
+                        </div>
+                        
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                @foreach (var candidate in candidates)
+                                {
+                                    <div class="card bg-light border-0 position-card h-100">
+                                            <div class="card-body d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="card-title mb-1 ">@candidate.Name</h5>
+                                                    <p class="card-text text-muted small mb-0">@candidate.Party</p>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-outline-primary" @onclick="() => ViewProfile(candidate.Id)">
+                                                        <i class="bi bi-person-circle me-1"></i>View
+                                                    </button>
+                                                    <button class="btn btn-outline-warning" @onclick="() => EditCandidate(candidate.Id)">
+                                                        <i class="bi bi-pencil-square me-1"></i>Edit
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" @onclick="() => DeleteCandidate(candidate.Id)">
+                                                        <i class="bi bi-trash me-1"></i>Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                    </div>
+
+                                }
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</main>
+
+@code {
+    private string SearchTerm { get; set; } = "";
+    private List<CandidateSerializedDto> Candidates { get; set; } = new();
+    private Dictionary<string, List<CandidateSerializedDto>> GroupedCandidates { get; set; } = new();
+    private Dictionary<string, int> CurrentPages { get; set; } = new();
+    private const int PageSize = 3;
+
+    private string SuccessMessage { get; set; } = "";
+    private string ErrorMessage { get; set; } = "";
+
+    [Inject]
+    private ICandidatesService CandidateService { get; set; }
+
+    [Inject]
+    private IAuthService AuthService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCandidates();
+        GroupCandidates();
+        InitializePagination();
+    }
+
+    private async Task LoadCandidates()
+    {
+        try
+        {
+            var token = "YOUR_TOKEN_HERE";
+            CandidateService.SetBearerToken(token);
+
+            Candidates = (await CandidateService.GetSerializedCandidatesAsync()).ToList();
+            ErrorMessage = "";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error loading candidates: {ex.Message}";
+            SuccessMessage = "";
+        }
+    }
+
+    private void GroupCandidates()
+    {
+        GroupedCandidates = Candidates
+            .Where(c => c != null)
+            .GroupBy(c => $"{c.Election ?? "No Election"} - {c.Position ?? "No Position"}")
+            .ToDictionary(g => g.Key, g => g.OrderBy(c => c.Name).ToList());
+
+        Console.WriteLine($"Grouped Candidates: {string.Join(", ", GroupedCandidates.Keys)}");
+    }
+
+    private void InitializePagination()
+    {
+        foreach (var position in GroupedCandidates.Keys)
+        {
+            if (!CurrentPages.ContainsKey(position))
+            {
+                CurrentPages[position] = 1;
+            }
+        }
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            FilterCandidates();
+        }
+    }
+
+    private void FilterCandidates()
+    {
+        if (string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            GroupCandidates();
+            return;
+        }
+
+        var filtered = Candidates
+            .Where(c => c.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        c.Party.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        c.Position.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        c.Election.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        GroupedCandidates = filtered
+            .GroupBy(c => $"{c.Election ?? "No Election"} - {c.Position ?? "No Position"}")
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        InitializePagination();
+    }
+
+    private IEnumerable<CandidateSerializedDto> GetPagedCandidates(string position)
+    {
+        if (!GroupedCandidates.ContainsKey(position) || !CurrentPages.ContainsKey(position))
+        {
+            return Enumerable.Empty<CandidateSerializedDto>();
+        }
+
+        var candidates = GroupedCandidates[position];
+        return candidates.Skip((CurrentPages[position] - 1) * PageSize).Take(PageSize);
+    }
+
+    private int GetTotalPages(string position)
+    {
+        return GroupedCandidates.TryGetValue(position, out var candidates) 
+            ? (int)Math.Ceiling(candidates.Count / (double)PageSize)
+            : 0;
+    }
+
+    private void NextPage(string position)
+    {
+        if (!CurrentPages.ContainsKey(position)) return;
+
+        if (CurrentPages[position] < GetTotalPages(position))
+        {
+            CurrentPages[position]++;
+        }
+    }
+
+    private void PreviousPage(string position)
+    {
+        if (!CurrentPages.ContainsKey(position)) return;
+
+        if (CurrentPages[position] > 1)
+        {
+            CurrentPages[position]--;
+        }
+    }
+
+    private async Task DeleteCandidate(Guid candidateId)
+    {
+        try
+        {
+            var token = "YOUR_TOKEN_HERE";
+            CandidateService.SetBearerToken(token);
+
+            await CandidateService.DeleteCandidateAsync(candidateId);
+            SuccessMessage = "Candidate deleted successfully!";
+            
+            Candidates.RemoveAll(c => c.Id == candidateId);
+            GroupCandidates();  
+            InitializePagination(); 
+            
+            StateHasChanged();  
+            
+            await ClearMessagesAfterDelay();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Delete failed: {ex.Message}";
+            await ClearMessagesAfterDelay();
+        }
+    }
+
+
+    private async Task ClearMessagesAfterDelay()
+    {
+        await Task.Delay(5000);
+        SuccessMessage = "";
+        ErrorMessage = "";
+        StateHasChanged();
+    }
+
+    private void ViewProfile(Guid candidateId)
+    {
+        // Navigation logic
+    }
+
+    private void EditCandidate(Guid candidateId)
+    {
+        // Edit logic
+    }
+}

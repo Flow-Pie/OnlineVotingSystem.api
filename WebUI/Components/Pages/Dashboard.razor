@@ -1,37 +1,27 @@
-@page "/dashboard"
+@page "/"  
 @rendermode InteractiveServer
 @using System.Timers
 @inject IJSRuntime JSRuntime
 
+@* home directory altleast for now *@
+
+
 <main class="container mt-4 scrollable-container">
-    <!-- Header Section -->
     <header class="mb-5">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-            <div>
-                <h1 class="fw-bold display-6 text-primary mb-1">Election Dashboard</h1>
-                <p class="text-muted mb-0">Real-time voting analytics and monitoring</p>
-            </div>
-            <div class="d-flex gap-2 w-100 w-md-auto">
-                <div class="vr d-none d-md-block"></div>
-                <div class="btn-group shadow-sm" role="group">
-                    @foreach (var role in roles)
-                    {
-                        <input type="radio" class="btn-check" name="role-filter" id="@role" autocomplete="off"
-                               checked='@(selectedRole == role)' @onchange='() => FilterByRole(role)'>
-                        <label class="btn btn-outline-primary px-3 py-2" for="@role">
-                            <i class="bi bi-person-badge me-2"></i>@role
-                        </label>
-                    }
-                </div>
-            </div>
-        </div>
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+    <div class="text-center text-md-start mb-3 mb-md-0">
+        <h2 class="fw-bold text-primary mb-1">Election Dashboard</h2>
+    </div>
+
+    <div class="vr d-none d-md-block mx-3"></div>
+        <p class="text-muted ">Real-time voting analytics and monitoring</p>
+
+</div>
         <hr class="border-primary opacity-50 mt-3" style="height: 2px">
     </header>
 
     <div class="row g-4">
-        <!-- Main Analytics Column -->
         <div class="col-xl-8">
-            <!-- Voting Activity Card -->
             <div class="card border-2 border-primary-subtle shadow-sm">
                 <div class="card-header bg-primary-subtle border-primary-subtle py-3">
                     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center">
@@ -56,7 +46,6 @@
                 </div>
             </div>
 
-            <!-- Metrics Grid -->
             <div class="row g-4 mt-2">
                 <div class="col-md-6">
                     <div class="card border-2 border-primary-subtle h-100">
@@ -109,7 +98,6 @@
                 </div>
             </div>
 
-            <!-- Demographic Insights -->
             <div class="card border-2 border-primary-subtle mt-4">
                 <div class="card-header bg-primary-subtle border-primary-subtle py-3">
                     <h5 class="h5 fw-semibold mb-0">
@@ -154,7 +142,6 @@
         <!-- Right Sidebar -->
         <div class="col-xl-4">
             <div class="sticky-xl-top" style="top: 1rem">
-                <!-- Activity Stream -->
                 <div class="card border-2 border-primary-subtle shadow-sm">
                     <div class="card-header bg-primary-subtle border-primary-subtle py-3">
                         <h5 class="h5 fw-semibold mb-0">
@@ -182,7 +169,6 @@
                     </div>
                 </div>
 
-                <!-- System Status -->
                 <div class="card border-2 border-primary-subtle mt-4">
                     <div class="card-header bg-primary-subtle border-primary-subtle py-3">
                         <h5 class="h5 fw-semibold mb-0">
@@ -262,7 +248,7 @@
     private List<string> roles = new() { "President", "Vice President", "Secretary", "Treasurer", "Member" };
 
     // <summary>
-    //TODO!! fetch data from db instead
+    //TODO!! add activity tracker Service later on
     /// </summary>
     private int TotalVoters = 1500;
     private int VoterTarget = 2000;
@@ -311,7 +297,7 @@
         }
     }
 
-    private void GenerateDummyData()
+    private void GenerateDummyData()//dummy data for testing purpose only!
     {
         TotalVoters = Math.Clamp(TotalVoters + random.Next(-50, 100), 100, 5000);
         voterRegistrationProgress = Math.Clamp(voterRegistrationProgress + random.Next(-2, 5), 0, 100);

@@ -17,9 +17,17 @@ public class ElectionService : IElectionsService
     }    
    
 
-    public async Task<IEnumerable<PositionDetails>> GetElectionPositionsAsync(Guid electionId)
+   public async Task<IEnumerable<ElectionPositionSerialized>> GetElectionPositionsAsync(Guid electionId)
     {
-        throw new NotImplementedException();
+        var url = $"/elections/{electionId}/positions";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var positions = await response.Content.ReadFromJsonAsync<IEnumerable<ElectionPositionSerialized>>()
+            ?? throw new InvalidOperationException("Failed to deserialize election positions.");
+
+        return positions;
     }
 
     public async Task<ElectionDetailsDto> CreateElectionAsync(CreateElectionDto createElectionDto, string token)
@@ -64,10 +72,17 @@ public class ElectionService : IElectionsService
             ?? throw new InvalidOperationException("Failed to deserialize election details.");
     }
 
-    public async Task<bool> DeleteElectionAsync(Guid electionId)
+    public async Task<bool> DeleteElectionAsync(Guid electionId, string token)
     {
-        var response = await httpClient.DeleteAsync($"/elections/{electionId}");
+        if (string.IsNullOrWhiteSpace(token))
+            throw new ArgumentException("Token cannot be null or empty", nameof(token));
 
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/elections/{electionId}")
+        {
+            Headers = { Authorization = new AuthenticationHeaderValue("Bearer", token) }
+        };
+
+        var response = await httpClient.SendAsync(request);
         return response.IsSuccessStatusCode;
     }
 

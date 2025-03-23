@@ -8,13 +8,11 @@
 @using System.Collections.ObjectModel
 @using System.Net
 <main class="container mt-4 scrollable-container">
-    <!-- Page Header -->
     <header class="mb-5">
         <h1 class="fw-bold display-6 text-primary">Election Management</h1>
         <hr class="border-primary opacity-50" style="height: 2px">
     </header>
 
-    <!-- Status Messages -->
     <div class="status-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
         @if (!string.IsNullOrEmpty(errorMessage))
         {
@@ -35,7 +33,6 @@
     </div>
 
     <div class="row g-4">
-        <!-- Main Election Form -->
          <div class="col-lg-8">
         <div class="card border-2 border-primary-subtle shadow-sm">
                 <div class="card-header bg-primary-subtle border-primary-subtle py-3">
@@ -46,7 +43,6 @@
 
                 <div class="card-body p-4">
                     <form @onsubmit="HandleSubmit">
-                        <!-- Election Metadata -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
                                 <div class="form-floating">
@@ -87,7 +83,6 @@
                             </div>
                         </div>
 
-                    <!-- Position Selection -->
                     <section class="mb-5">
                             <h3 class="h5 fw-semibold mb-4 text-primary">
                                 <i class="bi bi-person-gear me-2"></i>Available Positions
@@ -121,7 +116,6 @@
                                                     @onchange="() => TogglePosition(position.Id)">
                                                 <label class="form-check-label card-body p-3 d-flex align-items-center"
                                                     for="@($"pos-{position.Id}")">
-                                                    <!-- Icon and Position Name -->
                                                     <div class="d-flex align-items-center gap-3">
                                                         <i class="bi bi-person-circle fs-4 text-primary"></i>
                                                         <div>
@@ -130,7 +124,6 @@
                                                         </div>
                                                     </div>
 
-                                                    <!-- Selection Indicator -->
                                                     <div class="ms-auto">
                                                         <div class="form-check-circle @(SelectedPositions.Contains(position.Id) ? "checked" : "")">
                                                             <i class="bi bi-check-lg"></i>
@@ -146,7 +139,6 @@
                         </div>
                     </section>
 
-                   <!-- Form Actions -->
                         <div class="d-flex gap-3 justify-content-end border-top pt-4">
                             <button type="reset"
                                     class="btn btn-outline-secondary px-4"
@@ -168,10 +160,8 @@
             </div>
         </div>
 
-        <!-- Side Panel -->
         <div class="col-lg-4">
             <div class="sticky-top" style="top: 1rem">
-                <!-- Selected Positions -->             
         <div class="card border-2 border-primary-subtle shadow-sm mb-4">
             <div class="card-header bg-primary-subtle border-primary-subtle py-3">
                 <h3 class="h5 mb-0 fw-semibold">
@@ -206,11 +196,10 @@
             </div>
         </div>
 
-                <!-- Quick Position Creation -->
                 <div class="card border-2 border-primary-subtle shadow-sm">
                     <div class="card-header bg-primary-subtle border-primary-subtle py-3">
-                        <h3 class="h5 mb-0 fw-semibold">
-                            <i class="bi bi-plus-square me-2"></i>Create New Position
+                        <h3 class="h5 mb-0 fw-semibold text-primary">
+                            <i class="bi bi-plus-square me-2 text-primary"></i>Create New Position
                         </h3>
                     </div>
 
@@ -280,13 +269,11 @@
         border-color: var(--bs-primary);
     }
 
-    /* Selected State */
     .position-card.selected {
         border-color: var(--bs-primary);
         background-color: rgba(13, 110, 253, 0.05);
     }
 
-    /* Check Circle */
     .form-check-circle {
         width: 24px;
         height: 24px;

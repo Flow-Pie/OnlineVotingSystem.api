@@ -11,14 +11,12 @@
 @rendermode InteractiveServer
 
 <main class="container mt-4 scrollable-container">
-    <!-- Page Header -->
     <header class="mb-5">
         <h1 class="fw-bold display-6 text-primary">Add New Candidate</h1>
         <hr class="border-primary opacity-50" style="height: 2px">
     </header>
 
-    <!-- Status Messages -->
-    <div class="status-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+    <div class="status-container position-fixed top-0 p-3" style="z-index: 9999">
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="alert alert-danger d-flex align-items-center shadow-sm">
@@ -37,7 +35,6 @@
         }
     </div>
 
-    <!-- Candidate Form -->
     <div class="card border-2 border-primary-subtle shadow-sm">
         <div class="card-header bg-primary-subtle border-primary-subtle py-3">
             <h2 class="h5 mb-0 fw-semibold">
@@ -46,93 +43,95 @@
         </div>
 
         <div class="card-body p-4">
-            <form @onsubmit="AddCandidate">
-                <!-- User Selection -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <select class="form-select border-primary-subtle"
-                                id="userId"
-                                @bind="SelectedUserId">
-                            <option value="">Select a User</option>
-                            @foreach (var user in Users)
-                            {
-                                <option value="@user.Id">@user.Name</option>
-                            }
-                        </select>
-                        <label for="userId" class="text-muted">User</label>
-                    </div>
+            <EditForm Model="@model" OnValidSubmit="AddCandidate">
+            <div class="mb-4">
+                <div class="form-floating">
+                    <input type="text"
+                        class="form-control border-primary-subtle"
+                        id="nationalIdInput"
+                        placeholder="Enter National ID"
+                        @bind="NationalIdInput" />
+                    <label for="nationalIdInput" class="text-muted">National ID</label>
                 </div>
+                <button type="button" class="btn btn-primary mt-2" @onclick="SearchUserByNationalId" @onclick:preventDefault>
+                    Search User
+                </button>
 
-                <!-- Election Position Selection -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <select class="form-select border-primary-subtle"
-                                id="electionPositionId"
-                                @bind="SelectedElectionPositionId">
-                            <option value="">Select a Position</option>
-                            @foreach (var position in Positions)
-                            {
-                                <option value="@position.Id">@position.Name</option>
-                            }
-                        </select>
-                        <label for="electionPositionId" class="text-muted">Position</label>
-                    </div>
-                </div>
+                @if (!string.IsNullOrEmpty(foundUserName))
+                {
+                    <div class="mt-2 text-success">User Found: @foundUserName</div>
+                }
+                @if (!string.IsNullOrEmpty(searchErrorMessage))
+                {
+                    <div class="mt-2 text-danger">@searchErrorMessage</div>
+                }
+            </div>
 
-                <!-- Party -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <input type="text"
-                               class="form-control border-primary-subtle"
-                               id="party"
-                               @bind="Party"
-                               placeholder="Party">
-                        <label for="party" class="text-muted">Party</label>
-                    </div>
-                </div>
-
-                <!-- Bio -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <textarea class="form-control border-primary-subtle"
-                                  id="bio"
-                                  @bind="Bio"
-                                  placeholder="Bio"
-                                  style="height: 100px"></textarea>
-                        <label for="bio" class="text-muted">Bio</label>
-                    </div>
-                </div>
-
-                <!-- Photo URL -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <input type="url"
-                               class="form-control border-primary-subtle"
-                               id="photoUrl"
-                               @bind="PhotoUrl"
-                               placeholder="Photo URL">
-                        <label for="photoUrl" class="text-muted">Photo URL</label>
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="d-flex gap-3 justify-content-end border-top pt-4">
-                    <button type="reset"
-                            class="btn btn-outline-secondary px-4"
-                            @onclick="ResetForm">
-                        Reset
-                    </button>
-                    <button type="submit"
-                            class="btn btn-primary px-4"
-                            disabled="@isLoading">
-                        @if (isLoading)
+            <div class="mb-4">
+                <div class="form-floating">
+                    <select class="form-select border-primary-subtle"
+                            id="electionPositionId"
+                            @bind="model.ElectionPositionId">
+                        <option value="">Select a Position</option>
+                        @foreach (var position in Positions)
                         {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <option value="@position.Id">@position.Name</option>
                         }
-                        Add Candidate
-                    </button>
+                    </select>
+                    <label for="electionPositionId" class="text-muted">Position</label>
                 </div>
-            </form>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-floating">
+                    <input type="text"
+                        class="form-control border-primary-subtle"
+                        id="party"
+                        @bind="model.Party"
+                        placeholder="Party">
+                    <label for="party" class="text-muted">Party</label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-floating">
+                    <textarea class="form-control border-primary-subtle"
+                            id="bio"
+                            @bind="model.Bio"
+                            placeholder="Bio"
+                            style="height: 100px"></textarea>
+                    <label for="bio" class="text-muted">Bio</label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-floating">
+                    <input type="url"
+                        class="form-control border-primary-subtle"
+                        id="photoUrl"
+                        @bind="model.PhotoUrl"
+                        placeholder="Photo URL (optional)">
+                    <label for="photoUrl" class="text-muted">Photo URL (Optional)</label>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end border-top pt-4">
+                <button type="reset"
+                        class="btn btn-outline-secondary px-4"
+                        @onclick="ResetForm">
+                    Reset
+                </button>
+                <button type="submit"
+                        class="btn btn-primary px-4"
+                        disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Add Candidate
+                </button>
+            </div>
+        </EditForm>
         </div>
     </div>
 </main>
@@ -145,6 +144,8 @@
 </style>
 
 @code {
+
+    private CandidateFormModel model = new CandidateFormModel();
     // Form fields
     private Guid SelectedUserId;
     private Guid SelectedElectionPositionId;
@@ -152,22 +153,22 @@
     private string Bio = "";
     private string PhotoUrl = "";
 
-    // Dropdown data
+    private string NationalIdInput = "";
+    private string foundUserName = "";
+    private string searchErrorMessage = "";
+
     private List<UserDetailsDto> Users = new();
     private List<PositionDetails> Positions = new();
 
-    // Status messages
     private string errorMessage = "";
     private string successMessage = "";
 
-    // Loading state
     private bool isLoading = false;
+    private bool isSearching = false;
 
-    // Inject CandidatesService
     [Inject]
     private ICandidatesService CandidateService { get; set; }
 
-    // Inject authentication service (e.g., to get the token)
     [Inject]
     private IAuthService AuthService { get; set; }
 
@@ -175,18 +176,15 @@
     {
         try
         {
-            // Retrieve the bearer token
-            //var token = await AuthService.GetTokenAsync();
+            
             var token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOlsiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiQWRtaW4iXSwiZW1haWwiOiJhZG1pbkBzeXN0ZW0uY29tIiwibmF0aW9uYWxJZCI6IjEwMDAwMDAxIiwiaXNBZG1pbiI6InRydWUiLCJuYmYiOjE3NDI2ODYzMDQsImV4cCI6MTc0MjY4ODEwNCwiaWF0IjoxNzQyNjg2MzA0LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MjU2LyIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYifQ.HRbrj5Pu0CTFZ9qaLWZfTxExFHSEynYVoTwqTT5COWCEbDuUt3HiLsDhX8s9iDDpd-QvNzwcQv1RcpKDSehgbw";
             if (string.IsNullOrEmpty(token))
             {
                 throw new Exception("Authentication token is missing. Please log in.");
             }
 
-            // Set the bearer token in the CandidatesService
             CandidateService.SetBearerToken(token);
 
-            // Load dropdown data
             await LoadDropdownData();
         }
         catch (Exception ex)
@@ -199,7 +197,6 @@
     {
         try
         {
-            // Fetch users and election positions
             Users = (await UsersService.GetUsersAsync()).ToList();
             Positions = (await PositionsService.GetPositionsAsync()).ToList();
         }
@@ -217,31 +214,26 @@
 
         try
         {
-            // Validate required fields
-            if (SelectedUserId == Guid.Empty || SelectedElectionPositionId == Guid.Empty || string.IsNullOrWhiteSpace(Bio))
+            if (model.UserId == Guid.Empty )
             {
                 throw new Exception("Please fill in all required fields.");
             }
 
-            // Validate Photo URL
-            if (!string.IsNullOrWhiteSpace(PhotoUrl) && !Uri.TryCreate(PhotoUrl, UriKind.Absolute, out _))
+            if (!string.IsNullOrWhiteSpace(model.PhotoUrl) && !Uri.TryCreate(model.PhotoUrl, UriKind.Absolute, out _))
             {
                 throw new Exception("Invalid Photo URL format.");
             }
 
-            // Create the candidate
             var candidateDto = new CreateCandidateDto(
-                SelectedUserId,
-                SelectedElectionPositionId,
-                Party,
-                Bio,
-                string.IsNullOrWhiteSpace(PhotoUrl) ? null : new Uri(PhotoUrl)
+                model.UserId,
+                model.ElectionPositionId,
+                model.Party,
+                model.Bio,
+                string.IsNullOrWhiteSpace(model.PhotoUrl) ? null : new Uri(model.PhotoUrl)
             );
 
-            // Create the candidate (token is already set in the service)
             var createdCandidate = await CandidateService.CreateCandidateAsync(candidateDto);
 
-            // Show success message
             successMessage = "Candidate added successfully!";
 
             // Reset the form
@@ -263,11 +255,72 @@
 
     private void ResetForm()
     {
-        SelectedUserId = Guid.Empty;
-        SelectedElectionPositionId = Guid.Empty;
-        Party = "";
-        Bio = "";
-        PhotoUrl = "";
+        model = new CandidateFormModel();
+        NationalIdInput = "";
+        foundUserName = "";
+        searchErrorMessage = "";
     }
-}
-   
+
+    private async Task SearchUserByNationalId()
+    {
+        isSearching = true;
+        searchErrorMessage = "";
+        foundUserName = "";
+        SelectedUserId = Guid.Empty;
+
+        if (string.IsNullOrWhiteSpace(NationalIdInput))
+        {
+            searchErrorMessage = "Please enter a National ID";
+            isSearching = false;
+            return;
+        }
+
+        try
+        {
+            var allUsers = await UsersService.GetUsersAsync();
+
+            // safer parsing
+            if (int.TryParse(NationalIdInput.Trim(), out int nationalId))
+            {
+                var user = allUsers.FirstOrDefault(u => u.NationalId == nationalId);
+
+                if (user != null)
+                {
+                    SelectedUserId = user.Id;
+                    foundUserName = user.Name;
+                    searchErrorMessage = ""; 
+                }
+                else
+                {
+                    searchErrorMessage = "No user found with this National ID";
+                    foundUserName = "";
+                    SelectedUserId = Guid.Empty;
+                }
+            }
+            else
+            {
+                searchErrorMessage = "Invalid National ID format. Please enter a valid number.";
+            }
+        }
+        catch (ApiException ex)
+        {
+            searchErrorMessage = $"API Error: {ex.ProblemDetails?.Detail ?? ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            searchErrorMessage = $"Search failed: {ex.Message}";
+        }
+        finally
+        {
+            isSearching = false;
+        }
+    }
+    public class CandidateFormModel
+    {
+        public Guid UserId { get; set; }
+        public Guid ElectionPositionId { get; set; }
+        public string Party { get; set; } = "";
+        public string Bio { get; set; } = "";
+        public string PhotoUrl { get; set; } = "";
+    }
+}  

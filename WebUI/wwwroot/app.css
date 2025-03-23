@@ -157,3 +157,26 @@ h1:focus {
     90% { box-shadow: 0 0 0 8px rgba(32, 201, 151, 0); }
 }
 
+/* candidates */
+
+.scrollable-container {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.card-title {
+    font-size: 1.1rem;
+}
+
+.dropdown-menu {
+    min-width: 200px;
+}
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+}
+

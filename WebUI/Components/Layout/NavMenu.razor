@@ -3,10 +3,10 @@
     <div class="sticky-top border-bottom" style="background-color: #212529; border-color: #2d3339 !important;">
         <div class="d-flex align-items-center justify-content-between p-3">
             <div class="d-flex align-items-center">
-                <i class="bi bi-shield-check fs-4 me-2" style="color: #20c997;"></i>
+                <i class="bi bi-shield-check fs-4 pb-4 me-3" style="color: #20c997;"></i>
                 <span class="h5 mb-0" style="color: #f8f9fa;">
                     <span class="fw-medium">E</span>-Vote
-                    <span class="fw-light" style="color: #adb5bd;">Console</span>
+                    <span class="fw-light" style="color: #adb5bd;">ADMIN</span>
                 </span>
             </div>
             <!-- Toggle Button for Mobile -->
@@ -24,52 +24,87 @@
         <!-- Sidebar Navigation -->
         <div class="collapse d-lg-block flex-grow-1 overflow-auto vh-100 p-2" id="sidebar" style="background-color: #212529;">
             <nav class="nav flex-column gap-1">
-                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                <!-- Dashboard -->
+                <NavLink class="nav-link rounded-3 py-2 ps-3 d-flex align-items-center hover-item"
                          style="color: #e9ecef;"
                          href="dashboard"
                          ActiveClass="active-nav-item"
                          Match="NavLinkMatch.All">
                     <i class="bi bi-speedometer2 fs-5 me-3" style="color: #0dcaf0;"></i>
-                    <span class="fw-light">Dashboard</span>
+                    <span class="fw-light mt-2">Dashboard</span>
                 </NavLink>
 
-                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
-                         style="color: #e9ecef;"
-                         href="create-election"
-                         ActiveClass="active-nav-item"
-                         Match="NavLinkMatch.All">
-                    <i class="bi bi-clipboard-plus fs-5 me-3" style="color: #0dcaf0;"></i>
-                    <span class="fw-light">Election Creation</span>
-                </NavLink>
+                <!-- Election Management Dropdown -->
+                <div class="nav-item">
+                    <a class="nav-link rounded-3 py-2 ps-3 d-flex align-items-center hover-item"
+                       style="color: #e9ecef;"
+                       data-bs-toggle="collapse"
+                       href="#electionManagement"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="electionManagement">
+                        <i class="bi bi-clipboard-plus fs-5 me-3" style="color: #0dcaf0;"></i>
+                        <span class="fw-light mt-4">ELECTIONS</span>
+                        <i class="bi bi-chevron-down ms-auto fs-6"></i>
+                    </a>
+                    <div class="collapse ps-4" id="electionManagement">
+                        <div class="nav flex-column">
+                            <NavLink class="nav-link rounded-3 py-2 ps-4 d-flex align-items-center hover-item"
+                                     style="color: #e9ecef;"
+                                     href="create-election"
+                                     ActiveClass="active-nav-item"
+                                     Match="NavLinkMatch.All">
+                                <i class="bi bi-plus-circle fs-6 me-3" style="color: #0dcaf0;"></i>
+                                <span class="fw-light mt-4">Create Election</span>
+                            </NavLink>
+                            <NavLink class="nav-link rounded-3 py-2 ps-4 d-flex align-items-center hover-item"
+                                     style="color: #e9ecef;"
+                                     href="active-elections"
+                                     ActiveClass="active-nav-item"
+                                     Match="NavLinkMatch.All">
+                                <i class="bi bi-clock-history fs-6 me-3" style="color: #0dcaf0;"></i>
+                                <span class="fw-light mt-4">Active Elections</span>
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
 
-                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
-                         style="color: #e9ecef;"
-                         href="add-candidate"
-                         ActiveClass="active-nav-item"
-                         Match="NavLinkMatch.All">
-                    <i class="bi bi-person-add fs-5 me-3" style="color: #0dcaf0;"></i>
-                    <span class="fw-light">Candidate Management</span>
-                </NavLink>
+                <!-- Candidate Management Dropdown -->
+                <div class="nav-item">
+                    <a class="nav-link rounded-3 py-2 ps-3 d-flex align-items-center hover-item"
+                       style="color: #e9ecef;"
+                       data-bs-toggle="collapse"
+                       href="#candidateManagement"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="candidateManagement">
+                        <i class="bi bi-person-add fs-5 me-3" style="color: #0dcaf0;"></i>
+                        <span class="fw-light mt-4">CANDIDATES</span>
+                        <i class="bi bi-chevron-down ms-auto fs-6"></i>
+                    </a>
+                    <div class="collapse ps-4" id="candidateManagement">
+                        <div class="nav flex-column">
+                            <NavLink class="nav-link rounded-3 py-2 ps-4 d-flex align-items-center hover-item"
+                                     style="color: #e9ecef;"
+                                     href="add-candidate"
+                                     ActiveClass="active-nav-item"
+                                     Match="NavLinkMatch.All">
+                                <i class="bi bi-person-plus fs-6 me-3" style="color: #0dcaf0;"></i>
+                                <span class="fw-light mt-4">Add Candidate</span>
+                            </NavLink>
+                            <NavLink class="nav-link rounded-3 py-2 ps-4 d-flex align-items-center hover-item"
+                                     style="color: #e9ecef;"
+                                     href="candidates"
+                                     ActiveClass="active-nav-item"
+                                     Match="NavLinkMatch.All">
+                                <i class="bi bi-people fs-6 me-3" style="color: #0dcaf0;"></i>
+                                <span class="fw-light mt-4">Candidate Directory</span>
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
 
-                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
-                         style="color: #e9ecef;"
-                         href="active-elections"
-                         ActiveClass="active-nav-item"
-                         Match="NavLinkMatch.All">
-                    <i class="bi bi-clock-history fs-5 me-3" style="color: #0dcaf0;"></i>
-                    <span class="fw-light">Active Elections</span>
-                </NavLink>
-
-                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
-                         style="color: #e9ecef;"
-                         href="candidates"
-                         ActiveClass="active-nav-item"
-                         Match="NavLinkMatch.All">
-                    <i class="bi bi-people fs-5 me-3" style="color: #0dcaf0;"></i>
-                    <span class="fw-light">Candidate Directory</span>
-                </NavLink>
-
-                <NavLink class="nav-link rounded-3 py-3 ps-4 d-flex align-items-center hover-item"
+                <NavLink class="nav-link rounded-3 py-2 ps-3 d-flex align-items-center hover-item"
                          style="color: #e9ecef;"
                          href="results"
                          ActiveClass="active-nav-item"
@@ -80,7 +115,7 @@
             </nav>
 
             <!-- System Status Box -->
-            <div class="mt-auto p-3 d-lg-block mb-5 d-none">
+            <div class="p-3 d-lg-block d-none" style="position: fixed; bottom: 0; width: 100%; max-width: 250px; background-color: #212529;">
                 <div class="p-3 rounded-3" style="background-color: #1a1d20; border: 1px solid #2d3339;">
                     <div class="d-flex align-items-center mb-3">
                         <i class="bi bi-hexagon-fill fs-5 me-2" style="color: #0dcaf0;"></i>
@@ -96,7 +131,7 @@
                             <div class="mb-1" style="color: #adb5bd;">&copy; 2025 SecureVote</div>
                             <div class="small" style="color: #f8f9fa;">
                                 <i class="bi bi-shield-check"></i>
-                                Blockchain Secured
+                                Secured
                             </div>
                         </div>
                     </div>
@@ -105,4 +140,3 @@
         </div>
     </div>
 </div>
-

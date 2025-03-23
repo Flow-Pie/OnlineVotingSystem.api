@@ -42,6 +42,8 @@
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Microsoft.OpenApi.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/MinimalApis.Extensions.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/MiniValidation.dll
+/home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Npgsql.dll
+/home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/SQLitePCLRaw.batteries_v2.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/SQLitePCLRaw.core.dll
 /home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/SQLitePCLRaw.provider.e_sqlite3.dll
@@ -108,5 +110,3 @@
 /home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/WebUI.pdb
 /home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/WebUI.genruntimeconfig.cache
 /home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/ref/WebUI.dll
-/home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Npgsql.dll
-/home/jon/Documents/WebUI/WebUI/bin/Debug/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll

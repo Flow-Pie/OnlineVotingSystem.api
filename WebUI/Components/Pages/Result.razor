@@ -7,7 +7,6 @@
 <main class="container mt-4 scrollable-container">
     <h2 class="fw-bold mb-3 text-center">📊 Election Analytics</h2>
 
-    <!-- Filters -->
     <div class="row mb-4">
         <div class="col-md-4">
             <select @bind="SelectedRegion" class="form-select">
@@ -25,14 +24,12 @@
         </div>
     </div>
 
-    <!-- Real-time Data -->
     <div class="alert alert-info mb-3 d-flex align-items-center gap-2">
         <div class="spinner-border spinner-border-sm"></div>
         <span>Live results updating in @refreshCountdown seconds</span>
     </div>
 
     <div class="row g-4">
-        <!-- Interactive Charts -->
         <div class="col-lg-8">
             <div class="card p-3 shadow-sm">
                 <h5 class="fw-bold mb-3">Live Results</h5>
@@ -42,7 +39,6 @@
             </div>
         </div>
 
-        <!-- Demographic Insights -->
         <div class="col-lg-4">
             <div class="card p-3 shadow-sm">
                 <h5 class="fw-bold mb-3">Voter Demographics</h5>
@@ -63,7 +59,6 @@
         </div>
     </div>
 
-    <!-- Regional Breakdown -->
     <div class="card mt-4 p-3 shadow-sm">
         <h5 class="fw-bold mb-3">Regional Breakdown</h5>
         <div class="table-responsive">

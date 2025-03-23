@@ -2,22 +2,91 @@
 @using OnlineVotingSystem.api.DTOs.User
 @using OnlineVotingSystem.api.DTOs.Election
 @using OnlineVotingSystem.api.DTOs.Position
+@using OnlineVotingSystem.api.DTOs.ElectionPosition
+@using System.Net
+@using System.Timers
+@implements IDisposable
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <main class="container mt-4 scrollable-container">
+    <style>
+        .badge-status {
+            font-size: 0.75rem;  
+            padding: 0.25rem 0.5rem; 
+            border-radius: 0.75rem; 
+            font-weight: 500;
+            display: inline-block; 
+            min-width: auto; 
+        }
+
+
+        .badge-status-upcoming { 
+            background-color: #0dcaf0 !important; 
+            border: 1px solid #0dcaf0;
+        }
+
+        .badge-status-active { 
+            background-color: #198754 !important;
+            border: 1px solid #198754;
+        } 
+
+        .badge-status-ended { 
+            background-color: #dc3545 !important;
+            border: 1px solid #dc3545;
+        }
+
+        .scrollable-container {
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: var(--bs-primary-bg-subtle);
+            color: var(--bs-primary);
+        }
+
+        .accordion-item {
+            border-radius: 0.5rem !important;
+            overflow: hidden;
+        }
+
+        .card {
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .position-card {
+            background-color: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .position-card:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Active Elections</h2>
+        <h2 class="fw-bold mb-0 text-primary">Active Elections</h2>
         <div class="bg-primary-subtle rounded-circle p-3">
             <i class="bi bi-megaphone-fill fs-4 text-primary"></i>
         </div>
     </div>
+    <hr class="border-primary opacity-50" style="height: 2px">
 
-        
- <!-- Search & Filter -->
+    <!-- Search & Filter -->
     <div class="mb-4 d-flex gap-2">
         <input type="text" class="form-control" @bind="SearchTerm" 
-               placeholder="Search elections...click the Search button to search">
+               placeholder="Search elections...">
         <button class="btn btn-primary" @onclick="FilterElections">
             <i class="bi bi-search"></i> Search
         </button>
@@ -51,15 +120,9 @@
                                 data-bs-target="#collapse-@electionKey">
                             <div class="d-flex w-100 justify-content-between pe-3">
                                 <div>
-                                    <h5 class="mb-1">@election.Title</h5>
-                                    <small class="text-muted">
-                                        @election.StartTime.ToString("MMM dd") - 
-                                        @election.EndTime.ToString("MMM dd")
-                                    </small>
+                                    <h5 class="mb-1">@election.Title</h5>                                    
                                 </div>
-                                <div class="badge bg-primary bg-opacity-10 text-primary">
-                                    !Status
-                                </div>
+                                
                             </div>
                         </button>
                     </h2>
@@ -67,18 +130,22 @@
                     <div id="collapse-@electionKey" class="accordion-collapse collapse" 
                          data-bs-parent="#electionsAccordion">
                         <div class="accordion-body pt-0">
-                            <!-- Election Details -->
                             <div class="row mt-4 mb-4">
                                 <div class="col-md-8">
-                                    <p class="text-secondary">@election.Description</p>
+                                    <p class="text-secondary">
+                                        @election.Description
+                                        <span class="badge @GetStatusBadgeClass(election) text-white mx-1">
+                                            @GetTimeRemaining(election).formattedTime
+                                        </span> 
+                                    </p>
+                                
                                     
-                                    <!-- Creator Info -->
                                     <div class="card border-0 bg-light mb-4">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
                                                     <i class="bi bi-person-circle fs-4 text-primary"></i>
-                                                </div>
+                                                </div>                                                
                                                 <div>
                                                     <h6 class="mb-1">Created By</h6>
                                                     <p class="mb-0 fw-medium">
@@ -92,37 +159,49 @@
                                         </div>
                                     </div>
 
-                                    <!-- Positions -->
-                                    <h6 class="mb-3">Election Positions</h6>
-                                    @if (ElectionPositions.TryGetValue(election.Id, out var positions))
+                                    @if (ElectionDetailsState[election.Id])
                                     {
-                                        <div class="row g-3">
-                                            @foreach (var position in positions)
-                                            {
-                                                <div class="col-md-6">
-                                                    <div class="card border-0 bg-light h-100">
-                                                        <div class="card-body">
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <div>
-                                                                    <h6 class="mb-0">@position.Name</h6>
-                                                                    <small class="text-muted">
-                                                                        !Candidates.Count candidates
-                                                                    </small>
+                                        <h6 class="mb-3">Election Positions</h6>
+                                        @if (ElectionPositions.TryGetValue(election.Id, out var positions))
+                                        {
+                                            <div class="row g-3">
+                                                @foreach (var position in positions)
+                                                {
+                                                    <div class="col-md-6">
+                                                        <div class="card position-card h-100">
+                                                            <div class="card-body">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <div>
+                                                                        <h6 class="mb-0">@position.Position</h6>
+                                                                        <small class="text-muted">
+                                                                            !Count candidates
+                                                                        </small>
+                                                                    </div>
+                                                                    <span class="badge bg-primary bg-opacity-25 text-primary">
+                                                                        !seat(s)
+                                                                    </span>
                                                                 </div>
-                                                                <span class="badge bg-primary bg-opacity-25 text-primary">
-                                                                     !seat(s)
-                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
+                                                }
+                                            </div>
+                                        }
+                                        else if (PositionErrors.TryGetValue(election.Id, out var error))
+                                        {
+                                            <div class="alert alert-danger">@error</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-3">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading positions...</span>
                                                 </div>
-                                            }
-                                        </div>
+                                            </div>
+                                        }                                        
                                     }
                                 </div>
 
-
-                                <!-- Action Panel -->
                                 <div class="col-md-4">
                                     <div class="card border-0 bg-light h-100">
                                         <div class="card-body d-flex flex-column gap-3">
@@ -142,32 +221,53 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>                
             }
         </div>
 
         @if (ShowDeleteModal)
         {
-            <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5)" tabindex="-1">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title">
-                                <i class="bi bi-exclamation-octagon-fill text-danger me-2"></i>
-                                Confirm Deletion
-                            </h5>
+            <div class="modal @(ShowDeleteModal ? "show d-block" : "d-none")" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Delete Election</h5>
                             <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
                         </div>
                         <div class="modal-body">
-                            <p class="lead">Are you sure you want to permanently delete this election?</p>
-                            <p class="text-muted small">All associated data including votes and candidates will be removed.</p>
+                            <p>Are you sure you want to delete this election?</p>
+                            @if (IsDeleting)
+                            {
+                                <div class="alert alert-info">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                    Deleting election...
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(DeleteError))
+                            {
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> @DeleteError
+                                </div>
+                            }
                         </div>
-                        <div class="modal-footer border-0">
-                            <button class="btn btn-link text-muted text-decoration-none" @onclick="CloseDeleteModal">
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" 
+                                    @onclick="CloseDeleteModal" 
+                                    disabled="@IsDeleting">
                                 Cancel
                             </button>
-                            <button class="btn btn-danger px-4" @onclick="() => DeleteElection(SelectedElectionId)">
-                                <i class="bi bi-trash me-2"></i> Delete
+                            <button type="button" class="btn btn-danger" 
+                                    @onclick="() => DeleteElection(SelectedElectionId)"
+                                    disabled="@IsDeleting">
+                                @if (IsDeleting)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                    <span>Deleting...</span>
+                                }
+                                else
+                                {
+                                    <span>Confirm Delete</span>
+                                }
                             </button>
                         </div>
                     </div>
@@ -177,54 +277,42 @@
     }
 </main>
 
-<style>
-    .scrollable-container {
-        max-height: calc(100vh - 100px);
-        overflow-y: auto;
-    }
-
-    .accordion-button:not(.collapsed) {
-        background-color: var(--bs-primary-bg-subtle);
-        color: var(--bs-primary);
-    }
-
-    .accordion-item {
-        border-radius: 0.5rem !important;
-        overflow: hidden;
-    }
-</style>
-
-
 @code {
-    [Inject]
-    public required IElectionsService ElectionsService { get; set; }
-
-    [Inject]
-    public required IUsersService UsersService { get; set; }
+    [Inject] public required IElectionsService ElectionsService { get; set; }
+    [Inject] public required IUsersService UsersService { get; set; }
 
     private Dictionary<Guid, string> UserNames = new();
     private Dictionary<Guid, string> UserEmails = new();
-    public required List<ElectionDetailsDto> ElectionsModel { get; set; } = new();
-    public required List<UserDetailsDto> UsersModel { get; set; } = new();
+    private List<ElectionDetailsDto> ElectionsModel = new();
+    private List<UserDetailsDto> UsersModel = new();
     private Dictionary<Guid, bool> ElectionDetailsState = new();
-    private Dictionary<Guid, List<PositionDetails>> ElectionPositions = new();
-    private Dictionary<Guid, string> PositionErrors = new();        
-    private string SearchTerm { get; set; } = string.Empty;
-    private List<ElectionDetailsDto> FilteredElections{get; set;} = new();
+    private Dictionary<Guid, List<ElectionPositionSerialized>> ElectionPositions = new();
+    private Dictionary<Guid, string> PositionErrors = new();
+    private string SearchTerm = string.Empty;
+    private List<ElectionDetailsDto> FilteredElections = new();
 
     private bool ShowDeleteModal = false;
     private Guid SelectedElectionId;
-    private string? SuccessMessage;
-    private string? ErrorMessage;
+    private bool IsDeleting = false;
+    private string? DeleteError;
 
-  protected override async Task OnInitializedAsync()
+    private Timer? _electionTimer;
+    private DateTime _currentTime = DateTime.UtcNow;
+
+    protected override async Task OnInitializedAsync()
     {
+        _electionTimer = new Timer(1000);
+        _electionTimer.Elapsed += (sender, e) => 
+        {
+            _currentTime = DateTime.UtcNow;
+            InvokeAsync(StateHasChanged);
+        };
+        _electionTimer.Start();
+
         try
         {
             ElectionsModel = (await ElectionsService.GetElectionsAsync()).ToList();
             UsersModel = (await UsersService.GetUsersAsync()).ToList();
-
-            // Initialize the filtered list with all elections
             FilteredElections = new List<ElectionDetailsDto>(ElectionsModel);
 
             foreach (var election in ElectionsModel)
@@ -240,43 +328,33 @@
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Failed to load data: {ex.Message}";
+            Console.WriteLine($"Initialization error: {ex.Message}");
         }
     }
-    private string GetCreatorName(Guid userId)
-    {
-        return UserNames.TryGetValue(userId, out var name) ? name : "Unknown";
-    }
 
-    private string GetCreatorEmail(Guid userId)
-    {
-        return UserEmails.TryGetValue(userId, out var email) ? email : "Unknown";
-    }
+    private string GetCreatorName(Guid userId) => 
+        UserNames.TryGetValue(userId, out var name) ? name : "Unknown";
+
+    private string GetCreatorEmail(Guid userId) => 
+        UserEmails.TryGetValue(userId, out var email) ? email : "Unknown";
+
     private void FilterElections()
-{
-    try
     {
-        if (string.IsNullOrWhiteSpace(SearchTerm))
+        try
         {
-            FilteredElections = new List<ElectionDetailsDto>(ElectionsModel);
+            FilteredElections = string.IsNullOrWhiteSpace(SearchTerm)
+                ? new List<ElectionDetailsDto>(ElectionsModel)
+                : ElectionsModel.Where(e => 
+                    e.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    e.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+                  .ToList();
         }
-        else
+        catch (Exception ex)
         {
-            FilteredElections = ElectionsModel
-                .Where(e => e.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
-                              e.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            Console.WriteLine($"Filter error: {ex.Message}");
         }
+        StateHasChanged();
     }
-    catch (Exception ex)
-    {
-        ErrorMessage = $"An error occurred while filtering elections: {ex.Message}";
-        SuccessMessage = null;
-    }
-
-    // Trigger UI refresh
-    StateHasChanged();
-}
 
     private async Task ToggleDetails(Guid electionId)
     {
@@ -287,22 +365,16 @@
         {
             try
             {
-                var positions = await ElectionsService.GetElectionPositionsAsync(electionId);
-                ElectionPositions[electionId] = positions.ToList();
-                PositionErrors.Remove(electionId); 
+                PositionErrors.Remove(electionId);
+                var positions = (await ElectionsService.GetElectionPositionsAsync(electionId)).ToList();
+                ElectionPositions[electionId] = positions;
             }
             catch (Exception ex)
             {
                 PositionErrors[electionId] = $"Failed to load positions: {ex.Message}";
             }
+            StateHasChanged();
         }
-    }
-
-    private async Task RefreshPositions(Guid electionId)
-    {
-        ElectionPositions.Remove(electionId);
-        PositionErrors.Remove(electionId);
-        await ToggleDetails(electionId); // Force reload
     }
 
     private void ConfirmDeleteElection(Guid electionId)
@@ -315,27 +387,111 @@
     {
         ShowDeleteModal = false;
         SelectedElectionId = Guid.Empty;
+        DeleteError = null;
     }
 
     private async Task DeleteElection(Guid electionId)
     {
+        IsDeleting = true;
+        DeleteError = null;
+        
         try
         {
-            await ElectionsService.DeleteElectionAsync(electionId);
-            ElectionsModel.RemoveAll(e => e.Id == electionId);
-            ElectionPositions.Remove(electionId);
-            PositionErrors.Remove(electionId); 
-            SuccessMessage = "Election deleted successfully!";
-            ErrorMessage = null;
+            var token = "";
+
+            if (string.IsNullOrEmpty(token))
+            {
+                DeleteError = "Authentication required. Please login again.";
+                return;
+            }
+
+            var success = await ElectionsService.DeleteElectionAsync(electionId, token);
+            
+            if (success)
+            {
+                ElectionsModel.RemoveAll(e => e.Id == electionId);
+                FilteredElections = new List<ElectionDetailsDto>(ElectionsModel);
+                ElectionPositions.Remove(electionId);
+                PositionErrors.Remove(electionId);
+                CloseDeleteModal();
+            }
+            else
+            {
+                DeleteError = "Failed to delete election. Please try again.";
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            DeleteError = "You don't have permission to delete elections";
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Failed to delete election: {ex.Message}";
-            SuccessMessage = null;
+            DeleteError = $"Error: {ex.Message}";
         }
         finally
         {
-            CloseDeleteModal();
+            IsDeleting = false;
+            StateHasChanged();
         }
+    }
+
+    private (string formattedTime, ElectionStatus status) GetTimeRemaining(ElectionDetailsDto election)
+    {
+        // Hardcoded test values
+        var now = DateTime.UtcNow; 
+        var startTime = now.AddHours(1); 
+        var endTime = now.AddHours(3);
+
+        // Uncomment these lines to test different scenarios:
+        // Scenario 1: Election is upcoming
+        //    startTime = now.AddHours(2);
+         //   endTime = now.AddHours(4);
+
+        // Scenario 2: Election is active
+        //startTime = now.AddHours(-1);
+        //endTime = now.AddHours(2);
+
+        // Scenario 3: Election has ended
+        //startTime = now.AddHours(-3);
+       // endTime = now.AddHours(-1);
+
+       //scenario 4: real election
+        startTime = election.StartTime;
+        endTime = election.EndTime;
+
+        var startDiff = startTime - now;
+        var endDiff = endTime - now;
+
+        if (startDiff.TotalSeconds > 0)
+        {
+            return ($"Starts in {FormatTimeSpan(startDiff)}", ElectionStatus.Upcoming);
+        }
+
+        if (endDiff.TotalSeconds > 0)
+        {
+            return ($"{FormatTimeSpan(endDiff)} remaining", ElectionStatus.Active);
+        }
+
+        return ("Ended", ElectionStatus.Ended);
+    }
+
+    private string FormatTimeSpan(TimeSpan span) => 
+        $"{(int)span.TotalDays}d {span.Hours}h {span.Minutes}m {span.Seconds}s";
+
+    private string GetStatusBadgeClass(ElectionDetailsDto election) =>
+        GetTimeRemaining(election).status switch
+        {
+            ElectionStatus.Upcoming => "badge-status-upcoming",
+            ElectionStatus.Active => "badge-status-active",
+            ElectionStatus.Ended => "badge-status-ended",
+            _ => "badge bg-primary bg-opacity-10 text-primary"
+        };
+
+    private enum ElectionStatus { Upcoming, Active, Ended }
+
+    public void Dispose()
+    {
+        _electionTimer?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
