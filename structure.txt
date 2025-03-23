@@ -2,7 +2,6 @@
 ├── OnlineVotingSystem.api
 │   ├── appsettings.Development.json
 │   ├── appsettings.json
-│   ├── auth.http
 │   ├── bin
 │   │   └── Debug
 │   │       └── net8.0
@@ -87,6 +86,8 @@
 │   │           ├── MinimalApis.Extensions.dll
 │   │           ├── MiniValidation.dll
 │   │           ├── Mono.TextTemplating.dll
+│   │           ├── Npgsql.dll
+│   │           ├── Npgsql.EntityFrameworkCore.PostgreSQL.dll
 │   │           ├── OnlineVotingSystem.api
 │   │           ├── OnlineVotingSystem.api.deps.json
 │   │           ├── OnlineVotingSystem.api.dll
@@ -218,7 +219,11 @@
 │   │   ├── DataExtensions.cs
 │   │   └── OnlineVotingSystemContext.cs
 │   ├── DTOs
-│   │   ├── CreateUserDto.cs
+│   │   ├── Candidate
+│   │   │   ├── CandidateDetailsDto.cs
+│   │   │   ├── CandidateSerializedDto.cs
+│   │   │   ├── CreateCandidateDto.cs
+│   │   │   └── UpdateCandidateDto.cs
 │   │   ├── Election
 │   │   │   ├── CreateElectionDto.cs
 │   │   │   ├── ElectionDetailsDto.cs
@@ -226,20 +231,31 @@
 │   │   ├── ElectionPosition
 │   │   │   ├── CreateElectionPositionDto.cs
 │   │   │   └── ElectionPositionSerialized.cs
-│   │   ├── LoginResponseDto.cs
-│   │   ├── LoginUserDto.cs
+│   │   ├── Migrations
+│   │   │   ├── 20250322182738_InitialMigration.cs
+│   │   │   ├── 20250322182738_InitialMigration.Designer.cs
+│   │   │   └── OnlineVotingSystemContextModelSnapshot.cs
 │   │   ├── Position
 │   │   │   ├── CreatePositionDto.cs
 │   │   │   ├── PositionDetails.cs
 │   │   │   └── UpdatePositionDto.cs
-│   │   └── UserDetailsDto.cs
-│   ├── election_position.http
-│   ├── elections.http
+│   │   ├── User
+│   │   │   ├── CreateUserDto.cs
+│   │   │   ├── LoginResponseDto.cs
+│   │   │   ├── LoginUserDto.cs
+│   │   │   ├── UpdateUserDto.cs
+│   │   │   └── UserDetailsDto.cs
+│   │   └── Vote
+│   │       ├── CreateVoteDto.cs
+│   │       ├── VoteDetailsDto.cs
+│   │       └── VoteSerializedDto.cs
 │   ├── Endpoints
 │   │   ├── AuthEndpoints.cs
+│   │   ├── CandidatesEndpoints.cs
 │   │   ├── ElectionsEndpoints.cs
 │   │   ├── PositionsEndpoints.cs
-│   │   └── UsersEndpoints.cs
+│   │   ├── UsersEndpoints.cs
+│   │   └── VotesEndpoints.cs
 │   ├── Entities
 │   │   ├── Candidate.cs
 │   │   ├── Election.cs
@@ -247,16 +263,23 @@
 │   │   ├── Position.cs
 │   │   ├── User.cs
 │   │   └── Vote.cs
+│   ├── executionDiagram.svg
+│   ├── Http
+│   │   ├── auth.http
+│   │   ├── candidate.http
+│   │   ├── election_position.http
+│   │   ├── elections.http
+│   │   ├── positions.http
+│   │   ├── users.http
+│   │   └── vote.http
 │   ├── LICENSE
 │   ├── Mapping
+│   │   ├── CandidateMapping.cs
 │   │   ├── ElectionMapping.cs
 │   │   ├── ElectionPositionMapping.cs
 │   │   ├── PositionMapping.cs
-│   │   └── UserMapping.cs
-│   ├── Migrations
-│   │   ├── 20250308233645_InitialCreate.cs
-│   │   ├── 20250308233645_InitialCreate.Designer.cs
-│   │   └── OnlineVotingSystemContextModelSnapshot.cs
+│   │   ├── UserMapping.cs
+│   │   └── VoteMapping.cs
 │   ├── obj
 │   │   ├── Debug
 │   │   │   └── net8.0
@@ -288,22 +311,15 @@
 │   │   ├── OnlineVotingSystem.api.csproj.nuget.g.props
 │   │   ├── OnlineVotingSystem.api.csproj.nuget.g.targets
 │   │   ├── project.assets.json
-│   │   ├── project.nuget.cache
-│   │   ├── project.packagespec.json
-│   │   ├── rider.project.model.nuget.info
-│   │   └── rider.project.restore.info
+│   │   └── project.nuget.cache
 │   ├── OnlineVotingSystem.api.csproj
+│   ├── OnlineVotingSystem.api.sln
 │   ├── OnlineVotingSystem.db
-│   ├── OnlineVotingSystem.db-shm
-│   ├── OnlineVotingSystem.db-wal
-│   ├── positions.http
 │   ├── Program.cs
 │   ├── Properties
 │   │   └── launchSettings.json
-│   ├── Services
-│   │   └── JwtService.cs
-│   ├── structure.txt
-│   └── users.http
+│   └── Services
+│       └── JwtService.cs
 ├── OnlineVotingSystem.sln
 ├── OnlineVotingSystem.sln.DotSettings.user
 ├── structure.txt
@@ -316,6 +332,7 @@
     │           ├── appsettings.Development.json
     │           ├── appsettings.json
     │           ├── BCrypt.Net-Next.dll
+    │           ├── Blazored.LocalStorage.dll
     │           ├── Microsoft.AspNetCore.Authentication.JwtBearer.dll
     │           ├── Microsoft.AspNetCore.Authorization.dll
     │           ├── Microsoft.AspNetCore.Components.dll
@@ -347,6 +364,8 @@
     │           ├── Microsoft.OpenApi.dll
     │           ├── MinimalApis.Extensions.dll
     │           ├── MiniValidation.dll
+    │           ├── Npgsql.dll
+    │           ├── Npgsql.EntityFrameworkCore.PostgreSQL.dll
     │           ├── OnlineVotingSystem.api
     │           ├── OnlineVotingSystem.api.deps.json
     │           ├── OnlineVotingSystem.api.dll
@@ -455,15 +474,16 @@
     │   │   └── NavMenu.razor.css
     │   ├── Pages
     │   │   ├── ActiveElections.razor
-    │   │   ├── AddCandidate.razor
+    │   │   ├── AddCandidates.razor
+    │   │   ├── AddElection.razor
     │   │   ├── Candidate.razor
     │   │   ├── Counter.razor
-    │   │   ├── CreateElection.razor
     │   │   ├── Dashboard.razor
     │   │   ├── Error.razor
     │   │   ├── Home.razor
     │   │   ├── Login.razor
     │   │   ├── Result.razor
+    │   │   ├── UserLogin.razor
     │   │   └── Weather.razor
     │   └── Routes.razor
     ├── obj
@@ -518,13 +538,17 @@
     │   └── launchSettings.json
     ├── Services
     │   ├── AuthService.cs
+    │   ├── CandidateService.cs
+    │   ├── CustomAuthStateProvider.cs
     │   ├── ElectionService.cs
     │   ├── IAuthService.cs
+    │   ├── ICandidatesService.cs
     │   ├── IElectionsService.cs
     │   ├── IPositionsService.cs
     │   ├── IUsersService.cs
     │   ├── PositionsService.cs
     │   └── UsersService.cs
+    ├── structure.txt
     ├── WebUI.csproj
     └── wwwroot
         ├── app.css
@@ -536,4 +560,4 @@
             ├── charts.js
             └── dashboardCharts.js
 
-152 directories, 385 files
+156 directories, 405 files

@@ -15,4 +15,6 @@ public interface ICandidatesService
     Task<IEnumerable<CandidateSerializedDto>> GetCandidatesByPositionAsync(Guid electionPositionId);
     
     Task<IEnumerable<CandidateDetailsDto>> GetCandidatesByUserAsync(Guid userId);
+    
+    void SetBearerToken(string token);
 }

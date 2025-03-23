@@ -7,6 +7,7 @@
 │           ├── appsettings.Development.json
 │           ├── appsettings.json
 │           ├── BCrypt.Net-Next.dll
+│           ├── Blazored.LocalStorage.dll
 │           ├── Microsoft.AspNetCore.Authentication.JwtBearer.dll
 │           ├── Microsoft.AspNetCore.Authorization.dll
 │           ├── Microsoft.AspNetCore.Components.dll
@@ -38,6 +39,8 @@
 │           ├── Microsoft.OpenApi.dll
 │           ├── MinimalApis.Extensions.dll
 │           ├── MiniValidation.dll
+│           ├── Npgsql.dll
+│           ├── Npgsql.EntityFrameworkCore.PostgreSQL.dll
 │           ├── OnlineVotingSystem.api
 │           ├── OnlineVotingSystem.api.deps.json
 │           ├── OnlineVotingSystem.api.dll
@@ -146,15 +149,16 @@
 │   │   └── NavMenu.razor.css
 │   ├── Pages
 │   │   ├── ActiveElections.razor
-│   │   ├── AddCandidate.razor
+│   │   ├── AddCandidates.razor
+│   │   ├── AddElection.razor
 │   │   ├── Candidate.razor
 │   │   ├── Counter.razor
-│   │   ├── CreateElection.razor
 │   │   ├── Dashboard.razor
 │   │   ├── Error.razor
 │   │   ├── Home.razor
 │   │   ├── Login.razor
 │   │   ├── Result.razor
+│   │   ├── UserLogin.razor
 │   │   └── Weather.razor
 │   └── Routes.razor
 ├── obj
@@ -209,8 +213,11 @@
 │   └── launchSettings.json
 ├── Services
 │   ├── AuthService.cs
+│   ├── CandidateService.cs
+│   ├── CustomAuthStateProvider.cs
 │   ├── ElectionService.cs
 │   ├── IAuthService.cs
+│   ├── ICandidatesService.cs
 │   ├── IElectionsService.cs
 │   ├── IPositionsService.cs
 │   ├── IUsersService.cs
@@ -228,4 +235,4 @@
         ├── charts.js
         └── dashboardCharts.js
 
-70 directories, 159 files
+70 directories, 166 files

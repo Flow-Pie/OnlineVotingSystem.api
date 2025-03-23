@@ -1,0 +1,5 @@
+/home/jon/Documents/WebUI/obj/Debug/net8.0/launch.csproj.AssemblyReference.cache
+/home/jon/Documents/WebUI/obj/Debug/net8.0/launch.GeneratedMSBuildEditorConfig.editorconfig
+/home/jon/Documents/WebUI/obj/Debug/net8.0/launch.AssemblyInfoInputs.cache
+/home/jon/Documents/WebUI/obj/Debug/net8.0/launch.AssemblyInfo.cs
+/home/jon/Documents/WebUI/obj/Debug/net8.0/launch.csproj.CoreCompileInputs.cache
