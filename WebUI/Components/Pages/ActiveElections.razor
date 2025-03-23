@@ -280,6 +280,8 @@
 @code {
     [Inject] public required IElectionsService ElectionsService { get; set; }
     [Inject] public required IUsersService UsersService { get; set; }
+    [Inject] public required IPositionsService PositionsService { get; set; }
+    [Inject] public required IAuthService AuthService { get; set; }
 
     private Dictionary<Guid, string> UserNames = new();
     private Dictionary<Guid, string> UserEmails = new();
@@ -397,7 +399,7 @@
         
         try
         {
-            var token = "";
+            var token = await AuthService.GetTokenAsync();
 
             if (string.IsNullOrEmpty(token))
             {

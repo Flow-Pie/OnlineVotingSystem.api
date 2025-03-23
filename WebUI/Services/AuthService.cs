@@ -9,11 +9,33 @@ namespace WebUI.Services;
 public class AuthService : IAuthService
 {
     private readonly HttpClient _httpClient;
+    private string identifier = "11110011";
+    private string password = "Admin2Password!123";
 
     public AuthService(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
+
+     public async Task<string> GetTokenAsync()
+        {
+            var loginData = new
+            {
+                identifier,
+                password
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/auth/login", loginData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseData = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+                return responseData!.AccessToken;
+            }
+
+            return null; 
+        }
+
 
     public async Task<LoginResponseDto> LoginAsync(LoginUserDto loginRequest)
     {

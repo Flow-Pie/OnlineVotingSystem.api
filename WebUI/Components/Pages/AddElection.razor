@@ -13,7 +13,7 @@
         <hr class="border-primary opacity-50" style="height: 2px">
     </header>
 
-    <div class="status-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+    <div class="status-container position-fixed top-0 p-3" style="z-index: 9999">
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="alert alert-danger d-flex align-items-center shadow-sm">
@@ -302,6 +302,8 @@
 </style>
 
 @code {
+    [Inject]
+    private IAuthService AuthService { get; set; }
     // Form Fields
     private string Title { get; set; } = "";
     private string Description { get; set; } = "";
@@ -318,9 +320,7 @@
     // State Management
     private bool isLoading;
     private string errorMessage = "";
-    private string successMessage = "";
-    private string _bearerToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOlsiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiQWRtaW4iXSwiZW1haWwiOiJhZG1pbkBzeXN0ZW0uY29tIiwibmF0aW9uYWxJZCI6IjEwMDAwMDAxIiwiaXNBZG1pbiI6InRydWUiLCJuYmYiOjE3NDI2NzY0MTcsImV4cCI6MTc0MjY3ODIxNywiaWF0IjoxNzQyNjc2NDE3LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MjU2LyIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYifQ.23oBR4WcFVf6AGB-CraSZggwfkKjqNYqvJKMe_qhrdTggGA5fWEN9HDzhN3_p35JYxQqDOIF5l2I2Nls7oNsuQ";
-
+    private string successMessage = "";   
     protected override async Task OnInitializedAsync()
     {
         await LoadPositions();
@@ -379,7 +379,7 @@
                 StartTime,
                 EndTime
             );
-
+            var _bearerToken = await AuthService.GetTokenAsync();
             var createdElection = await ElectionService.CreateElectionAsync(electionDto, _bearerToken);
             await AssignPositionsToElection(createdElection.Id);
             
@@ -449,10 +449,13 @@
             }
 
             var newPosition = new CreatePositionDto(newPositionName.Trim());
+            var _bearerToken = await AuthService.GetTokenAsync();
+            Console.WriteLine(_bearerToken);
             var createdPosition = await PositionsService.CreatePositionAsync(newPosition, _bearerToken);
 
             availablePositions.Add(createdPosition);
             SelectedPositions.Add(createdPosition.Id);
+            successMessage = "Position created successfully!";
             newPositionName = string.Empty;
         }
         catch (Exception ex)

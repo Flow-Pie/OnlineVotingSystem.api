@@ -176,10 +176,10 @@
         try
         {
             
-            var token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOlsiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiQWRtaW4iXSwiZW1haWwiOiJhZG1pbkBzeXN0ZW0uY29tIiwibmF0aW9uYWxJZCI6IjEwMDAwMDAxIiwiaXNBZG1pbiI6InRydWUiLCJuYmYiOjE3NDI2ODYzMDQsImV4cCI6MTc0MjY4ODEwNCwiaWF0IjoxNzQyNjg2MzA0LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MjU2LyIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjUyNTYifQ.HRbrj5Pu0CTFZ9qaLWZfTxExFHSEynYVoTwqTT5COWCEbDuUt3HiLsDhX8s9iDDpd-QvNzwcQv1RcpKDSehgbw";
+            var token = await AuthService.GetTokenAsync();
             if (string.IsNullOrEmpty(token))
             {
-                throw new Exception("Authentication token is missing. Please log in.");
+                throw new  Exception("Authentication token is missing. Please log in.");
             }
 
             CandidateService.SetBearerToken(token);

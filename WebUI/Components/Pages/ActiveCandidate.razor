@@ -6,13 +6,11 @@
 
 <main class="container mt-4 scrollable-container">
     <style>
-        /* Scrollable container */
         .scrollable-container {
             max-height: calc(100vh - 100px);
             overflow-y: auto;
         }
 
-        /* Card styling */
         .card {
             border: 2px solid var(--bs-primary-subtle);
             border-radius: 0.5rem;
@@ -86,6 +84,7 @@
             <i class="bi bi-search me-2"></i>Search
         </button>
     </div>
+
 
      @if (SelectedCandidate != null)
     {
@@ -217,7 +216,7 @@
     {
         try
         {
-            var token = "YOUR_TOKEN_HERE";
+            var token = await AuthService.GetTokenAsync();
             CandidateService.SetBearerToken(token);
 
             Candidates = (await CandidateService.GetSerializedCandidatesAsync()).ToList();
@@ -323,7 +322,7 @@
     {
         try
         {
-            var token = "YOUR_TOKEN_HERE";
+            var token = await AuthService.GetTokenAsync();
             CandidateService.SetBearerToken(token);
 
             await CandidateService.DeleteCandidateAsync(candidateId);
@@ -366,6 +365,6 @@
 
     private void EditCandidate(Guid candidateId)
     {
-        // Edit logic
+        // TODO!! edit
     }
 }
