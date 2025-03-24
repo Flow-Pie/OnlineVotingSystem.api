@@ -15,7 +15,20 @@ public class ElectionService : IElectionsService
     public ElectionService(HttpClient httpClient)
     {
         this.httpClient = httpClient;
-    }    
+    } 
+
+    public async Task<IEnumerable<ElectionResultsView>> GetElectionsResultsAsync()
+    {
+        return await httpClient.GetFromJsonAsync<IEnumerable<ElectionResultsView>>("/elections/results")
+            ??new List<ElectionResultsView>();
+    }
+    
+
+     public async Task<IEnumerable<ElectionDetailsDto>> GetElectionsAsync()
+        {
+        return await httpClient.GetFromJsonAsync<IEnumerable<ElectionDetailsDto>>("/elections")
+            ??new List<ElectionDetailsDto>();
+        }   
    
 
    public async Task<IEnumerable<ElectionPositionSerialized>> GetElectionPositionsAsync(Guid electionId)
@@ -56,12 +69,7 @@ public class ElectionService : IElectionsService
        if(!response.IsSuccessStatusCode) throw new HttpRequestException($"Error creating election positions: {response.ReasonPhrase}");
        return await response.Content.ReadFromJsonAsync<ElectionPositionSerialized>()
            ?? throw new InvalidOperationException("Failed to deserialize election positions.");
-    }
-     public async Task<IEnumerable<ElectionDetailsDto>> GetElectionsAsync()
-    {
-       return await httpClient.GetFromJsonAsync<IEnumerable<ElectionDetailsDto>>("/elections")
-           ??new List<ElectionDetailsDto>();
-    }
+    }    
 
     public async Task<ElectionDetailsDto> GetElectionAsync(Guid electionId)
     {

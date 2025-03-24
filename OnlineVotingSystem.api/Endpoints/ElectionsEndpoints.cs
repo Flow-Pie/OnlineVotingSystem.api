@@ -23,6 +23,17 @@ public static class ElectionsEndpoints
                 .ToListAsync();
         }).WithName("getElections"); // name of the route
 
+        //get results
+        group.MapGet("/results", async (OnlineVotingSystemContext dbContext) =>
+            {
+                return await dbContext.ElectionResults
+                    .Select(election => election.ToElectionResultsDetailsDto())
+                    .AsNoTracking()
+                    .ToListAsync();
+                
+            });
+
+
         // Create election - "http://localhost:PORT/elections/create" - ADMIN ONLY
         group.MapPost("/create",
             async (

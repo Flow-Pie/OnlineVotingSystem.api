@@ -30,6 +30,8 @@ else
     builder.Services.AddNpgsql<OnlineVotingSystemContext>(connString);
 }
 
+
+
 // Add JWT authentication
 builder.Services.AddAuthentication(options =>
 {
@@ -57,6 +59,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<ViewManagerService>();
 
 // Define authorization policies
 builder.Services.AddAuthorizationBuilder()
@@ -137,7 +140,11 @@ app.MapVoteEndpoints();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<OnlineVotingSystemContext>();
+    var viewManager = scope.ServiceProvider.GetRequiredService<ViewManagerService>(); 
+
     dbContext.Database.EnsureCreated(); // Ensure DB exists
+    viewManager.EnsureViewsCreated(); // Create views
+    
 }
 
 app.Run();

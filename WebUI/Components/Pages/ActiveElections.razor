@@ -12,10 +12,10 @@
 <main class="container mt-4 scrollable-container">
     <style>
         .badge-status {
-            font-size: 0.75rem;  
+            font-size: 0.85rem;  
             padding: 0.25rem 0.5rem; 
-            border-radius: 0.75rem; 
-            font-weight: 500;
+            border-radius: 0.95rem; 
+            font-weight:bolder;
             display: inline-block; 
             min-width: auto; 
         }
@@ -23,7 +23,8 @@
 
         .badge-status-upcoming { 
             background-color: #0dcaf0 !important; 
-            border: 1px solid #0dcaf0;
+            border: 1px solid #0dcaf0;    
+
         }
 
         .badge-status-active { 
@@ -134,8 +135,8 @@
                                 <div class="col-md-8">
                                     <p class="text-secondary">
                                         @election.Description
-                                        <span class="badge @GetStatusBadgeClass(election) text-white mx-1">
-                                            @GetTimeRemaining(election).formattedTime
+                                        <span class="badge-status @GetStatusBadgeClass(election) text-white mx-1">
+                                           @GetTimeRemaining(election).formattedTime
                                         </span> 
                                     </p>
                                 

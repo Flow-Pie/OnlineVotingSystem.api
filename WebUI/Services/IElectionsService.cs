@@ -7,6 +7,8 @@ namespace WebUI.Services;
 public interface IElectionsService
 {
     Task<IEnumerable<ElectionDetailsDto>> GetElectionsAsync();
+    Task<IEnumerable<ElectionResultsView>> GetElectionsResultsAsync();
+
     Task<ElectionDetailsDto> GetElectionAsync(Guid electionId);
     Task<IEnumerable<ElectionPositionSerialized>> GetElectionPositionsAsync(Guid electionId);
     Task<ElectionDetailsDto> CreateElectionAsync(CreateElectionDto createElectionDto, string token);

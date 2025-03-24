@@ -18,6 +18,23 @@ public static class ElectionMapping
         );
     }
 
+     public static ElectionResultsView ToElectionResultsDetailsDto(this ElectionResult election)
+    {
+        return new ElectionResultsView        
+        (
+            election.CandidateId,
+            election.CandidateUserId,
+            election.CandidateName,
+            election.Party,
+            election.ElectionPositionId,
+            election.PositionId,
+            election.PositionName,
+            election.ElectionId,
+            election.ElectionTitle,
+            election.TotalVotes
+        );
+    }
+
     public static Election ToEntity(this CreateElectionDto election, Guid userId)
     {
         return new Election
