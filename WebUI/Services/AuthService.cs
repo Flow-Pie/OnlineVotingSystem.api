@@ -9,8 +9,8 @@ namespace WebUI.Services;
 public class AuthService : IAuthService
 {
     private readonly HttpClient _httpClient;
-    private string identifier = "11110011";
-    private string password = "Admin2Password!123";
+    private string identifier = "10000001";
+    private string password = "AdminPassword!1234";
 
     public AuthService(HttpClient httpClient)
     {

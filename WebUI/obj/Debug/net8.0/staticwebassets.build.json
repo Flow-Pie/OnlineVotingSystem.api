@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "Hash": "O0315ogSHaxFGg0K5SURAFHcrqsUYoSug1cNl5vg1r0=",
+  "Hash": "Hv3y7LrugHMqXoZTFv6Yx2gS3PA2jOOFM+Pvf/SgJUM=",
   "Source": "WebUI",
   "BasePath": "_content/WebUI",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [
     {
-      "Identity": "/home/jon/Documents/WebUI/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
       "Version": 2,
       "Source": "OnlineVotingSystem.api",
       "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
@@ -22,7 +22,7 @@
     {
       "Name": "WebUI/wwwroot",
       "Source": "WebUI",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/wwwroot/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/",
       "BasePath": "_content/WebUI",
       "Pattern": "**"
     }
@@ -200,10 +200,10 @@
       "OriginalItemSpec": "/home/jon/.nuget/packages/syncfusion.blazor.data/28.2.11/staticwebassets/scripts/data.min.js"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/scopedcss/bundle/WebUI.styles.css",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/bundle/WebUI.styles.css",
       "SourceId": "WebUI",
       "SourceType": "Computed",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/scopedcss/bundle/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/bundle/",
       "BasePath": "_content/WebUI",
       "RelativePath": "WebUI.styles.css",
       "AssetKind": "All",
@@ -216,13 +216,13 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "/home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/scopedcss/bundle/WebUI.styles.css"
+      "OriginalItemSpec": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/bundle/WebUI.styles.css"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/WebUI.bundle.scp.css",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/WebUI.bundle.scp.css",
       "SourceId": "WebUI",
       "SourceType": "Computed",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/",
       "BasePath": "_content/WebUI",
       "RelativePath": "WebUI.bundle.scp.css",
       "AssetKind": "All",
@@ -235,13 +235,13 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "/home/jon/Documents/WebUI/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/WebUI.bundle.scp.css"
+      "OriginalItemSpec": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/WebUI.bundle.scp.css"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/wwwroot/app.css",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/app.css",
       "SourceId": "WebUI",
       "SourceType": "Discovered",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/wwwroot/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/",
       "BasePath": "_content/WebUI",
       "RelativePath": "app.css",
       "AssetKind": "All",
@@ -257,10 +257,10 @@
       "OriginalItemSpec": "wwwroot/app.css"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/wwwroot/bootstrap/bootstrap.min.css",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/bootstrap/bootstrap.min.css",
       "SourceId": "WebUI",
       "SourceType": "Discovered",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/wwwroot/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/",
       "BasePath": "_content/WebUI",
       "RelativePath": "bootstrap/bootstrap.min.css",
       "AssetKind": "All",
@@ -276,10 +276,10 @@
       "OriginalItemSpec": "wwwroot/bootstrap/bootstrap.min.css"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/wwwroot/bootstrap/bootstrap.min.css.map",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/bootstrap/bootstrap.min.css.map",
       "SourceId": "WebUI",
       "SourceType": "Discovered",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/wwwroot/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/",
       "BasePath": "_content/WebUI",
       "RelativePath": "bootstrap/bootstrap.min.css.map",
       "AssetKind": "All",
@@ -295,10 +295,10 @@
       "OriginalItemSpec": "wwwroot/bootstrap/bootstrap.min.css.map"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/wwwroot/favicon.png",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/favicon.png",
       "SourceId": "WebUI",
       "SourceType": "Discovered",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/wwwroot/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/",
       "BasePath": "_content/WebUI",
       "RelativePath": "favicon.png",
       "AssetKind": "All",
@@ -314,10 +314,10 @@
       "OriginalItemSpec": "wwwroot/favicon.png"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/wwwroot/js/charts.js",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/js/charts.js",
       "SourceId": "WebUI",
       "SourceType": "Discovered",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/wwwroot/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/",
       "BasePath": "_content/WebUI",
       "RelativePath": "js/charts.js",
       "AssetKind": "All",
@@ -333,10 +333,10 @@
       "OriginalItemSpec": "wwwroot/js/charts.js"
     },
     {
-      "Identity": "/home/jon/Documents/WebUI/WebUI/wwwroot/js/dashboardCharts.js",
+      "Identity": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/js/dashboardCharts.js",
       "SourceId": "WebUI",
       "SourceType": "Discovered",
-      "ContentRoot": "/home/jon/Documents/WebUI/WebUI/wwwroot/",
+      "ContentRoot": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/",
       "BasePath": "_content/WebUI",
       "RelativePath": "js/dashboardCharts.js",
       "AssetKind": "All",

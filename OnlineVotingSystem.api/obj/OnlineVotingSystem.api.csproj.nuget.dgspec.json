@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/jon/Documents/WebUI/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {}
+    "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {}
   },
   "projects": {
-    "/home/jon/Documents/WebUI/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {
+    "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/jon/Documents/WebUI/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
+        "projectUniqueName": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
         "projectName": "OnlineVotingSystem.api",
-        "projectPath": "/home/jon/Documents/WebUI/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
+        "projectPath": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
         "packagesPath": "/home/jon/.nuget/packages/",
-        "outputPath": "/home/jon/Documents/WebUI/OnlineVotingSystem.api/obj/",
+        "outputPath": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/jon/.nuget/NuGet/NuGet.Config"

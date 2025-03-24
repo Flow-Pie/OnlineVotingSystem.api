@@ -8,7 +8,7 @@ using WebUI.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Ensure API base URL is correctly formatted
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"]?.TrimEnd('/') + "/" ?? "http://localhost:5256/";
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"]?.TrimEnd('/') + "/" ?? "http://localhost:5256";
 
 builder.Services.AddCors(options => 
 {
@@ -56,7 +56,7 @@ builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>(); 
+// builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>(); 
 
 builder.Logging.SetMinimumLevel(LogLevel.Debug);  // Log everything from Debug level
 builder.Logging.AddConsole();
