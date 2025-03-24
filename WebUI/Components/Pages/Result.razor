@@ -2,304 +2,588 @@
 @rendermode InteractiveServer
 @using System.Text
 @using System.Timers
+@inject IElectionsService ElectionsService
 @inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <main class="container mt-4 scrollable-container">
-    <h2 class="fw-bold mb-3 text-center">📊 Election Analytics</h2>
-    <div class="alert alert-warning mb-4">
-        <i class="bi bi-tools me-2"></i>
-        This results dashboard is currently under active development. 
-        Some features may be incomplete or unavailable.
-    </div>
-
-    <!-- Filters -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <select @bind="SelectedRegion" class="form-select">
-                <option value="">All Regions</option>
-                @foreach (var region in Regions)
-                {
-                    <option value="@region">@region</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-8 d-flex gap-2 justify-content-end">
-            <button class="btn btn-outline-primary" @onclick="ExportCSV">
-                <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
-            </button>
-        </div>
-    </div>
-
-    <div class="alert alert-info mb-3 d-flex align-items-center gap-2">
-        <div class="spinner-border spinner-border-sm"></div>
-        <span>Live results updating in @refreshCountdown seconds</span>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card p-3 shadow-sm">
-                <h5 class="fw-bold mb-3">Live Results</h5>
-                <div class="chart-container" style="height: 400px;">
-                    <canvas id="resultsChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card p-3 shadow-sm">
-                <h5 class="fw-bold mb-3">Voter Demographics</h5>
-                <ul class="nav nav-tabs mb-3">
-                    <li class="nav-item">
-                        <button class="nav-link @(activeTab == "age" ? "active" : "")"
-                                @onclick='() => SwitchTab("age")'>Age Groups</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(activeTab == "gender" ? "active" : "")"
-                                @onclick='() => SwitchTab("gender")'>Gender</button>
-                    </li>
-                </ul>
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="demographicChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mt-4 p-3 shadow-sm">
-        <h5 class="fw-bold mb-3">Regional Breakdown</h5>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Region</th>
-                    <th>Total Votes</th>
-                    <th>Leading Candidate</th>
-                    <th>Voter Turnout</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var region in RegionalData)
-                {
-                    <tr>
-                        <td>@region.RegionName</td>
-                        <td>@region.TotalVotes.ToString("N0")</td>
-                        <td>@region.LeadingCandidate</td>
-                        <td>
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar"
-                                     style="width: @region.TurnoutPercentage%; background-color: @GetRegionColor(region.RegionName)">
-                                    @region.TurnoutPercentage.ToString("0.##")%
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</main>
-<style>
-    .scrollable-container {
-        max-height: calc(100vh - 100px);
-        overflow-y: auto;
+    <style>
+    :root {
+        --enterprise-primary: #2A5C8D;
+        --enterprise-secondary: #5F7D95;
+        --enterprise-accent: #48A3C6;
+        --enterprise-success: #3A9D85;
+        --enterprise-border: #EBEFF2;
     }
+
+    .scrollable-container {
+        max-height: calc(100vh - 120px);
+        overflow-y: overlay;
+        scroll-behavior: smooth;
+    }
+
+    .card {
+        border: 1px solid var(--enterprise-border);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-tabs {
+        border-bottom: 2px solid var(--enterprise-border);
+    }
+
+    .nav-tabs .nav-link {
+        font-weight: 600;
+        color: var(--enterprise-secondary);
+        padding: 1rem 2rem;
+        border-radius: 6px 6px 0 0;
+        transition: all 0.2s ease;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--enterprise-primary);
+        border-color: transparent;
+        background: linear-gradient(to bottom, rgba(42,92,141,0.1) 0%, rgba(255,255,255,0) 100%);
+        border-bottom: 3px solid var(--enterprise-accent);
+    }
+
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-striped-bg: rgba(72,163,198,0.03);
+        border-collapse: separate;
+        border-spacing: 0 4px;
+    }
+
+    .table thead th {
+        background-color: var(--enterprise-primary);
+        color: white;
+        padding: 1rem 1.5rem;
+        border: none;
+    }
+
+    .table tbody tr {
+        background-color: white;
+        border-radius: 6px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        transition: box-shadow 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        background-color: white;
+    }
+
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: rgba(72,163,198,0.1);
+    }
+
+    .progress-bar {
+        border-radius: 4px;
+        background-image: linear-gradient(
+            to right,
+            var(--enterprise-accent),
+            var(--enterprise-success)
+        );
+    }
+
+    .badge-status {
+        background-color: var(--enterprise-success);
+        padding: 0.375rem 1rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .chart-container {
+        background: linear-gradient(145deg, rgba(255,255,255,0.8) 0%, rgba(245,248,250,0.8) 100%);
+        backdrop-filter: blur(4px);
+        border-radius: 12px;
+        border: 1px solid var(--enterprise-border);
+    }
+
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        background: rgba(72,163,198,0.1);
+        color: var(--enterprise-accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    
 </style>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading election results...</p>
+        </div>
+    }
+    else if (errorOccurred)
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Failed to load results</h4>
+            <p>@errorMessage</p>
+            <button class="btn btn-primary" @onclick="LoadData">Retry</button>
+        </div>
+    }
+    else
+    {
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-bold mb-0 text-primary">Kenya General Elections 2027</h1>
+                <div class="text-muted">Live Official Results</div>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-danger badge-status">LIVE</span>
+                <div class="text-muted small mt-1">Last updated: @DateTime.Now.ToString("HH:mm:ss")</div>
+            </div>
+        </div>
+        <hr class="border-primary opacity-50" style="height: 2px">
+
+        <!-- Summary Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card border-primary shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-people-fill fs-4 text-primary"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Total Votes Cast</div>
+                                <div class="h4 mb-0">@TotalVotes.ToString("N0")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-success shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-check-circle-fill fs-4 text-success"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">National Turnout</div>
+
+                                <div class="h4 mb-0">@($"{CalculatedTurnout:F1}%")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-warning shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-clock-history fs-4 text-warning"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Next Update</div>
+                                <div class="h4 mb-0">@refreshCountdown sec</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Position Tabs -->
+        <div class="mb-4">
+            <ul class="nav nav-tabs">
+                @foreach (var position in Positions)
+                {
+                    var pos = position;
+                    <li class="nav-item">
+                        <button class="nav-link @(selectedPosition == pos ? "active" : "")" 
+                                @onclick="() => SelectPosition(pos)">
+                            <i class="bi bi-person-badge me-2"></i>@pos
+                        </button>
+                    </li>
+                }
+            </ul>
+        </div>
+
+         <!-- Detailed Results -->
+        <div class="card mt-4 border-0 shadow-sm bg-secondary bg-opacity-10">
+        <div class="card-body p-0">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+                <div class="bg-secondary bg-opacity-10 p-3 rounded-3">
+                    <h5 class="card-title fw-bold mb-0">
+                        <i class="bi bi-table me-2 text-primary"></i>Detailed Results - @selectedPosition
+                    </h5>
+                    <small class="text-muted">Showing @FilteredResults.Length candidates</small>
+                </div>
+                <button class="btn btn-primary btn-sm" @onclick="ExportCSV">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export CSV
+                </button>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-secondary-subtle">
+                        <tr>
+                            <th scope="col" class="ps-4" style="width: 30%">Candidate</th>
+                            <th scope="col" style="width: 25%">Party</th>
+                            <th scope="col" class="text-end pe-4" style="width: 20%">Votes</th>
+                            <th scope="col" class="text-end pe-4" style="width: 25%">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var candidate in FilteredResults)                       {
+            
+                            <tr class="align-middle">
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-person fs-5"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">@candidate.CandidateName</h6>
+                                            <small class="text-muted">@candidate.PositionName</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill py-2 px-3" style="background-color: @GetPartyColor(candidate.Party); color: white">
+                                        <i class="bi bi-flag-fill me-1"></i>@candidate.Party
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="fw-semibold">@candidate.TotalVotes.ToString("N0")</div>
+                                    <small class="text-muted">votes</small>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="progress" style="height: 6px">
+                                        <div class="progress-bar" 
+                                            style="width: @GetVotePercentageNumber(candidate.TotalVotes, candidate.PositionName)%; 
+                                                    background-color: @GetPartyColor(candidate.Party)"></div>
+                                    </div>
+                                    <div class="fw-semibold mt-1">@GetVotePercentage(candidate.TotalVotes, candidate.PositionName)</div>
+                                </td>
+                            </tr>
+                    }
+                 </tbody>
+                </table>
+            </div>
+
+            @if (FilteredResults.Length == 0)
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-info-circle fs-1 text-muted"></i>
+                    <p class="mt-3 text-muted">No candidates found for this position</p>
+                </div>
+            }
+        </div>      
+
+        <!-- Main Content -->
+        <div class="row g-4">
+            <!-- Results Chart -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <ErrorBoundary>
+                            <div class="chart-container">
+                                @if (!isLoading && !errorOccurred && hasChartData)
+                                {
+                                    <canvas id="resultsChart"></canvas>
+                                }
+                                else
+                                {
+                                    <div class="text-muted text-center py-4">
+                                        <i class="bi bi-bar-chart-line fs-3"></i>
+                                        <p class="mt-2">@((hasChartData) ? "Loading chart..." : "No data available")</p>
+                                    </div>
+                                }
+                            </div>
+                        </ErrorBoundary>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leading Candidates -->
+            <div class="col-lg-4 ">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title fw-bold mb-0">Leading Candidates</h5>
+                            <i class="bi bi-trophy-fill text-warning fs-5"></i>
+                        </div>
+                        <div class="list-group">
+                            @foreach (var position in Positions)
+                            {
+                                var leader = GetPositionLeader(position);
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold small text-primary">@position</div>
+                                            <div class="fw-bold mt-2">@leader.CandidateName</div>
+                                            <div class="small text-muted">@leader.Party</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="h5 mb-0">@leader.TotalVotes.ToString("N0")</div>
+                                            <div class="small text-muted">
+                                                @GetVotePercentage(leader.TotalVotes, position)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+    </div>
+
+    }
+</main>
 @code {
-    private List<CandidateResult> ChartData = new();
-    private List<RegionResult> RegionalData = new();
-    private string SelectedRegion = "";
-    private string activeTab = "age";
-    private int refreshCountdown = 30;
+    private bool isLoading = true;
+    private bool errorOccurred;
+    private string errorMessage = string.Empty;
+    private ElectionResultsView[] results = Array.Empty<ElectionResultsView>();
     private Timer? refreshTimer;
-    private List<string> Regions = new() { "Northern Kenya", "South", "Central", "Metrapolitan" };
+    private Timer? countdownTimer;
+    private int refreshCountdown = 30;
+    private string selectedPosition = "President";
     private IJSObjectReference? chartModule;
-    private object? resultsChartInstance;
-    private object? demographicChartInstance;
-    private Random random = new();
+    private IJSObjectReference? chartInstance;
+
+    private IEnumerable<string> Positions => results.Select(r => r.PositionName).Distinct();
+    private decimal TotalVotes => results.Where(r => r.PositionName == selectedPosition).Sum(r => r.TotalVotes);
+    private decimal CalculatedTurnout => CalculateTurnout();
+
+    private decimal GetVotePercentageNumber(decimal votes, string position)
+    {
+        var total = results.Where(r => r.PositionName == position).Sum(r => r.TotalVotes);
+        return total > 0 ? votes / total * 100m : 0;
+    }
+
+    private decimal CalculateTurnout()
+    {
+        if (!results.Any()) return 0;
+        
+        var totalVotes = results
+            .Where(r => r.PositionName == "President")
+            .Sum(r => r.TotalVotes);
+            
+        const decimal registeredVoters =20;
+            
+        return (totalVotes / registeredVoters) * 100;
+    }
+    private bool hasChartData => results.Any() && Positions.Any();
+
+    private ElectionResultsView[] FilteredResults => 
+        results.Where(r => r.PositionName == selectedPosition)
+               .OrderByDescending(r => r.TotalVotes)
+               .ToArray();
 
     protected override async Task OnInitializedAsync()
     {
-        InitializeDummyData();
-        refreshTimer = new Timer(1000);
-        refreshTimer.Elapsed += OnTimerElapsed;
+        await LoadData();
+        SetupTimers();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            errorOccurred = false;
+            results = (await ElectionsService.GetElectionsResultsAsync()).ToArray();
+            await UpdateChart();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            errorOccurred = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+    private void SetupTimers()
+    {
+        refreshTimer = new Timer(30000);
+        refreshTimer.Elapsed += async (sender, e) => await RefreshData();
+        refreshTimer.AutoReset = true;
         refreshTimer.Start();
+
+        countdownTimer = new Timer(1000);
+        countdownTimer.Elapsed += (sender, e) => UpdateCountdown();
+        countdownTimer.AutoReset = true;
+        countdownTimer.Start();
     }
 
-    private async void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+    private async Task RefreshData()
     {
-        await InvokeAsync(async () => await UpdateCountdown());
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        await InvokeAsync(async () =>
         {
-            chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./js/charts.js");
-
-            resultsChartInstance = await chartModule.InvokeAsync<object>(
-                "initializeResultsChart",
-                "resultsChart",
-                ChartData.Select(c => c.Candidate).ToArray(),
-                ChartData.Select(c => c.Votes).ToArray(),
-                ChartData.Select(c => c.PartyColor).ToArray()
-            );
-
-            await InitializeDemographicChart();
-        }
-    }
-
-    private async Task InitializeDemographicChart()
-    {
-        if (chartModule != null)
-        {
-            demographicChartInstance = await chartModule.InvokeAsync<object>(
-                "initializeDemographicChart",
-                "demographicChart",
-                GetDemographicLabels(),
-                GetDemographicData()
-            );
-        }
-    }
-
-    private void InitializeDummyData()
-    {
-        var parties = new[] { ("Party A", "#4e73df"), ("Party B", "#1cc88a"), ("Party C", "#f6c23e") };
-        ChartData = Enumerable.Range(1, 6).Select(i => new CandidateResult
-        {
-            Candidate = $"Candidate {(char)('A' + i - 1)}",
-            Votes = random.Next(5000, 25000),
-            PartyColor = parties[i % 3].Item2,
-            PartyName = parties[i % 3].Item1
-        }).ToList();
-
-        RegionalData = Regions.Select(region => new RegionResult
-        {
-            RegionName = region,
-            TotalVotes = random.Next(10000, 50000),
-            LeadingCandidate = ChartData.OrderByDescending(c => c.Votes).First().Candidate,
-            TurnoutPercentage = Math.Round(random.NextDouble() * 30 + 60, 2)
-        }).ToList();
-    }
-
-    private async Task UpdateCountdown()
-    {
-        refreshCountdown--;
-
-        if (refreshCountdown <= 0)
-        {
+            await LoadData();
             refreshCountdown = 30;
-            foreach (var candidate in ChartData)
-            {
-                candidate.Votes += random.Next(50, 200);
-            }
-            await UpdateCharts();
-        }
-
-        await InvokeAsync(StateHasChanged);
+            StateHasChanged();
+        });
     }
 
-    private async Task UpdateCharts()
+    private void UpdateCountdown()
     {
-        if (chartModule != null && resultsChartInstance != null)
+        if (refreshCountdown > 0)
         {
-            await chartModule.InvokeVoidAsync(
-                "updateChartData",
-                resultsChartInstance,
-                ChartData.Select(c => c.Candidate).ToArray(),
-                ChartData.Select(c => c.Votes).ToArray(),
-                ChartData.Select(c => c.PartyColor).ToArray()
-            );
-        }
-
-        if (chartModule != null && demographicChartInstance != null)
-        {
-            await chartModule.InvokeVoidAsync(
-                "updateDemographicChart",
-                demographicChartInstance,
-                GetDemographicLabels(),
-                GetDemographicData()
-            );
+            refreshCountdown--;
+            InvokeAsync(StateHasChanged);
         }
     }
 
-    private async Task SwitchTab(string tab)
+    private void SelectPosition(string position)
     {
-        activeTab = tab;
-        await UpdateDemographicChart();
+        selectedPosition = position;
+        InvokeAsync(StateHasChanged);
     }
 
-    private async Task UpdateDemographicChart()
+    private ElectionResultsView GetPositionLeader(string position)
     {
-        if (chartModule != null && demographicChartInstance != null)
-        {
-            await chartModule.InvokeVoidAsync(
-                "updateDemographicChart",
-                demographicChartInstance,
-                GetDemographicLabels(),
-                GetDemographicData()
-            );
-        }
+        return results.Where(r => r.PositionName == position)
+                     .OrderByDescending(r => r.TotalVotes)
+                     .FirstOrDefault() ?? new ElectionResultsView(Guid.Empty, Guid.Empty, string.Empty, string.Empty, Guid.Empty, Guid.Empty, string.Empty, Guid.Empty, string.Empty, 0);
     }
-
-    private string[] GetDemographicLabels() => activeTab == "age"
-        ? new[] { "18-25", "26-35", "36-50", "51+" }
-        : new[] { "Male", "Female", "Other" };
-
-    private int[] GetDemographicData()
+    private string GetVotePercentage(decimal votes, string position)
     {
-        return activeTab == "age"
-            ? new[] { random.Next(20,40), random.Next(30,50), random.Next(20,40), random.Next(10,30) }
-            : new[] { random.Next(40,60), random.Next(35,55), random.Next(1,5) };
+        var total = results.Where(r => r.PositionName == position).Sum(r => r.TotalVotes);
+        return total > 0 ? $"{votes / total * 100m:N1}%" : "0.0%";
     }
+    
+    @* private string GetPartyColor(string party) => party switch
+    {
+        "UDA" => "#FF0000",
+        "ODM" => "#00FF00",
+        "JUBILEE" => "#0000FF",
+        _ => "#CCCCCC"
+    }; *@
+     private string GetPartyColor(string party) => 
+    
+        "#00FF00";
+        
+    
 
     private async Task ExportCSV()
     {
         var csvContent = new StringBuilder();
         csvContent.AppendLine("Candidate,Party,Votes,Percentage");
 
-        var totalVotes = ChartData.Sum(c => c.Votes);
-        foreach (var candidate in ChartData)
+        foreach (var item in FilteredResults)
         {
-            var percentage = (double)candidate.Votes / totalVotes;
-            csvContent.AppendLine($"{candidate.Candidate},{candidate.PartyName},{candidate.Votes},{percentage:P}");
+            var percentage = GetVotePercentage(item.TotalVotes, selectedPosition);
+            csvContent.AppendLine($"{item.CandidateName},{item.Party},{item.TotalVotes},{percentage}");
         }
 
-        await JSRuntime.InvokeVoidAsync("downloadFile",
-            "election-results.csv",
-            "text/csv",
-            csvContent.ToString());
+        var fileName = $"{selectedPosition.Replace(" ", "_")}_Results.csv";
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, csvContent.ToString());
     }
-
-    private string GetRegionColor(string region) => region switch
-    {
-        "North" => "#4e73df",
-        "South" => "#1cc88a",
-        "East" => "#36b9cc",
-        "West" => "#f6c23e",
-        _ => "#858796"
-    };
 
     public void Dispose()
     {
         refreshTimer?.Dispose();
-        GC.SuppressFinalize(this);
+        countdownTimer?.Dispose();
+        chartInstance?.DisposeAsync().AsTask();
+        chartModule?.DisposeAsync().AsTask();
     }
 
-    private class CandidateResult
+    private async Task UpdateChart()
     {
-        public string Candidate { get; set; } = string.Empty;
-        public int Votes { get; set; }
-        public string PartyColor { get; set; } = string.Empty;
-        public string PartyName { get; set; } = string.Empty;
-    }
+        // Don't try to render charts during pre-rendering
+        if (OperatingSystem.IsBrowser())
+        {
+            try
+            {
+                if (chartInstance != null)
+                {
+                    await chartModule.InvokeVoidAsync("destroyChart", chartInstance);
+                    await chartInstance.DisposeAsync();
+                    chartInstance = null;
+                }
 
-    private class RegionResult
+                var positionData = FilteredResults;
+                if (positionData.Length == 0) return;
+
+                chartModule ??= await JSRuntime.InvokeAsync<IJSObjectReference>(
+                    "import", "./js/charts.js");
+                
+                chartInstance = await chartModule.InvokeAsync<IJSObjectReference>(
+                    "createResultsChart",
+                    "resultsChart",  // Explicitly pass the canvas ID
+                    new
+                    {
+                        labels = positionData.Select(x => x.CandidateName).ToArray(),
+                        data = positionData.Select(x => (decimal)x.TotalVotes).ToArray(),
+                        colors = positionData.Select(x => GetPartyColor(x.Party)).ToArray()
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating chart: {ex.Message}");
+                errorOccurred = true;
+                errorMessage = "Failed to load chart visualization";
+            }
+            finally
+            {
+                StateHasChanged();
+            }
+        }
+    }
+     public async ValueTask DisposeAsync()
     {
-        public string RegionName { get; set; } = string.Empty;
-        public int TotalVotes { get; set; }
-        public string LeadingCandidate { get; set; } = string.Empty;
-        public double TurnoutPercentage { get; set; }
+        if (OperatingSystem.IsBrowser() && chartInstance != null)
+        {
+            try
+            {
+                if (chartModule != null)
+                {
+                    await chartModule.InvokeVoidAsync("destroyChart", chartInstance);
+                }
+                await chartInstance.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error disposing chart: {ex.Message}");
+            }
+        }
+
+        chartModule?.DisposeAsync().AsTask();
+        refreshTimer?.Dispose();
+        countdownTimer?.Dispose();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadData();
+            SetupTimers();
+        }
+        await base.OnAfterRenderAsync(firstRender);
     }
 }

@@ -223,11 +223,11 @@
 /home/jon/Desktop/WebUI/WebUI/obj/Debug/net8.0/WebUI.pdb
 /home/jon/Desktop/WebUI/WebUI/obj/Debug/net8.0/WebUI.genruntimeconfig.cache
 /home/jon/Desktop/WebUI/WebUI/obj/Debug/net8.0/ref/WebUI.dll
-/home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.Development.json
-/home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.json
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.deps.json
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.runtimeconfig.json
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api
+/home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.Development.json
+/home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.json
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/WebUI.staticwebassets.runtime.json
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/WebUI
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/WebUI.deps.json

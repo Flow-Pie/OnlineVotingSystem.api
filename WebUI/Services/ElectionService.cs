@@ -19,8 +19,17 @@ public class ElectionService : IElectionsService
 
     public async Task<IEnumerable<ElectionResultsView>> GetElectionsResultsAsync()
     {
-        return await httpClient.GetFromJsonAsync<IEnumerable<ElectionResultsView>>("/elections/results")
-            ??new List<ElectionResultsView>();
+        try
+        {
+            var response = await httpClient.GetAsync("/elections/results");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<IEnumerable<ElectionResultsView>>() 
+                ?? new List<ElectionResultsView>();
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new ApplicationException("Failed to retrieve election results", ex);
+        }
     }
     
 
