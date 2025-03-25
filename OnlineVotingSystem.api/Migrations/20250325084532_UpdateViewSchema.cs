@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlineVotingSystem.api.Migrations
 {
     /// <inheritdoc />
-    public partial class MoreSeedData : Migration
+    public partial class UpdateViewSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

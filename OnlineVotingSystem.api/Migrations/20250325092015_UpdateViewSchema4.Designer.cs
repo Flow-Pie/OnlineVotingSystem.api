@@ -11,8 +11,8 @@ using OnlineVotingSystem.api.Data;
 namespace OnlineVotingSystem.api.Migrations
 {
     [DbContext(typeof(OnlineVotingSystemContext))]
-    [Migration("20250324135906_AddedElectionResultsView")]
-    partial class AddedElectionResultsView
+    [Migration("20250325092015_UpdateViewSchema4")]
+    partial class UpdateViewSchema4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -196,26 +196,22 @@ namespace OnlineVotingSystem.api.Migrations
                         });
                 });
 
-            modelBuilder.Entity("OnlineVotingSystem.api.Entities.ElectionResultView", b =>
+            modelBuilder.Entity("OnlineVotingSystem.api.Entities.ElectionResult", b =>
                 {
-                    b.Property<string>("CandidateId")
-                        .IsRequired()
+                    b.Property<Guid?>("CandidateId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CandidateName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CandidateUserId")
-                        .IsRequired()
+                    b.Property<Guid?>("CandidateUserId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ElectionId")
-                        .IsRequired()
+                    b.Property<Guid?>("ElectionId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ElectionPositionId")
-                        .IsRequired()
+                    b.Property<Guid?>("ElectionPositionId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ElectionTitle")
@@ -226,18 +222,24 @@ namespace OnlineVotingSystem.api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PositionId")
-                        .IsRequired()
+                    b.Property<Guid?>("PositionId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PositionName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("RegisteredVoters")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("TotalVotes")
                         .HasColumnType("INTEGER");
 
-                    b.ToTable("ElectionResults");
+                    b.Property<string>("VoterNames")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.ToTable((string)null);
 
                     b.ToView("ElectionResults", (string)null);
                 });

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineVotingSystem.api.Data;
 
@@ -10,9 +11,11 @@ using OnlineVotingSystem.api.Data;
 namespace OnlineVotingSystem.api.Migrations
 {
     [DbContext(typeof(OnlineVotingSystemContext))]
-    partial class OnlineVotingSystemContextModelSnapshot : ModelSnapshot
+    [Migration("20250325084532_UpdateViewSchema")]
+    partial class UpdateViewSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
@@ -195,20 +198,20 @@ namespace OnlineVotingSystem.api.Migrations
 
             modelBuilder.Entity("OnlineVotingSystem.api.Entities.ElectionResult", b =>
                 {
-                    b.Property<Guid?>("CandidateId")
+                    b.Property<Guid>("CandidateId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CandidateName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("CandidateUserId")
+                    b.Property<Guid>("CandidateUserId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("ElectionId")
+                    b.Property<Guid>("ElectionId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("ElectionPositionId")
+                    b.Property<Guid>("ElectionPositionId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ElectionTitle")
@@ -219,7 +222,7 @@ namespace OnlineVotingSystem.api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("PositionId")
+                    b.Property<Guid>("PositionId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PositionName")

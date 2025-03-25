@@ -11,8 +11,8 @@ using OnlineVotingSystem.api.Data;
 namespace OnlineVotingSystem.api.Migrations
 {
     [DbContext(typeof(OnlineVotingSystemContext))]
-    [Migration("20250324123732_MoreSeedData")]
-    partial class MoreSeedData
+    [Migration("20250325090738_UpdateViewSchema3")]
+    partial class UpdateViewSchema3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -194,6 +194,54 @@ namespace OnlineVotingSystem.api.Migrations
                             ElectionId = new Guid("44444444-4444-4444-4444-444444444444"),
                             PositionId = new Guid("4d5e6f7a-8b9c-0123-4567-abcdefabcdef")
                         });
+                });
+
+            modelBuilder.Entity("OnlineVotingSystem.api.Entities.ElectionResult", b =>
+                {
+                    b.Property<Guid>("CandidateId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CandidateName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CandidateUserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ElectionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ElectionPositionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ElectionTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Party")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PositionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PositionName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RegisteredVoters")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalVotes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VoterNames")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("ElectionResults", (string)null);
                 });
 
             modelBuilder.Entity("OnlineVotingSystem.api.Entities.Position", b =>

@@ -22,18 +22,21 @@ public static class ElectionMapping
     {
         return new ElectionResultsView        
         (
-            election.CandidateId,
-            election.CandidateUserId,
+            election.ElectionId ?? Guid.Empty,                // If null, use Guid.Empty
+            election.ElectionTitle,
+            election.ElectionPositionId ?? Guid.Empty,
+            election.PositionId ?? Guid.Empty,
+            election.PositionName,
+            election.CandidateId ?? Guid.Empty,
+            election.CandidateUserId ?? Guid.Empty,
             election.CandidateName,
             election.Party,
-            election.ElectionPositionId,
-            election.PositionId,
-            election.PositionName,
-            election.ElectionId,
-            election.ElectionTitle,
-            election.TotalVotes
+            election.TotalVotes,
+            election.RegisteredVoters,
+            election.VoterNames
         );
     }
+
 
     public static Election ToEntity(this CreateElectionDto election, Guid userId)
     {
