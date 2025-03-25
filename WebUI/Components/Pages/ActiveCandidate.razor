@@ -6,10 +6,13 @@
 
 <main class="container mt-4 scrollable-container">
     <style>
-        /* Custom CSS Variables */
         :root {
-            --candidate-card-hover-transition: all 0.2s ease-in-out;
-            --modal-backdrop-opacity: 0.5;
+            --enterprise-primary: #2A5C8D;
+            --enterprise-secondary: #5F7D95;
+            --enterprise-accent: #48A3C6;
+            --enterprise-success: #3A9D85;
+            --enterprise-border: #EBEFF2;
+            --enterprise-chart-bg: rgba(245, 248, 250, 0.9);
         }
 
         .scrollable-container {
@@ -18,25 +21,42 @@
         }
 
         .candidate-card {
-            border: 1px solid var(--bs-primary-border-subtle);
+            border: 1px solid var(--enterprise-border);
             border-radius: 0.75rem;
-            transition: var(--candidate-card-hover-transition);
+            transition: all 0.2s ease-in-out;
         }
 
         .candidate-card:hover {
             transform: translateY(-0.25rem);
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-            border-color: var(--bs-primary);
+            border-color: var(--enterprise-accent);
         }
 
         .position-header {
-            background: linear-gradient(135deg, var(--bs-primary-bg-subtle), var(--bs-light-bg-subtle));
+            background: linear-gradient(135deg, var(--enterprise-primary), var(--enterprise-border));
             border-radius: 0.75rem 0.75rem 0 0;
         }
 
         .candidate-actions {
             gap: 0.75rem;
         }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .candidate-bio {
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        /* Enterprise Theme Overrides */
+        .bg-primary-subtle { background-color: rgba(42,92,141,0.1) !important; }
+        .border-primary { border-color: var(--enterprise-primary) !important; }
+        .text-primary { color: var(--enterprise-primary) !important; }
+        .text-success { color: var(--enterprise-success) !important; }
+        .border-primary-subtle { border-color: var(--enterprise-border) !important; }
+        .bg-success { background-color: var(--enterprise-success) !important; }
 
         @@media (max-width: 768px) {
             .candidate-actions {
@@ -48,15 +68,6 @@
                 flex: 1 1 45%;
                 min-width: 100px;
             }
-        }
-
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, var(--modal-backdrop-opacity));
-        }
-
-        .candidate-bio {
-            line-height: 1.6;
-            white-space: pre-wrap;
         }
     </style>
 
@@ -114,7 +125,7 @@
         <div class="modal fade show d-block" tabindex="-1" aria-modal="true" role="dialog">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
                 <div class="modal-content shadow-lg">
-                    <div class="modal-header text-white" style="background-color: black;">
+                    <div class="modal-header text-white" style="background-color: var(--enterprise-primary);">
                         <h2 class="modal-title h5">Candidate Details</h2>
                         <button type="button" class="btn-close btn-close-white" @onclick="CloseDetails" aria-label="Close"></button>
                     </div>
@@ -175,7 +186,7 @@
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header position-header py-3">
-                            <h2 class="h5 mb-0 text-primary">@position Position</h2>
+                            <h2 class="h5 mb-0 text-white">@position Position</h2>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">

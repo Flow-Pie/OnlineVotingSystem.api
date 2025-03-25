@@ -11,25 +11,41 @@
 
 <main class="container mt-4 scrollable-container">
     <style>
+        :root {
+            --enterprise-primary: #2A5C8D;
+            --enterprise-secondary: #5F7D95;
+            --enterprise-accent: #48A3C6;
+            --enterprise-success: #3A9D85;
+            --enterprise-border: #EBEFF2;
+            --enterprise-chart-bg: rgba(245, 248, 250, 0.9);
+
+            /* Bootstrap Variable Overrides */
+            --bs-primary: var(--enterprise-primary);
+            --bs-secondary: var(--enterprise-secondary);
+            --bs-success: var(--enterprise-success);
+            --bs-info: var(--enterprise-accent);
+            --bs-border-color: var(--enterprise-border);
+            --bs-link-color: var(--enterprise-accent);
+            --bs-link-hover-color: var(--enterprise-primary);
+        }
+
         .badge-status {
             font-size: 0.85rem;  
             padding: 0.25rem 0.5rem; 
             border-radius: 0.95rem; 
-            font-weight:bolder;
+            font-weight: bolder;
             display: inline-block; 
             min-width: auto; 
         }
 
-
         .badge-status-upcoming { 
-            background-color: #0dcaf0 !important; 
-            border: 1px solid #0dcaf0;    
-
+            background-color: var(--enterprise-accent) !important; 
+            border: 1px solid var(--enterprise-accent);    
         }
 
         .badge-status-active { 
-            background-color: #198754 !important;
-            border: 1px solid #198754;
+            background-color: var(--enterprise-success) !important;
+            border: 1px solid var(--enterprise-success);
         } 
 
         .badge-status-ended { 
@@ -43,40 +59,49 @@
         }
 
         .accordion-button:not(.collapsed) {
-            background-color: var(--bs-primary-bg-subtle);
-            color: var(--bs-primary);
+            background-color: var(--enterprise-chart-bg);
+            color: var(--enterprise-primary);
         }
 
         .accordion-item {
             border-radius: 0.5rem !important;
             overflow: hidden;
+            border-color: var(--enterprise-border);
         }
 
         .card {
-            border: 1px solid rgba(0, 0, 0, 0.125);
+            border: 1px solid var(--enterprise-border);
             border-radius: 0.5rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(42, 92, 141, 0.1);
         }
 
         .position-card {
             background-color: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--enterprise-border);
             border-radius: 0.5rem;
             transition: background-color 0.2s ease;
         }
 
         .position-card:hover {
-            background-color: #f8f9fa;
+            background-color: var(--enterprise-chart-bg);
+        }
+
+        .bg-primary-subtle {
+            background-color: rgba(42, 92, 141, 0.1) !important;
+        }
+        
+        .text-muted {
+            color: var(--enterprise-secondary) !important;
         }
     </style>
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0 text-primary">Active Elections</h2>
         <div class="bg-primary-subtle rounded-circle p-3">
             <i class="bi bi-megaphone-fill fs-4 text-primary"></i>
