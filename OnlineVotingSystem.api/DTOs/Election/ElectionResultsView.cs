@@ -12,4 +12,5 @@ public record ElectionResultsView
      int TotalVotes,
      int RegisteredVoters,
      string VoterNames
+
 );

@@ -6,118 +6,144 @@
 
 <main class="container mt-4 scrollable-container">
     <style>
+        /* Custom CSS Variables */
+        :root {
+            --candidate-card-hover-transition: all 0.2s ease-in-out;
+            --modal-backdrop-opacity: 0.5;
+        }
+
         .scrollable-container {
             max-height: calc(100vh - 100px);
             overflow-y: auto;
         }
 
-        .card {
-            border: 2px solid var(--bs-primary-subtle);
-            border-radius: 0.5rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        .candidate-card {
+            border: 1px solid var(--bs-primary-border-subtle);
+            border-radius: 0.75rem;
+            transition: var(--candidate-card-hover-transition);
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background-color: var(--bs-primary-subtle);
-            border-bottom: 2px solid var(--bs-primary-subtle);
-        }
-
-        .position-card {
-            background-color: #ffffff;
-            border: 1px solid var(--bs-primary-subtle);
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .position-card:hover {
-            background-color: var(--bs-primary-bg-subtle);
+        .candidate-card:hover {
+            transform: translateY(-0.25rem);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
             border-color: var(--bs-primary);
+        }
+
+        .position-header {
+            background: linear-gradient(135deg, var(--bs-primary-bg-subtle), var(--bs-light-bg-subtle));
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+
+        .candidate-actions {
+            gap: 0.75rem;
+        }
+
+        @@media (max-width: 768px) {
+            .candidate-actions {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            
+            .candidate-actions .btn {
+                flex: 1 1 45%;
+                min-width: 100px;
+            }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, var(--modal-backdrop-opacity));
+        }
+
+        .candidate-bio {
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
     </style>
 
     <!-- Page Header -->
-    <header class="mb-5">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="fw-bold display-6 text-primary">Registered Candidates</h1>
-            <div class="bg-primary-subtle rounded-circle p-3">
-                <i class="bi bi-person-lines-fill fs-4 text-primary"></i>
+    <header class="mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h1 class="h2 fw-bold text-primary mb-0">
+                <i class="bi bi-people-fill me-2"></i>Registered Candidates
+            </h1>
+            <div class="bg-primary-subtle p-3 rounded-circle">
+                <i class="bi bi-person-lines-fill fs-5 text-primary"></i>
             </div>
         </div>
-        <hr class="border-primary opacity-50" style="height: 2px">
+        <hr class="border-primary opacity-50 my-0">
     </header>
 
     <!-- Status Messages -->
-    <div class="status-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
         @if (!string.IsNullOrEmpty(SuccessMessage))
         {
-            <div class="alert alert-success d-flex align-items-center shadow-sm">
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center shadow">
                 <i class="bi bi-check-circle-fill me-2"></i>
                 <div class="flex-grow-1">@SuccessMessage</div>
-                <button type="button" class="btn-close" @onclick="() => SuccessMessage = string.Empty"></button>
+                <button type="button" class="btn-close" @onclick="() => SuccessMessage = string.Empty" aria-label="Close"></button>
             </div>
         }
         @if (!string.IsNullOrEmpty(ErrorMessage))
         {
-            <div class="alert alert-danger d-flex align-items-center shadow-sm">
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center shadow">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <div class="flex-grow-1">@ErrorMessage</div>
-                <button type="button" class="btn-close" @onclick="() => ErrorMessage = string.Empty"></button>
+                <button type="button" class="btn-close" @onclick="() => ErrorMessage = string.Empty" aria-label="Close"></button>
             </div>
         }
     </div>
 
-    <!-- Search & Filter -->
-    <div class="mb-4 d-flex gap-3">
-        <div class="form-floating flex-grow-1">
-            <input type="text" 
-                   class="form-control border-primary-subtle" 
+    <!-- Search & Filter Section -->
+    <section class="mb-5">
+        <div class="input-group input-group-lg shadow-sm">
+            <input type="search" 
+                   class="form-control form-control-lg border-primary-subtle" 
                    @bind="SearchTerm"
-                   placeholder="Search candidates...">
-            <label class="text-muted">Search candidates</label>
+                   placeholder="Search candidates..."
+                   aria-label="Search candidates">
+            <button class="btn btn-primary px-4" @onclick="FilterCandidates" aria-label="Perform search">
+                <i class="bi bi-search me-2"></i>Search
+            </button>
         </div>
-        <button class="btn btn-primary px-4" @onclick="FilterCandidates">
-            <i class="bi bi-search me-2"></i>Search
-        </button>
-    </div>
+    </section>
 
-
-     @if (SelectedCandidate != null)
+    <!-- Candidate Details Modal -->
+    @if (SelectedCandidate != null)
     {
-        <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4)">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header text-white" style="background-color: #212529">
-                        <h5 class="modal-title">Candidate Details</h5>
-                        <button type="button" class="btn-close btn-close-white" @onclick="CloseDetails"></button>
+        <div class="modal-backdrop show d-block"></div>
+        <div class="modal fade show d-block" tabindex="-1" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header text-white" style="background-color: black;">
+                        <h2 class="modal-title h5">Candidate Details</h2>
+                        <button type="button" class="btn-close btn-close-white" @onclick="CloseDetails" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-4 text-center">
-                                <div class="mb-3">
-                                    <i class="bi bi-person-circle fs-1 text-primary"></i>
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center mb-4 mb-md-0">
+                                <div class="avatar-lg bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
+                                    <i class="bi bi-person-badge-fill fs-1 text-primary"></i>
                                 </div>
-                                <h4>@SelectedCandidate.Name</h4>
-                                <p class="text-muted">@SelectedCandidate.Party</p>
+                                <h3 class="h4 mt-3 mb-1">@SelectedCandidate.Name</h3>
+                                <p class="text-muted mb-0">@SelectedCandidate.Party</p>
                             </div>
                             <div class="col-md-8">
-                                <dl class="row">
-                                    <dt class="col-sm-4">Position:</dt>
-                                    <dd class="col-sm-8">@SelectedCandidate.Position</dd>
+                                <dl class="row g-3">
+                                    <dt class="col-sm-4 text-muted">Position</dt>
+                                    <dd class="col-sm-8 fw-semibold">@SelectedCandidate.Position</dd>
 
-                                    <dt class="col-sm-4">Election:</dt>
+                                    <dt class="col-sm-4 text-muted">Election</dt>
                                     <dd class="col-sm-8">@SelectedCandidate.Election</dd>
 
-                                    <dt class="col-sm-4">Bio:</dt>
-                                    <dd class="col-sm-8">@SelectedCandidate.Bio</dd>
+                                    <dt class="col-sm-4 text-muted">Bio</dt>
+                                    <dd class="col-sm-8 candidate-bio">@SelectedCandidate.Bio</dd>
 
-                                    <dt class="col-sm-4">Party:</dt>
-                                    <dd class="col-sm-8">@SelectedCandidate.Party</dd>
-                                    
+                                    <dt class="col-sm-4 text-muted">Party</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-primary-subtle text-primary fs-6">
+                                            @SelectedCandidate.Party
+                                        </span>
+                                    </dd>
                                 </dl>
                             </div>
                         </div>
@@ -130,15 +156,12 @@
         </div>
     }
 
-
-    
-
-
+    <!-- Candidates List -->
     @if (!GroupedCandidates.Any())
     {
-        <div class="alert alert-warning text-center py-4">
-            <i class="bi bi-people fs-4 me-2"></i>
-            No candidates found
+        <div class="alert alert-warning text-center py-4 shadow-sm">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            No candidates found matching your criteria
         </div>
     }
     else
@@ -148,41 +171,45 @@
             {
                 var position = group.Key;
                 var candidates = GetPagedCandidates(position);
-                var totalPages = GetTotalPages(position);
 
                 <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary-subtle">
-                            <h3 class="h9 mb-3 text-primary text-center">@position</h3>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header position-header py-3">
+                            <h2 class="h5 mb-0 text-primary">@position Position</h2>
                         </div>
-                        
-                        <div class="card-body p-4">
+                        <div class="card-body">
                             <div class="row g-3">
                                 @foreach (var candidate in candidates)
                                 {
-                                    <div class="card bg-light border-0 position-card h-100">
-                                            <div class="card-body d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="card-title mb-1 ">@candidate.Name</h5>
-                                                    <p class="card-text text-muted small mb-0">@candidate.Party</p>
+                                    <div class="col-12">
+                                        <div class="candidate-card p-3">
+                                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                                                <div class="mb-2 mb-md-0">
+                                                    <h3 class="h6 mb-1">@candidate.Name</h3>
+                                                    <p class="text-muted small mb-0">@candidate.Party</p>
                                                 </div>
-                                                <div class="d-flex gap-2">
-                                                    <button class="btn btn-outline-primary" @onclick="() => ViewProfile(candidate)">
-                                                        <i class="bi bi-person-circle me-1"></i>View
+                                                <div class="candidate-actions d-flex">
+                                                    <button class="btn btn-outline-primary btn-sm" 
+                                                            @onclick="() => ViewProfile(candidate)"
+                                                            aria-label="View candidate profile">
+                                                        <i class="bi bi-eye me-1"></i>View
                                                     </button>
-                                                    <button class="btn btn-outline-warning" @onclick="() => EditCandidate(candidate.Id)">
+                                                    <button class="btn btn-outline-warning btn-sm" 
+                                                            @onclick="() => EditCandidate(candidate.Id)"
+                                                            aria-label="Edit candidate">
                                                         <i class="bi bi-pencil-square me-1"></i>Edit
                                                     </button>
-                                                    <button class="btn btn-outline-danger" @onclick="() => DeleteCandidate(candidate.Id)">
+                                                    <button class="btn btn-outline-danger btn-sm" 
+                                                            @onclick="() => DeleteCandidate(candidate.Id)"
+                                                            aria-label="Delete candidate">
                                                         <i class="bi bi-trash me-1"></i>Delete
                                                     </button>
                                                 </div>
                                             </div>
+                                        </div>
                                     </div>
-
                                 }
                             </div>
-                            
                         </div>
                     </div>
                 </div>

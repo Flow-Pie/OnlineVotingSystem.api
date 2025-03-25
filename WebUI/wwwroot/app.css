@@ -1,3 +1,4 @@
+@import '_content/Syncfusion.Blazor.Themes/bootstrap5.css';
 body, html {
     margin: 0;
     padding: 0;

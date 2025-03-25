@@ -87,6 +87,6 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 // Register Syncfusion License
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("EMPTYFORNOW");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc3NTY2NkAzMjM4MmUzMDJlMzBMMmV5c0wrUmdFUFIyOEVScDJXcUExT005YjRMUlZEOHkzdkcwRjY4MzMwPQ==");
 
 app.Run();

@@ -22,15 +22,13 @@ public class ViewManagerService
                 ep.Id AS ElectionPositionId,
                 p.Id AS PositionId,
                 p.Name AS PositionName,
-                COALESCE(c.Id, '') AS CandidateId, 
-                COALESCE(u.Id, '') AS CandidateUserId, 
-                COALESCE(u.Name, 'Unknown') AS CandidateName, 
+                c.Id AS CandidateId,  
+                u.Id AS CandidateUserId,  
+                COALESCE(u.Name, 'No candidate found') AS CandidateName, 
                 COALESCE(c.Party, 'Independent') AS Party, 
                 COALESCE(COUNT(v.Id), 0) AS TotalVotes,  
-                COALESCE((SELECT COUNT(DISTINCT v.UserId) 
-                        FROM Votes v 
-                        WHERE v.ElectionPositionId = ep.Id), 0) AS RegisteredVoters,
-                COALESCE(GROUP_CONCAT(vuser.Name, ', '), 'No Votes') AS VoterNames  
+                (SELECT COUNT(DISTINCT u_all.Id) FROM Users u_all) AS RegisteredVoters,  -- Get total users as voters
+                COALESCE(GROUP_CONCAT(vuser.Name, ', '), 'No Voter found') AS VoterNames  
             FROM Elections e
             LEFT JOIN ElectionPositions ep ON ep.ElectionId = e.Id
             LEFT JOIN Positions p ON ep.PositionId = p.Id
@@ -39,8 +37,6 @@ public class ViewManagerService
             LEFT JOIN Votes v ON v.CandidateId = c.Id AND v.ElectionPositionId = ep.Id  
             LEFT JOIN Users vuser ON v.UserId = vuser.Id  
             GROUP BY e.Id, e.Title, ep.Id, p.Id, p.Name, c.Id, u.Id, u.Name, c.Party;
-
-
         ";
 
         _context.Database.ExecuteSqlRaw(sql);
