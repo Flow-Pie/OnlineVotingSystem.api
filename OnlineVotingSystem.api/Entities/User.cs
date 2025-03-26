@@ -9,7 +9,9 @@ public class User
 
     public required int NationalId { get; set; }
 
-    [StringLength(100)] public required string Name { get; set; } // First Name And Second
+    [StringLength(100)] public required string Name { get; set; } 
+
+    // First Name And Second
 // Phone Number
 // Gender
     [StringLength(100)] public required string Email { get; set; }

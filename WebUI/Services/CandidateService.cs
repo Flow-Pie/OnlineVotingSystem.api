@@ -47,12 +47,25 @@ public class CandidatesService : ICandidatesService, IDisposable
     }
 
     public async Task<CandidateDetailsDto> CreateCandidateAsync(CreateCandidateDto candidateDto)
+{
+    var response = await _httpClient.PostAsJsonAsync("/candidates", candidateDto);
+    
+    var responseContent = await response.Content.ReadAsStringAsync();
+
+    Console.WriteLine($"Response status: {response.StatusCode}");
+    Console.WriteLine($"Response content: {responseContent}");
+
+    if (!response.IsSuccessStatusCode)
     {
-        Console.WriteLine("Creating a new candidate...");
-        var response = await _httpClient.PostAsJsonAsync("/candidates", candidateDto);
-        Console.WriteLine($"Response status: {response.StatusCode}");
-        return await HandleResponseAsync<CandidateDetailsDto>(response);
+        throw new ApiException($"API Error: {response.StatusCode} - {responseContent}")
+        {
+            StatusCode = response.StatusCode,
+        };
     }
+
+    return await response.Content.ReadFromJsonAsync<CandidateDetailsDto>();
+}
+
 
     public async Task<CandidateDetailsDto> UpdateCandidateAsync(Guid candidateId, UpdateCandidateDto updateDto)
     {
@@ -150,10 +163,15 @@ public class CandidatesService : ICandidatesService, IDisposable
 public class ApiException : Exception
 {
     public ProblemDetails ProblemDetails { get; }
+    public HttpStatusCode StatusCode { get; internal set; }
 
     public ApiException(ProblemDetails problemDetails)
         : base(problemDetails.Detail)
     {
         ProblemDetails = problemDetails;
+    }
+
+    public ApiException(string? message) : base(message)
+    {
     }
 }

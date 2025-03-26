@@ -1,85 +1,51 @@
 @page "/dashboard"  
 @rendermode InteractiveServer
 @using System.Timers
-@inject IJSRuntime JSRuntime
-
 
 <main class="container mt-4 scrollable-container">
     <style>
-        :root {
-            /* Enterprise Theme Variables */
-            --enterprise-primary: #2A5C8D;
-            --enterprise-secondary: #5F7D95;
-            --enterprise-accent: #48A3C6;
-            --enterprise-success: #3A9D85;
-            --enterprise-warning: #FFC107;
-            --enterprise-danger: #DC3545;
-            --enterprise-border: #EBEFF2;
-            --enterprise-chart-bg: rgba(245, 248, 250, 0.9);
-
-            /* Bootstrap Overrides */
-            --bs-primary: var(--enterprise-primary);
-            --bs-secondary: var(--enterprise-secondary);
-            --bs-success: var(--enterprise-success);
-            --bs-info: var(--enterprise-accent);
-            --bs-warning: var(--enterprise-warning);
-            --bs-danger: var(--enterprise-danger);
-            --bs-border-color: var(--enterprise-border);
-        }
-
+        
         .scrollable-container {
             max-height: calc(100vh - 120px);
             overflow-y: auto;
             padding-right: 0.5rem;
         }
-
         .card {
             border: 2px solid var(--enterprise-border);
             border-radius: 0.75rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-
         .card-header {
             background-color: rgba(42, 92, 141, 0.08);
             border-bottom: 2px solid var(--enterprise-border);
         }
-
         .bg-primary-subtle {
             background-color: rgba(42, 92, 141, 0.08) !important;
         }
-
         .border-primary-subtle {
             border-color: rgba(42, 92, 141, 0.15) !important;
         }
-
         .btn-primary {
             background-color: var(--enterprise-primary);
             border-color: var(--enterprise-primary);
         }
-
         .btn-outline-primary {
             border-color: var(--enterprise-primary);
             color: var(--enterprise-primary);
         }
-
         .progress-bar {
             background-color: var(--enterprise-primary);
         }
-        
-
         .list-group-item:hover {
             background-color: var(--enterprise-chart-bg);
         }
-
         .scrollable-list {
             scrollbar-width: thin;
             scrollbar-color: var(--enterprise-primary) rgba(42, 92, 141, 0.1);
         }
-
         .text-muted {
             color: var(--enterprise-secondary) !important;
         }
-
         .vr {
             background-color: var(--enterprise-border);
         }
@@ -90,6 +56,7 @@
         <div class="flex-grow-1">This dashboard is currently under active development. Some features may be incomplete or unavailable.</div>
     </div>
 
+    <!-- Dashboard Header -->
     <header class="mb-5">
         <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
             <div class="text-center text-md-start mb-3 mb-md-0">
@@ -102,8 +69,8 @@
     </header>
 
     <div class="row g-4">
+        <!-- Main Metrics and Charts Column -->
         <div class="col-xl-8">
-            <!-- Voting Activity Card -->
             <div class="card border-primary-subtle shadow-sm">
                 <div class="card-header py-3">
                     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center">
@@ -112,12 +79,9 @@
                             <span class="badge bg-primary bg-opacity-25 text-primary ms-2">Live</span>
                         </h5>
                         <div class="d-flex gap-2 mt-2 mt-lg-0">
-                            <button class="btn btn-sm btn-primary rounded-pill px-3"
-                                    @onclick='() => ChangeTimeRange("24h")'>24H</button>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                                    @onclick='() => ChangeTimeRange("7d")'>7D</button>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                                    @onclick='() => ChangeTimeRange("30d")'>30D</button>
+                            <button class="btn btn-sm btn-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("24h")'>24H</button>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("7d")'>7D</button>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("30d")'>30D</button>
                         </div>
                     </div>
                 </div>
@@ -142,7 +106,7 @@
                                     <h3 class="mb-0 fw-bold">@ActiveVoters.ToString("N0")</h3>
                                     <div class="mt-3">
                                         <div class="d-flex justify-content-between small text-muted">
-                                            <span>Target: @VoterTarget.ToString("N0")</span>
+                                            <span>Target: @TotalVoters.ToString("N0")</span>
                                             <span>@voterRegistrationProgress%</span>
                                         </div>
                                         <div class="progress" style="height: 6px">
@@ -290,36 +254,49 @@
 </main>
 
 @code {
-    private static Random random = new();
-    private Timer? dataRefreshTimer;
-    private int refreshCountdown = 30;
-    private string selectedRole = "President";
-    private string timeRange = "24h";
-    private List<string> roles = new() { "President", "Vice President", "Secretary", "Treasurer", "Member" };
+    // Injected Services
+    [Inject] private IJSRuntime JSRuntime { get; set; }
+    [Inject] private IElectionsService ElectionService { get; set; }
+    [Inject] private IUsersService UsersService { get; set; }
 
-    // <summary>
-    //TODO!! add activity tracker Service later on
-    /// </summary>
-    private int TotalVoters = 1500;
-    private int VoterTarget = 2000;
-    private int ActiveVoters => TotalVoters - random.Next(100, 300);
-    private int CompletedVotes => (int)(TotalVoters * (random.NextDouble() * 0.8));
-    private double participationRate => Math.Round((double)CompletedVotes / TotalVoters * 100, 1);
-    private double voterRegistrationProgress = 75;
-    private List<Activity> recentActivities = new();
-    private List<Demographic> demographics = new();
-    private int apiLatency = random.Next(50, 200);
+    // Metrics and API data
+    private int TotalVoters  =10;//TODO!!
+    private int CompletedVotes { get; set; }
+    private int ActiveVoters => TotalVoters - CompletedVotes; 
+    private double participationRate => TotalVoters > 0 ? Math.Round((double)CompletedVotes / TotalVoters * 100, 1) : 0;
+    private double voterRegistrationProgress { get; set; } = 75;
+    private int apiLatency { get; set; } = 100;
 
-    // Chart Management
+    private List<Activity> recentActivities { get; set; } = new();
+    private List<Demographic> demographics { get; set; } = new();
+
+    // Chart management
     private IJSObjectReference? chartModule;
     private bool chartsInitialized;
     private bool disposed;
 
+    // Time range for charts
+    private string timeRange = "24h";
+
     protected override async Task OnInitializedAsync()
     {
-        GenerateDummyData();
-        InitializeTimers();
-        await base.OnInitializedAsync();
+        try
+        {
+            // Load election results from API
+            var results = await ElectionService.GetElectionsResultsAsync();
+            // Compute CompletedVotes by aggregating total votes from the results.
+            CompletedVotes = results.Sum(r => r.TotalVotes);
+            //TODO!! Additional metrics calculations will go here            
+
+            await LoadRecentActivities();
+            UpdateDemographicsData();          
+
+           
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Dashboard initialization error: {ex.Message}");
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -336,8 +313,7 @@
         try
         {
             chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
-                "import", 
-                "./js/dashboardCharts.js"
+                "import", "./js/dashboardCharts.js"
             );
             await InitializeCharts();
         }
@@ -347,38 +323,9 @@
         }
     }
 
-    private void GenerateDummyData()//dummy data for testing purpose only!
-    {
-        TotalVoters = Math.Clamp(TotalVoters + random.Next(-50, 100), 100, 5000);
-        voterRegistrationProgress = Math.Clamp(voterRegistrationProgress + random.Next(-2, 5), 0, 100);
-        apiLatency = random.Next(50, 200);
-
-        recentActivities.Insert(0, new Activity { 
-            Timestamp = DateTime.Now, 
-            Description = GetRandomActivity(),
-            Type = GetRandomActivityType()
-        });
-        
-        if (recentActivities.Count > 15) recentActivities.RemoveAt(14);
-
-        UpdateDemographicsData();
-    }
-
-    private void UpdateDemographicsData()
-    {
-        demographics = new List<Demographic>
-        {
-            new() { Category = "18-25", Percentage = random.Next(20, 35), Count = random.Next(300, 500) },
-            new() { Category = "26-35", Percentage = random.Next(25, 40), Count = random.Next(400, 600) },
-            new() { Category = "36-50", Percentage = random.Next(15, 30), Count = random.Next(200, 400) },
-            new() { Category = "51+", Percentage = random.Next(5, 20), Count = random.Next(100, 300) }
-        };
-    }
-
     private async Task InitializeCharts()
     {
         if (chartModule == null) return;
-        
         try
         {
             await chartModule.InvokeVoidAsync("initializeActivityChart", 
@@ -386,7 +333,6 @@
                 GetTimeLabels(), 
                 GetVoteData()
             );
-            
             await chartModule.InvokeVoidAsync("initializeDemographicsChart",
                 "demographicsChart",
                 demographics.Select(d => d.Category).ToArray(),
@@ -402,7 +348,6 @@
     private async Task UpdateCharts()
     {
         if (chartModule == null) return;
-        
         try
         {
             await chartModule.InvokeVoidAsync("updateActivityChart",
@@ -410,7 +355,6 @@
                 GetTimeLabels(),
                 GetVoteData()
             );
-            
             await chartModule.InvokeVoidAsync("updateDemographicsChart",
                 "demographicsChart",
                 demographics.Select(d => d.Category).ToArray(),
@@ -423,27 +367,7 @@
         }
     }
 
-    private void InitializeTimers()
-    {
-        dataRefreshTimer = new Timer(1000);
-        dataRefreshTimer.Elapsed += async (sender, e) => await UpdateData();
-        dataRefreshTimer.Start();
-    }
-
-    private async Task UpdateData()
-    {
-        if (disposed) return;
-        
-        refreshCountdown--;
-        if (refreshCountdown <= 0)
-        {
-            refreshCountdown = 30;
-            GenerateDummyData();
-            await UpdateCharts();
-        }
-        await InvokeAsync(StateHasChanged);
-    }
-
+    // Dummy implementations atleast for now
     private string[] GetTimeLabels() => timeRange switch
     {
         "24h" => Enumerable.Range(0, 24).Select(h => $"{h:00}:00").ToArray(),
@@ -453,20 +377,10 @@
 
     private int[] GetVoteData() => timeRange switch
     {
-        "24h" => Enumerable.Range(0, 24).Select(_ => random.Next(50, 500)).ToArray(),
-        "7d" => Enumerable.Range(0, 7).Select(_ => random.Next(200, 2000)).ToArray(),
-        _ => Enumerable.Range(0, 30).Select(_ => random.Next(100, 1500)).ToArray()
+        "24h" => Enumerable.Range(0, 24).Select(_ => CompletedVotes / 24).ToArray(), 
+        "7d" => Enumerable.Range(0, 7).Select(_ => CompletedVotes / 7).ToArray(),
+        _ => Enumerable.Range(0, 30).Select(_ => CompletedVotes / 30).ToArray()
     };
-
-    private string GetRoleButtonClass(string role) =>
-        selectedRole == role ? "btn-primary active" : "btn-outline-secondary";
-
-    private void FilterByRole(string role)
-    {
-        selectedRole = role;
-        GenerateDummyData();
-        _ = UpdateCharts();
-    }
 
     private void ChangeTimeRange(string range)
     {
@@ -474,25 +388,34 @@
         _ = UpdateCharts();
     }
 
-    private string GetActivityIcon(ActivityType type) => type switch
+    private async Task LoadRecentActivities()
     {
-        ActivityType.Security => "bi-shield-check",
-        ActivityType.Vote => "bi-check-circle",
-        ActivityType.System => "bi-gear",
-        ActivityType.Registration => "bi-person-add",
-        _ => "bi-clipboard-data"
-    };
+        // TODO!!
+        recentActivities.Clear();
+        recentActivities.Add(new Activity { Timestamp = DateTime.Now, Description = "Live vote update", Type = ActivityType.Vote });
+        recentActivities.Add(new Activity { Timestamp = DateTime.Now.AddMinutes(-2), Description = "New voter registered", Type = ActivityType.Registration });
+    }
+
+    private void UpdateDemographicsData()
+    {
+        // TODO!!
+        demographics = new List<Demographic>
+        {
+            new() { Category = "18-25", Percentage = 30, Count = 600 },
+            new() { Category = "26-35", Percentage = 35, Count = 700 },
+            new() { Category = "36-50", Percentage = 25, Count = 500 },
+            new() { Category = "51+", Percentage = 10, Count = 200 }
+        };
+    }
 
     public async void Dispose()
     {
         if (disposed) return;
         disposed = true;
-
         try
         {
             dataRefreshTimer?.Stop();
             dataRefreshTimer?.Dispose();
-            
             if (chartModule != null)
             {
                 await chartModule.InvokeVoidAsync("destroyCharts");
@@ -505,6 +428,41 @@
         }
     }
 
+    // Timer to refresh dashboard data periodically.
+    private Timer? dataRefreshTimer;
+    private int refreshCountdown = 30;
+    private void InitializeTimers()
+    {
+        dataRefreshTimer = new Timer(1000);
+        dataRefreshTimer.Elapsed += async (sender, e) => await UpdateData();
+        dataRefreshTimer.Start();
+    }
+
+    private async Task UpdateData()
+    {
+        refreshCountdown--;
+        if (refreshCountdown <= 0)
+        {
+            refreshCountdown = 30;
+            // TODO !!
+            // var results = await ElectionService.GetElectionsResultsAsync();
+            // CompletedVotes = results.Sum(r => r.totalVotes);
+            await UpdateCharts();
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // Activity helper methods
+    private string GetActivityIcon(ActivityType type) => type switch
+    {
+        ActivityType.Security => "bi-shield-check",
+        ActivityType.Vote => "bi-check-circle",
+        ActivityType.System => "bi-gear",
+        ActivityType.Registration => "bi-person-add",
+        _ => "bi-clipboard-data"
+    };
+
+    private enum ActivityType { Security, Vote, System, Registration, Maintenance }
     private class Activity
     {
         public DateTime Timestamp { get; set; }
@@ -512,40 +470,17 @@
         public ActivityType Type { get; set; }
         public string Subtext => Type switch
         {
-            ActivityType.Security => "Security subsystem update",
-            ActivityType.Vote => "Voting process activity",
+            ActivityType.Security => "Security update",
+            ActivityType.Vote => "Vote activity",
             ActivityType.System => "System maintenance",
-            ActivityType.Registration => "Voter management",
-            _ => "General operation"
+            ActivityType.Registration => "New registration",
+            _ => "General activity"
         };
     }
-
     private class Demographic
     {
         public string Category { get; set; } = "";
         public int Percentage { get; set; }
         public int Count { get; set; }
     }
-
-    private enum ActivityType { Security, Vote, System, Registration, Maintenance }
-    
-    private ActivityType GetRandomActivityType() => random.Next(5) switch
-    {
-        0 => ActivityType.Security,
-        1 => ActivityType.Vote,
-        2 => ActivityType.System,
-        3 => ActivityType.Registration,
-        _ => ActivityType.Maintenance
-    };
-
-    private string GetRandomActivity() => random.Next(6) switch
-    {
-        0 => "New voter registration completed",
-        1 => $"Vote cast in {selectedRole} election",
-        2 => "System maintenance performed",
-        3 => "New election configuration added",
-        4 => "Security audit completed",
-        _ => "Database backup executed"
-    };
-    
 }

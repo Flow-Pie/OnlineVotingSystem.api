@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace OnlineVotingSystem.api.DTOs.Candidate;
 
 public record CreateCandidateDto(
-    Guid UserId,
-    Guid ElectionPositionId,
+    string  NationalId,//FIX:  BUG CREATE DTO TO USE NATIONALID
+    Guid? PositionId, //FIX:  BUG CREATE DTO TO USE POSITIONID
     [StringLength(100)] string? Party,
     [StringLength(255)] string Bio,
-    [StringLength(255)] Uri? PhotoUrl
+    [StringLength(255)] string? PhotoUrl
 );

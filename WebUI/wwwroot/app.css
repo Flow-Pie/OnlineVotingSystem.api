@@ -16,6 +16,33 @@ body, html {
     -moz-osx-font-smoothing: grayscale;  
 }
 
+:root {
+    /* Enterprise Theme Variables */
+    --enterprise-primary: #2A5C8D;
+    --enterprise-secondary: #5F7D95;
+    --enterprise-accent: #48A3C6;
+    --enterprise-success: #3A9D85;
+    --enterprise-warning: #FFC107;
+    --enterprise-danger: #DC3545;
+    --enterprise-border: #EBEFF2;
+    --enterprise-chart-bg: rgba(245, 248, 250, 0.9);
+
+    /* Bootstrap Overrides */
+    --bs-primary: var(--enterprise-primary);
+    --bs-secondary: var(--enterprise-secondary);
+    --bs-success: var(--enterprise-success);
+    --bs-info: var(--enterprise-accent);
+    --bs-warning: var(--enterprise-warning);
+    --bs-danger: var(--enterprise-danger);
+    --bs-border-color: var(--enterprise-border);
+}
+.scrollable-container {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--enterprise-primary) var(--enterprise-border);
+}
+
 
 a, .btn-link {
     color: #006bb7;

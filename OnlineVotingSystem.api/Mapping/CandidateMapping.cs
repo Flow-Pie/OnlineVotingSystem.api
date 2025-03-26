@@ -41,7 +41,7 @@ public static class CandidateMapping
             ElectionPositionId = electionPositionId,
             Bio = candidate.Bio,
             Party = candidate.Party,
-            PhotoUrl = candidate.PhotoUrl
+            PhotoUrl = new Uri(candidate.PhotoUrl)
         };
     }
 }
