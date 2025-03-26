@@ -1,72 +1,85 @@
-// // charts.js
-
-
-// export function createResultsChart(canvasId, chartData) {
-//     const ctx = document.getElementById(canvasId).getContext('2d');
+function createPieChart(svgId, data, colors) {
+    const svg = document.getElementById(svgId);
+    svg.innerHTML = '';
     
-//     return new Chart(ctx, {
-//         type: 'bar',
-//         data: {
-//             labels: chartData.labels,
-//             datasets: [{
-//                 label: `Votes for ${chartData.position}`,
-//                 data: chartData.data,
-//                 backgroundColor: chartData.colors,
-//                 borderColor: '#2A5C8D',
-//                 borderWidth: 1
-//             }]
-//         },
-//         options: {
-//             responsive: true,
-//             maintainAspectRatio: false,
-//             plugins: {
-//                 title: {
-//                     display: true,
-//                     text: `Total Registered Voters: ${chartData.totalVoters}`,
-//                     padding: { bottom: 20 }
-//                 },
-//                 legend: { display: false },
-//                 tooltip: {
-//                     callbacks: {
-//                         label: function(context) {
-//                             const percentage = (context.raw / chartData.totalVoters * 100).toFixed(1);
-//                             return `${context.raw} votes (${percentage}%)`;
-//                         }
-//                     }
-//                 }
-//             },
-//             scales: {
-//                 y: {
-//                     beginAtZero: true,
-//                     max: chartData.totalVoters,
-//                     title: { display: true, text: 'Number of Votes' }
-//                 },
-//                 x: {
-//                     title: { display: true, text: 'Candidates' }
-//                 }
-//             }
-//         }
-//     });
-// }
-// export function destroyChart(chartInstance) {
-//     if (chartInstance) {
-//         chartInstance.destroy();
-//     }
-// }
+    const radius = 150;
+    const centerX = 200;
+    const centerY = 200;
+    let total = data.reduce((sum, item) => sum + item.value, 0);
+    let currentAngle = -90;
 
-// // Register window resize handler for Blazor components
-// function registerChartResizeHandler(dotNetHelper) {
-//     let resizeTimeout;
-    
-//     window.addEventListener('resize', () => {
-//         clearTimeout(resizeTimeout);
-//         resizeTimeout = setTimeout(() => {
-//             dotNetHelper.invokeMethodAsync('OnChartResize');
-//         }, 200); // Debounce for 200ms
-//     });
-// }
+    data.forEach((item, index) => {
+        // Calculate slice angles
+        const angle = (item.value / total) * 360;
+        const endAngle = currentAngle + angle;
+        
+        // Create path
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const startRad = currentAngle * Math.PI / 180;
+        const endRad = endAngle * Math.PI / 180;
+        
+        const x1 = centerX + radius * Math.cos(startRad);
+        const y1 = centerY + radius * Math.sin(startRad);
+        const x2 = centerX + radius * Math.cos(endRad);
+        const y2 = centerY + radius * Math.sin(endRad);
 
-// // Make the function available globally
-// window.chartResize = {
-//     register: registerChartResizeHandler
-// };
+        const largeArc = angle > 180 ? 1 : 0;
+        const pathData = `M ${centerX},${centerY} L ${x1},${y1} A ${radius},${radius} 0 ${largeArc},1 ${x2},${y2} Z`;
+        
+        path.setAttribute("d", pathData);
+        path.setAttribute("fill", colors[index % colors.length]);
+        path.classList.add("pie-slice");
+        path.dataset.tooltip = `${item.label}: ${((item.value / total) * 100).toFixed(1)}%`;
+        
+        // Add hover effect
+        path.addEventListener('mouseover', function() {
+            this.style.filter = 'brightness(120%)';
+            showTooltip(this.dataset.tooltip);
+        });
+        
+        path.addEventListener('mouseout', function() {
+            this.style.filter = '';
+            hideTooltip();
+        });
+
+        svg.appendChild(path);
+
+        // Add labels
+        const labelAngle = currentAngle + angle / 2;
+        const labelRadius = radius * 0.6;
+        const labelX = centerX + labelRadius * Math.cos(labelAngle * Math.PI / 180);
+        const labelY = centerY + labelRadius * Math.sin(labelAngle * Math.PI / 180);
+
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", labelX);
+        label.setAttribute("y", labelY);
+        label.setAttribute("text-anchor", "middle");
+        label.classList.add("pie-label");
+        label.textContent = item.label;
+
+        svg.appendChild(label);
+
+        currentAngle = endAngle;
+    });
+}
+
+function showTooltip(text) {
+    let tooltip = document.getElementById('chart-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'chart-tooltip';
+        tooltip.style.position = 'absolute';
+        tooltip.style.background = 'rgba(0, 0, 0, 0.8)';
+        tooltip.style.color = 'white';
+        tooltip.style.padding = '5px 10px';
+        tooltip.style.borderRadius = '4px';
+        tooltip.style.pointerEvents = 'none';
+        document.body.appendChild(tooltip);
+    }
+    tooltip.textContent = text;
+}
+
+function hideTooltip() {
+    const tooltip = document.getElementById('chart-tooltip');
+    if (tooltip) tooltip.remove();
+}

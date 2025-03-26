@@ -109,13 +109,7 @@
         .metric-card:hover {
             border-left-color: var(--enterprise-primary);
         }
-
-        .chart-container {
-            background: var(--enterprise-chart-bg);
-            border-radius: 8px;
-            border: 1px solid var(--enterprise-border);
-            min-height: 400px;
-        }
+       
 
         .avatar-icon {
             width: 40px;
@@ -125,6 +119,7 @@
             align-items: center;
             justify-content: center;
         }
+
 
         @@media (max-width: 768px) {
             .scrollable-container {
@@ -137,9 +132,12 @@
                 font-size: 0.9rem;
             }
         }
+
+        
+
     </style>
 
-    @if (isLoading)
+      @if (isLoading)
     {
         <div class="d-flex flex-column align-items-center justify-content-center py-5">
             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
@@ -368,63 +366,53 @@
 
             <!-- Visualization Sidebar -->
             <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h3 class="h5 fw-bold mb-0">Data Visualization</h3>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="chart-container p-2">
-                            @if (hasChartData)
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h3 class="h5 fw-bold mb-0">Data Visualization</h3>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="chart-container p-2">
+                                <div class="card mt-4">
+                        <div class="card-header">
+                            <h3 class="h5 fw-bold mb-0">
+                                <i class="bi bi-trophy me-2 text-warning"></i>
+                                Current Leaders
+                            </h3>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            @foreach (var position in Positions)
                             {
-                                <canvas id="resultsChart"></canvas>
-                            }
-                            else
-                            {
-                                <div class="text-center text-muted py-4">
-                                    <i class="bi bi-pie-chart fs-2"></i>
-                                    <div class="mt-2">No data available</div>
-                                </div>
+                                var leader = results.Where(r => r.PositionName == position)
+                                                .OrderByDescending(r => r.TotalVotes)
+                                                .FirstOrDefault();
+                                
+                                @if (leader != null)
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="fw-semibold text-primary">@position</div>
+                                                <div class="text-muted small">@leader.Party</div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-bold">@leader.CandidateName</div>
+                                                <div class="text-success small">
+                                                    @leader.TotalVotes.ToString("N0") votes
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             }
                         </div>
                     </div>
                 </div>
-
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h3 class="h5 fw-bold mb-0">
-                            <i class="bi bi-trophy me-2 text-warning"></i>
-                            Current Leaders
-                        </h3>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        @foreach (var position in Positions)
-                        {
-                            var leader = results.Where(r => r.PositionName == position)
-                                              .OrderByDescending(r => r.TotalVotes)
-                                              .FirstOrDefault();
-                            
-                            @if (leader != null)
-                            {
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-semibold text-primary">@position</div>
-                                            <div class="text-muted small">@leader.Party</div>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="fw-bold">@leader.CandidateName</div>
-                                            <div class="text-success small">
-                                                @leader.TotalVotes.ToString("N0") votes
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </div>
                 </div>
+                </div>
+                
             </div>
-        </div>
+     </div>
+    
     }
 </main>
 
@@ -439,6 +427,8 @@
     private Timer? countdownTimer;
     private int refreshCountdown = 30;
     private string selectedPosition = "President";
+    private bool isExporting = false;
+    private bool isDeleting = false;
     
     [Inject] private ILogger<ElectionResultsView> Logger { get; set; } = null!;
 
@@ -452,9 +442,12 @@
     private bool loadingElections;
     private List<ElectionDetailsDto> electionsList = new();
 
+    private List<ChartSegment> pieChartData = new();
+    private string[] colorPalette = { "#2A5C8D", "#5F7D95", "#48A3C6", "#3A9D85", "#D82B20" };
+    private bool hasChartData => FilteredResults?.Any() == true;
     private IJSObjectReference? chartModule;
     private IJSObjectReference? chartInstance;
-    private bool hasChartData => FilteredResults.Any();
+
 
 
     private Guid selectedElectionId
@@ -469,6 +462,11 @@
             }
         }
     }
+
+   
+    private decimal GetMaxVotes() => FilteredResults.Any() 
+        ? FilteredResults.Max(r => r.TotalVotes) 
+        : 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -556,9 +554,10 @@
         {
             isLoading = false;
             StateHasChanged();
-            await UpdateChart();
         }
     }
+      
+
 
     private void SelectPosition(string position)
     {
@@ -631,13 +630,24 @@
 
     private async Task RefreshData()
     {
-        if (!autoRefreshEnabled) return;
-        await InvokeAsync(async () =>
+        if (!autoRefreshEnabled || isLoading) return;
+        
+        try
         {
-            await LoadData();
+            isLoading = true;
+            await InvokeAsync(StateHasChanged);
+            
+            // Force new data load
+            var freshResults = await ElectionService.GetElectionsResultsAsync();
+            results = freshResults.Where(r => r.ElectionId == selectedElectionId).ToArray();
+            
+        }
+        finally
+        {
+            isLoading = false;
             refreshCountdown = 30;
-            StateHasChanged();
-        });
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private void UpdateCountdown()
@@ -648,14 +658,7 @@
             InvokeAsync(StateHasChanged);
         }
     }
-
-    private string GetPartyColor(ElectionResultsView result) => result.Party switch
-    {
-        "UDA" => "#2A5C8D",
-        "ODM" => "#D82B20",
-        "JUBILEE" => "#48A3C6",
-        _ => "#EBEFF2"
-    };
+   
 
     private void HandleError(string context, Exception ex)
     {
@@ -663,76 +666,19 @@
         errorMessage = $"{context}: {ex.Message}";
         errorOccurred = true;
         StateHasChanged();
-    }
-
-
-
-
-    private async Task UpdateChart()
-    {
-        if (!OperatingSystem.IsBrowser()) return;
-        
-        await DestroyChartAsync();
-        
-        try 
-        {
-            var positionData = FilteredResults;
-            if (!hasChartData) return;
-
-            chartModule ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/charts.js");
-            chartInstance = await chartModule.InvokeAsync<IJSObjectReference>(
-                "createResultsChart", 
-                new object[] { 
-                    "resultsChart",
-                    new {
-                        labels = positionData.Select(x => x.CandidateName).ToArray(),
-                        data = positionData.Select(x => x.TotalVotes).ToArray(),
-                        colors = positionData.Select(GetPartyColor).ToArray(),
-                        totalVoters = positionData.FirstOrDefault()?.RegisteredVoters ?? 0,
-                        position = selectedPosition
-                    }
-                }
-            );
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Chart update failed");
-            errorOccurred = true;
-            errorMessage = "Failed to load chart visualization";
-            StateHasChanged();
-        }
-    }
-
-
-
-    private async Task DestroyChartAsync()
-    {
-        try 
-        {
-            if (chartInstance != null && chartModule != null)
-            {
-                await chartModule.InvokeVoidAsync("destroyChart", chartInstance);
-                await chartInstance.DisposeAsync();
-                chartInstance = null;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Chart destruction error");
-        }
-    }
+    }     
 
     public async ValueTask DisposeAsync()
     {
-        await DestroyChartAsync();
-        
-        if (chartModule != null)
-            await chartModule.DisposeAsync();
+        if (chartInstance != null)
+        {
+            await chartInstance.DisposeAsync();
+        }
 
-        refreshTimer?.Dispose();
-        countdownTimer?.Dispose();
-        refreshTimer = null;
-        countdownTimer = null;
+        if (chartModule != null)
+        {
+            await chartModule.DisposeAsync();
+        }
     }
     public void Dispose()
     {
