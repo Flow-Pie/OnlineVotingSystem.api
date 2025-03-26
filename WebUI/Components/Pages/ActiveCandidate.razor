@@ -1,7 +1,10 @@
 @page "/candidates"
 @using OnlineVotingSystem.api.DTOs.Candidate
 @using OnlineVotingSystem.api.DTOs.Election
+@using System.ComponentModel.DataAnnotations
+@using OnlineVotingSystem.api.DTOs.Position
 @using WebUI.Services
+@using System.Text.Json
 @rendermode InteractiveServer
 
 <main class="container mt-4 scrollable-container">
@@ -167,7 +170,97 @@
         </div>
     }
 
-    <!-- Candidates List -->
+    <!-- Edit Candidate Modal -->
+    @if (ShowEditModal)
+        {
+            <div class="modal-backdrop show d-block"></div>
+            <div class="modal fade show d-block" tabindex="-1" aria-modal="true" role="dialog">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                    <div class="modal-content shadow-lg">
+                        <div class="modal-header text-white" style="background-color: var(--enterprise-primary);">
+                            <h2 class="modal-title h5">Edit Candidate</h2>
+                            <button type="button" class="btn-close btn-close-white" @onclick="CloseEdit" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form @onsubmit="HandleEditSubmit">
+                                <div class="row">
+                                     <div class="col-md-6 mb-3">
+                                        <label class="form-label">Candidate Name</label>
+                                        <input type="" 
+                                            class="form-control @(ValidationErrors.ContainsKey(nameof(EditingModel.PhotoUrl)) ? "is-invalid" : "")" 
+                                            value=@SelectedCandidate.Name
+                                             disabled/>                                        
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Political Party</label>
+                                        <input type="text" 
+                                            class="form-control @(ValidationErrors.ContainsKey(nameof(EditingModel.Party)) ? "is-invalid" : "")" 
+                                            @bind="EditingModel.Party"
+                                            @bind:event="oninput" />
+                                        @if (ValidationErrors.ContainsKey(nameof(EditingModel.Party)))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @ValidationErrors[nameof(EditingModel.Party)]
+                                            </div>
+                                        }
+                                    </div>                                    
+                                   
+                                    
+                                   <div class="col-12 mb-3">
+                                        <label class="form-label">Position</label>
+                                        <select class="form-select @(ValidationErrors.ContainsKey(nameof(EditingModel.PositionId)) ? "is-invalid" : "")" 
+                                            @bind="EditingModel.PositionId">
+                                        @foreach (var position in AvailablePositions)
+                                        {
+                                            <option value="@position.Id">@position.Name</option>
+                                        }
+                                    </select>
+                                        @if (ValidationErrors.ContainsKey(nameof(EditingModel.PositionId)))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @ValidationErrors[nameof(EditingModel.PositionId)]
+                                            </div>
+                                        }
+                                    </div>
+
+                                    
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Biography</label>
+                                        <textarea class="form-control @(ValidationErrors.ContainsKey(nameof(EditingModel.Bio)) ? "is-invalid" : "")" 
+                                                rows="5"
+                                                @bind="EditingModel.Bio"
+                                                @bind:event="oninput"></textarea>
+                                        @if (ValidationErrors.ContainsKey(nameof(EditingModel.Bio)))
+                                        {
+                                            <div class="invalid-feedback">
+                                                @ValidationErrors[nameof(EditingModel.Bio)]
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" @onclick="CloseEdit">Cancel</button>
+                                    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+                                        @if (isProcessing)
+                                        {
+                                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                                        }
+                                        else
+                                        {
+                                            <span>Save Changes</span>
+                                        }
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+     <!-- Candidates List -->
     @if (!GroupedCandidates.Any())
     {
         <div class="alert alert-warning text-center py-4 shadow-sm">
@@ -206,7 +299,7 @@
                                                         <i class="bi bi-eye me-1"></i>View
                                                     </button>
                                                     <button class="btn btn-outline-warning btn-sm" 
-                                                            @onclick="() => EditCandidate(candidate.Id)"
+                                                            @onclick="() => EditCandidate(candidate.Id, candidate)"
                                                             aria-label="Edit candidate">
                                                         <i class="bi bi-pencil-square me-1"></i>Edit
                                                     </button>
@@ -231,20 +324,40 @@
 
 @code {
     private string SearchTerm { get; set; } = "";
+    
     private CandidateSerializedDto? SelectedCandidate { get; set; }
-    private List<CandidateSerializedDto> Candidates { get; set; } = new();
-    private Dictionary<string, List<CandidateSerializedDto>> GroupedCandidates { get; set; } = new();
-    private Dictionary<string, int> CurrentPages { get; set; } = new();
-    private const int PageSize = 3;
 
+    private List<CandidateSerializedDto> Candidates { get; set; } = new();
+
+    private Dictionary<string, List<CandidateSerializedDto>> GroupedCandidates { get; set; } = new();
+
+    private Dictionary<string, int> CurrentPages { get; set; } = new();
+
+    private const int PageSize = 3;
     private string SuccessMessage { get; set; } = "";
     private string ErrorMessage { get; set; } = "";
 
     [Inject]
     private ICandidatesService CandidateService { get; set; }
-
+    
     [Inject]
     private IAuthService AuthService { get; set; }
+    
+    [Inject]
+    private IPositionsService PositionService { get; set; }
+
+    private EditCandidateFormModel EditingModel { get; set; } = new();
+
+    private bool IsEditing { get; set; } = false;
+    private bool IsLoading { get; set; } = false;
+    private bool IsDeleting { get; set; } = false;
+    private bool isProcessing { get; set; } = false;
+    private bool IsEditingCandidate { get; set; } = false;
+    private bool ShowEditModal { get; set; } = false;
+
+    private List<PositionDetails> AvailablePositions { get; set; }
+
+    private Dictionary<string, string> ValidationErrors { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -253,13 +366,67 @@
         InitializePagination();
     }
 
+     private async Task HandleEditSubmit()
+    {
+        try
+        {
+            isProcessing = true;
+            ValidationErrors.Clear();
+            
+            // Manual validation using DataAnnotations.
+            var validationContext = new ValidationContext(EditingModel);
+            var validationResults = new List<ValidationResult>();
+            bool isValid = Validator.TryValidateObject(EditingModel, validationContext, validationResults, true);
+
+            if (!isValid)
+            {
+                foreach (var validationResult in validationResults)
+                {
+                    foreach (var memberName in validationResult.MemberNames)
+                    {
+                        ValidationErrors[memberName] = validationResult.ErrorMessage;
+                    }
+                }
+                StateHasChanged();
+                return;
+            }
+
+            // Create update DTO. Note: PhotoUrl is null to avoid serialization issues.
+            var updateDto = new UpdateCandidateDto(
+                PositionId: EditingModel.PositionId,
+                Party: EditingModel.Party,
+                Bio: EditingModel.Bio,
+                PhotoUrl: null 
+            );
+
+            await CandidateService.UpdateCandidateAsync(SelectedCandidate.Id, updateDto);
+            SuccessMessage = "Candidate updated successfully";
+            Console.WriteLine($"[DEBUG] Sending UpdateCandidate Request:\n{JsonSerializer.Serialize(updateDto, new JsonSerializerOptions { WriteIndented = true })}");
+
+            await LoadCandidates();
+            GroupCandidates();
+            InitializePagination();
+
+            SelectedCandidate = null;
+            ShowEditModal = false;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Update failed: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    // Loads all candidates from the API.
     private async Task LoadCandidates()
     {
         try
         {
             var token = await AuthService.GetTokenAsync();
             CandidateService.SetBearerToken(token);
-
             Candidates = (await CandidateService.GetSerializedCandidatesAsync()).ToList();
             ErrorMessage = "";
         }
@@ -270,10 +437,10 @@
         }
     }
 
+    // Groups candidates by "Election - Position" key.
     private void GroupCandidates()
     {
         GroupedCandidates = Candidates
-            .Where(c => c != null)
             .GroupBy(c => $"{c.Election ?? "No Election"} - {c.Position ?? "No Position"}")
             .ToDictionary(g => g.Key, g => g.OrderBy(c => c.Name).ToList());
 
@@ -332,6 +499,7 @@
         return candidates.Skip((CurrentPages[position] - 1) * PageSize).Take(PageSize);
     }
 
+    // Calculates total number of pages for a given group.
     private int GetTotalPages(string position)
     {
         return GroupedCandidates.TryGetValue(position, out var candidates) 
@@ -339,6 +507,7 @@
             : 0;
     }
 
+    // Moves to the next page for the specified group.
     private void NextPage(string position)
     {
         if (!CurrentPages.ContainsKey(position)) return;
@@ -349,6 +518,7 @@
         }
     }
 
+    // Moves to the previous page for the specified group.
     private void PreviousPage(string position)
     {
         if (!CurrentPages.ContainsKey(position)) return;
@@ -359,6 +529,7 @@
         }
     }
 
+    // Deletes a candidate.
     private async Task DeleteCandidate(Guid candidateId)
     {
         try
@@ -368,13 +539,10 @@
 
             await CandidateService.DeleteCandidateAsync(candidateId);
             SuccessMessage = "Candidate deleted successfully!";
-            
             Candidates.RemoveAll(c => c.Id == candidateId);
             GroupCandidates();  
             InitializePagination(); 
-            
             StateHasChanged();  
-            
             await ClearMessagesAfterDelay();
         }
         catch (Exception ex)
@@ -384,7 +552,7 @@
         }
     }
 
-
+    // Clears success/error messages after a delay.
     private async Task ClearMessagesAfterDelay()
     {
         await Task.Delay(5000);
@@ -393,19 +561,82 @@
         StateHasChanged();
     }
 
-   private void ViewProfile(CandidateSerializedDto candidate)
+    // Views candidate profile.
+    private void ViewProfile(CandidateSerializedDto candidate)
     {
         SelectedCandidate = candidate;
     }
 
+    // Closes candidate details.
     private void CloseDetails()
     {
         SelectedCandidate = null;
     }
 
-
-    private void EditCandidate(Guid candidateId)
+    // Initiates candidate editing.
+    private async Task EditCandidate(Guid candidateId , CandidateSerializedDto candidate)
     {
-        // TODO!! edit
+        try
+        {
+            isProcessing = true;
+            var candidateDetails = await CandidateService.GetCandidateDetailsAsync(candidateId);
+            
+            SelectedCandidate = new CandidateSerializedDto(
+                candidateDetails.Id, 
+                Name: candidate.Name,         
+                Position: candidate.Position,      
+                Election: "",      
+                candidateDetails.Bio,
+                candidateDetails.Party,
+                candidateDetails.PhotoUrl
+            );
+            
+            AvailablePositions = (await PositionService.GetPositionsAsync()).ToList();
+
+            EditingModel = new EditCandidateFormModel
+            {
+                PositionId = candidateDetails.ElectionPositionId,
+                Party = candidateDetails.Party,
+                Bio = candidateDetails.Bio,
+                PhotoUrl = candidateDetails.PhotoUrl?.ToString()
+            };
+
+            ShowEditModal = true;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to load candidate: {ex.Message}";
+            await ClearMessagesAfterDelay();
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+   private void CloseEdit()
+    {
+        ShowEditModal = false;
+        ValidationErrors.Clear();
+        EditingModel = new EditCandidateFormModel();
+        SelectedCandidate = null;
+    }
+
+    // Model for candidate editing form with DataAnnotations for validation.
+    public class EditCandidateFormModel
+    {
+        [Required]
+        public Guid PositionId { get; set; }
+
+        [StringLength(100)]
+        public string? Party { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        public string Bio { get; set; } = string.Empty;
+
+        [StringLength(255)]
+        [Url]
+        public string? PhotoUrl { get; set; }
     }
 }

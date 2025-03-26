@@ -57,10 +57,19 @@ public class CandidatesService : ICandidatesService, IDisposable
     public async Task<CandidateDetailsDto> UpdateCandidateAsync(Guid candidateId, UpdateCandidateDto updateDto)
     {
         Console.WriteLine($"Updating candidate with ID: {candidateId}...");
-        var response = await _httpClient.PutAsJsonAsync($"/candidates/{candidateId}", updateDto);
+
+        var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"/candidates/{candidateId}")
+        {
+            Content = JsonContent.Create(updateDto)
+        };
+
+        var response = await _httpClient.SendAsync(request);
+
         Console.WriteLine($"Response status: {response.StatusCode}");
+
         return await HandleResponseAsync<CandidateDetailsDto>(response);
     }
+
 
     public async Task DeleteCandidateAsync(Guid candidateId)
     {
@@ -84,7 +93,7 @@ public class CandidatesService : ICandidatesService, IDisposable
         var response = await _httpClient.GetAsync($"/candidates/user/{userId}");
         Console.WriteLine($"Response status: {response.StatusCode}");
         return await HandleResponseAsync<IEnumerable<CandidateDetailsDto>>(response);
-    }
+    }     
 
    private async Task<T> HandleResponseAsync<T>(HttpResponseMessage response)
     {
@@ -135,6 +144,7 @@ public class CandidatesService : ICandidatesService, IDisposable
         }
     }
     public void Dispose() => _httpClient?.Dispose();
+  
 }
 
 public class ApiException : Exception

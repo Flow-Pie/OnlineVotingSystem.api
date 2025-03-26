@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using OnlineVotingSystem.api.Entities;
 
-namespace OnlineVotingSystem.api.Entities;
 
 public class ElectionPosition
 

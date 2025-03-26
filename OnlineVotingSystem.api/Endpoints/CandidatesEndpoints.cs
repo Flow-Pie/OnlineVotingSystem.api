@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using OnlineVotingSystem.api.Data;
 using OnlineVotingSystem.api.DTOs.Candidate;
 using OnlineVotingSystem.api.Mapping;
+using OnlineVotingSystem.api.Entities;
+using OnlineVotingSystem.api.DTOs.Election;
+
 
 namespace OnlineVotingSystem.api.Endpoints;
 
@@ -81,29 +84,45 @@ public static class CandidateEndpoints
 
         // Edit candidate
         group.MapPatch("/{candidateId:guid}",
-            async (Guid candidateId,
-                UpdateCandidateDto updateDto,
-                OnlineVotingSystemContext dbContext) =>
+        async (Guid candidateId,
+            UpdateCandidateDto updateDto,
+            OnlineVotingSystemContext dbContext) =>
+        {
+            // Find the candidate
+            var candidate = await dbContext.Candidates
+                .FirstOrDefaultAsync(c => c.Id == candidateId);
+
+            if (candidate == null)
             {
-                // Find the candidate
-                var candidate = await dbContext.Candidates
-                    .FirstOrDefaultAsync(c => c.Id == candidateId);
+                return Results.NotFound("Candidate not found.");
+            }
 
-                if (candidate == null)
-                {
-                    return Results.NotFound("Candidate not found.");
-                }
+            // Update candidate details
+            if (!string.IsNullOrEmpty(updateDto.Bio)) candidate.Bio = updateDto.Bio;
 
-                // Update candidate details
-                if (!string.IsNullOrEmpty(updateDto.Bio)) candidate.Bio = updateDto.Bio;
-                if (!string.IsNullOrEmpty(updateDto.Party)) candidate.Party = updateDto.Party;
-                if (updateDto.PhotoUrl is not null) candidate.PhotoUrl = updateDto.PhotoUrl;
+            // Declare electionPosition before using it outside the if block
+            ElectionPosition? electionPosition = null;
 
-                // Save changes
-                await dbContext.SaveChangesAsync();
+            if (updateDto.PositionId.HasValue)
+            {
+                electionPosition = await dbContext.ElectionPositions
+                    .FirstOrDefaultAsync(ep => ep.PositionId == updateDto.PositionId.Value);
 
-                return Results.Ok(candidate.ToCandidateDetailsDto());
-            }).RequireAuthorization("AdminOnly");
+                if (electionPosition ==null) return Results.NotFound("Invalid PositionId. No matching ElectionPosition found.");
+                
+                
+                candidate.ElectionPositionId = electionPosition.Id; // FIXED POSITION NOT UPDATING BUG!!
+            }
+
+            if (!string.IsNullOrEmpty(updateDto.Party)) candidate.Party = updateDto.Party;
+            if (updateDto.PhotoUrl is not null) candidate.PhotoUrl = updateDto.PhotoUrl;
+
+            // Save changes
+            await dbContext.SaveChangesAsync();
+
+            return Results.Ok(candidate.ToCandidateDetailsDto());
+        }).RequireAuthorization("AdminOnly");
+
 
 
         // Delete candidate

@@ -1,10 +1,12 @@
 @page "/active-elections"
+@using OnlineVotingSystem.api.DTOs.Candidate
 @using OnlineVotingSystem.api.DTOs.User
 @using OnlineVotingSystem.api.DTOs.Election
 @using OnlineVotingSystem.api.DTOs.Position
 @using OnlineVotingSystem.api.DTOs.ElectionPosition
 @using System.Net
 @using System.Timers
+@using OnlineVotingSystem.api.Entities
 @implements IDisposable
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
@@ -200,11 +202,11 @@
                                                                     <div>
                                                                         <h6 class="mb-0">@position.Position</h6>
                                                                         <small class="text-muted">
-                                                                            !Count candidates
+                                                                            @CountCandidatesByPosition(ElectionsViewList, position.Id) candidates
                                                                         </small>
                                                                     </div>
                                                                     <span class="badge bg-primary bg-opacity-25 text-primary">
-                                                                        !seat(s)
+                                                                        10 seat(s) max
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -309,6 +311,7 @@
     [Inject] public required IPositionsService PositionsService { get; set; }
     [Inject] public required IAuthService AuthService { get; set; }
 
+
     private Dictionary<Guid, string> UserNames = new();
     private Dictionary<Guid, string> UserEmails = new();
     private List<ElectionDetailsDto> ElectionsModel = new();
@@ -318,6 +321,7 @@
     private Dictionary<Guid, string> PositionErrors = new();
     private string SearchTerm = string.Empty;
     private List<ElectionDetailsDto> FilteredElections = new();
+    private List<ElectionResultsView> ElectionsViewList;
 
     private bool ShowDeleteModal = false;
     private Guid SelectedElectionId;
@@ -326,9 +330,18 @@
 
     private Timer? _electionTimer;
     private DateTime _currentTime = DateTime.UtcNow;
+ 
+
+    public int CountCandidatesByPosition(List<ElectionResultsView> results, Guid targetPositionId) 
+    => results
+        .Where(r => r.PositionId.Equals(targetPositionId))
+        .Select(r => r.CandidateId)
+        .Distinct()
+        .Count();
 
     protected override async Task OnInitializedAsync()
     {
+
         _electionTimer = new Timer(1000);
         _electionTimer.Elapsed += (sender, e) => 
         {
@@ -337,8 +350,9 @@
         };
         _electionTimer.Start();
 
-        try
+        try        
         {
+            ElectionsViewList= (await ElectionsService.GetElectionsResultsAsync()).ToList();
             ElectionsModel = (await ElectionsService.GetElectionsAsync()).ToList();
             UsersModel = (await UsersService.GetUsersAsync()).ToList();
             FilteredElections = new List<ElectionDetailsDto>(ElectionsModel);
