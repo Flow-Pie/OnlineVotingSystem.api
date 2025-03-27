@@ -1,6 +1,14 @@
 ```markdown
 # 🗳️ Online Voting System - Secure Digital Democracy
 
+---
+
+<div align="center">
+  <h3>✨ Built by 0x4B47 developers with love for democratic innovation ✨</h3>
+  <img src="https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif" width="200">
+</div>
+```
+
 ```diff
 +---------------------------------------------------------------+
 |  🚀 Modern | 🔐 Secure | ⚡ Efficient | 🎯 User-Friendly       |
@@ -97,6 +105,87 @@ graph TB
   🔐 Automatic token handling
 
 ## 🛠️ Developer Quickstart
+## 🚀 Getting Started
+ 
+ ### ☑️ Prerequisites
+ 
+ Before getting started with `OnlineVotingSystem.api.git`, ensure your runtime environment meets the following requirements:
+ 
+ - **Programming Language:** CSharp
+ - **Package Manager:** Nuget
+ - **Database:** SQLite
+ - **.NET SDK:** Ensure you have the .NET SDK installed. You can download it from the [official .NET website](https://dotnet.microsoft.com/download).
+ 
+ ### ⚙️ Installation
+ **THIS INSTRUCTIONS WILL WORK FOR 99.9% AND FOR THAT 0.1% HELP YOURSELF MAN!**
+ 
+ #### Clone the Repository
+ 
+ 1. Clone the `OnlineVotingSystem.api.git` repository:
+    ```bash
+    ❯ git clone https://github.com/Flow-Pie/OnlineVotingSystem.api.git
+    ```
+ 
+ 2. Navigate to the project directory:
+    ```bash
+    ❯ cd OnlineVotingSystem.api.git
+    ```
+ 
+ #### Cleaning the project
+ 
+ 3. Clean the project:
+    ```bash
+    ❯ dotnet clean
+    ```
+    #### Build the project
+ 
+ 4. Build the project:
+    ```bash
+    ❯ dotnet build
+    ```
+    #### Restore Dependencies
+ 
+ 5. Restore the project dependencies using NuGet:
+    ```bash
+    ❯ dotnet restore
+    ```
+ 
+ ### 🤖 Running the Projects
+ 
+ The solution contains two projects: `OnlineVotingSystem.api` and application layer `WebUI`. Follow the steps below to run each project.
+ 
+ #### Running `OnlineVotingSystem.api`
+ 
+ 1. Navigate to the `OnlineVotingSystem.api` directory:
+    ```bash
+    ❯ cd OnlineVotingSystem.api
+    ```
+ 
+ 2. Run the project:
+    ```bash
+    ❯ dotnet run 
+    ```
+ 
+ #### Running `Interface Application layer ie WebUI`
+ 
+ 1. Navigate to the `WebUI` directory:
+    ```bash
+    ❯ cd WebUI
+    ```
+ 
+ 2. Run the project:
+    ```bash
+    ❯ dotnet run 
+    ```
+ 
+ The User Interface will launch
+ 
+ ### 🧪 Testing(optional)
+ 
+ To run the test suite, use the following command:
+ 
+ ```bash
+ + dotnet test
 
 ### 🏗️ Installation
 ```bash
@@ -106,7 +195,7 @@ cd OnlineVotingSystem.api && \
 echo "🚀 Repository cloned successfully!"
 ```
 
-### ⚙️ Setup Guide
+### ⚙️ Setup Guide summary
 ```diff
 + dotnet restore   # Get all dependencies
 ! dotnet build     # Compile the solution
@@ -169,23 +258,3 @@ dotnet ef migrations add "InitialSchema" -o "Data/Migrations"
 - Commercial Use Allowed
 ! Attribution Required
 ```
-
----
-
-<div align="center">
-  <h3>✨ Built with ❤️ for democratic innovation ✨</h3>
-  <img src="https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif" width="200">
-</div>
-```
-
-This version includes:
-1. **Visual Diagrams** using Mermaid syntax
-2. **Diff Blocks** for important notes
-3. **Badges** for tech stack
-4. **ASCII Art** for UI representation
-5. **Colorful Headers** for section separation
-6. **Interactive Elements** like tables and code blocks
-7. **Emoji Usage** for visual scanning
-8. **Modern Formatting** with clean spacing
-
-The document balances technical accuracy with creative presentation, making it both informative and visually engaging.
