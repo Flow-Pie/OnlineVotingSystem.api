@@ -8,11 +8,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlineVotingSystem.api.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateViewSchema : Migration
+    public partial class TestMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            
             migrationBuilder.CreateTable(
                 name: "Positions",
                 columns: table => new

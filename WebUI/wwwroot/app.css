@@ -43,6 +43,10 @@ body, html {
     scrollbar-color: var(--enterprise-primary) var(--enterprise-border);
 }
 
+.border-primary-subtle {
+    border-color: var(--enterprise-primary) !important;
+}
+
 
 a, .btn-link {
     color: #006bb7;
