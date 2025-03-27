@@ -1,13 +1,16 @@
-```markdown
-# 🗳️ Online Voting System - Secure Digital Democracy
-
 ---
 
 <div align="center">
   <h3>✨ Built by 0x4B47 developers with love for democratic innovation ✨</h3>
   <img src="https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif" width="200">
 </div>
-```
+
+---
+
+
+
+```markdown
+# 🗳️ Online Voting System - Secure Digital Democracy
 
 ```diff
 +---------------------------------------------------------------+
