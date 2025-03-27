@@ -1,5 +1,3 @@
-Here's a creatively styled Markdown documentation for your Online Voting System project with visual enhancements:
-
 ```markdown
 # 🗳️ Online Voting System - Secure Digital Democracy
 
