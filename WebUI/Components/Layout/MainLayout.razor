@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 <head>    
 
     <!-- Bootstrap CSS -->
@@ -18,7 +19,9 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+             <button class="btn btn-outline-danger" @onclick="Logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
         </div>
 
         <article class="content px-4">
@@ -33,3 +36,7 @@
     <a class="dismiss">🗙</a>
 </div>
 
+@code
+{
+ private void Logout() => Navigation.NavigateTo("/");
+}

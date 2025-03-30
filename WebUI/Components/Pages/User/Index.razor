@@ -1,0 +1,145 @@
+@page "/"  
+@rendermode InteractiveServer
+@using System.Timers
+@inherits LayoutComponentBase
+
+<div class="enterprise-landing container mt-4 scrollable-container">
+    <!-- Hero Section -->
+    <section class="enterprise-hero bg-gradient">
+        <div class="container">
+            <div class="row align-items-center py-8">
+                <div class="col-lg-7">
+                    <h1 class="hero-title mb-4">
+                        Secure Enterprise Voting 
+                        <span class="typed-text"></span>
+                    </h1>
+                    <div class="cta-group">
+                        <NavLink href="/register" class="btn btn-primary btn-lg me-3">
+                            <i class="bi bi-person-badge me-2"></i>Get Started
+                        </NavLink>
+                        <NavLink href="/learn-more" class="btn btn-outline-light btn-lg">
+                            Platform Overview
+                        </NavLink>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="security-card p-4 rounded-4 shadow">
+                        <i class="bi bi-shield-lock fs-1 text-primary"></i>
+                        <h3 class="my-3">Military-Grade Security</h3>
+                        <ul class="security-features">
+                            <li><i class="bi bi-check-circle text-success"></i> AES-256 Encryption</li>
+                            <li><i class="bi bi-check-circle text-success"></i> FIPS 140-2 Validated</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Blockchain Audit Trail</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="enterprise-process py-6">
+        <div class="container">
+            <h2 class="section-title text-center mb-6">Enterprise Voting Protocol</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="process-card hover-lift">
+                        <div class="card-icon bg-primary">
+                            <i class="bi bi-person-rolodex"></i>
+                        </div>
+                        <h4>Identity Verification</h4>
+                        <p>Active Directory integration with multi-factor authentication</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-card hover-lift">
+                        <div class="card-icon bg-success">
+                            <i class="bi bi-file-earmark-lock"></i>
+                        </div>
+                        <h4>Policy Compliance</h4>
+                        <p>Automated governance policy enforcement engine</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-card hover-lift">
+                        <div class="card-icon bg-warning">
+                            <i class="bi bi-clipboard2-check"></i>
+                        </div>
+                        <h4>Voting Session</h4>
+                        <p>Real-time validation with cryptographic receipts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Badge -->
+    <div class="security-banner bg-dark text-light py-3">
+        <div class="container text-center">
+            <i class="bi bi-patch-check fs-4 text-primary"></i>
+            <span class="ms-2">ISO 27001 Certified • SOC 2 Type II Compliant • GDPR Ready</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    @* protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await new Typed(".typed-text", {
+                strings: ["Platform", "Solutions", "Governance"],
+                typeSpeed: 80,
+                backSpeed: 50,
+                loop: true
+            });
+        }
+    } *@
+}
+
+<style>
+    .enterprise-hero {
+        background: linear-gradient(135deg, var(--enterprise-primary) 0%, var(--enterprise-accent) 100%);
+    }
+
+    .hero-title {
+        font-size: 2.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--enterprise-chart-bg);
+    }
+
+    .security-card {
+        background: rgba(255,255,255,0.95);
+        border: 1px solid var(--enterprise-border);
+    }
+
+    .process-card {
+        background: white;
+        border: 1px solid var(--enterprise-border);
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.2s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+        font-size: 1.75rem;
+    }
+
+    .security-banner {
+        border-top: 2px solid var(--enterprise-warning);
+    }
+</style>

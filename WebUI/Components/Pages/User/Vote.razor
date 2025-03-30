@@ -1,0 +1,848 @@
+@page "/vote"
+@using System.Collections.Generic
+@using Microsoft.AspNetCore.Components
+@using OnlineVotingSystem.api.DTOs.ElectionPosition;
+@using OnlineVotingSystem.api.DTOs.Candidate;
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+
+<main class="voting-container bg-light scrollable-container">
+    <style>       
+        .bg-gradient-primary {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .btn-outline-primary-hover {
+            border-color: #dee2e6;
+            color: #2C3E50;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-primary-hover:hover {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        .alert {
+            border-left: 2px solid;
+            border-radius: 0.5rem;
+            border-right: 2px solid;
+        }
+            .submission-steps {
+            border-left: 2px solid #dee2e6;
+            margin-left: 1.5rem;
+            padding-left: 2rem;
+        }
+        .step-item {
+            margin-bottom: 2rem;
+            position: relative;
+            transition: opacity 0.3s ease;
+        }
+        .step-item.completed .step-icon {
+            background: #198754;
+            border-color: #198754;
+        }
+        .step-item.processing .step-icon {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            animation: pulse 1.5s infinite;
+        }
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: -2.3rem;
+            top: 0;
+            background: white;
+        }
+        .step-content {
+            padding-left: 2rem;
+        }
+        .modal {
+            --bs-modal-zindex: 1055;
+            --bs-modal-bg: #fff;
+            --bs-backdrop-zindex: 1050;
+        }
+
+        .modal-backdrop {
+            z-index: var(--bs-backdrop-zindex);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            position: relative;
+            z-index: var(--bs-modal-zindex);
+        }
+       
+    </style>
+
+    <!-- Loading Overlay -->
+    @if (isLoading)
+    {
+        <div class="position-fixed top-0 start-0 vw-100 vh-100 bg-white opacity-75 d-flex justify-content-center align-items-center">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+
+    <div class="container py-5">
+        <!-- Header Section -->
+       <header class="bg-gradient-primary shadow rounded-3 p-4 mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-baseline gap-3">
+                    <div class="border-start border-3 border-primary ps-3">
+                        <h2 class="h3 mb-0 text-dark fw-bold">Elections 2027</h2>
+                        <small class="text-muted small opacity-75">Voter ID: @userId</small>
+                    </div>
+                    <div class="vr opacity-50"></div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-check text-success me-2"></i>
+                        <span class="small text-muted">Secure Session</span>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <div class="vr d-none d-md-block opacity-50" style="height: 2rem"></div>
+                    <button class="btn btn-outline-primary-hover" 
+                            @onclick="ToggleHelp"
+                            data-bs-toggle="tooltip" 
+                            title="Get voting assistance">
+                        <i class="bi bi-life-preserver me-2"></i>
+                        <span class="d-none d-md-inline">Assistance</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="alert alert-@voteStatusClass fade show " 
+                role="alert"
+                style="width: 300px; z-index: 100">
+                <div class="d-flex align-items-center">
+                    <i class="bi @statusIcon me-3 fs-5"></i>
+                    <div>
+                        <h6 class="alert-heading mb-1">Vote Status</h6>
+                        <p class="small mb-0">@voteStatus</p>
+                    </div>                    
+                </div>
+            </div>
+        </header>
+
+        <!-- Voting Progress -->
+        @if (electionPositions.Any())
+        {
+            <div class="progress-steps mb-5 mx-5">
+                <div class="d-flex justify-content-between position-relative">
+                    <div class="progress position-absolute w-100" style="height: 3px; top: 20px">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                            style="width: @(progressPercentage)%"></div>
+                    </div>
+                    
+                    @foreach (var (position, index) in electionPositions.Select((p, i) => (p, i)))
+                    {
+                        <div class="step-item d-flex flex-column align-items-center">
+                            <div class="step-icon bg-@(currentStep > index ? "success" : currentStep == index ? "primary" : "secondary") 
+                                text-white rounded-circle d-flex justify-content-center align-items-center mb-2"
+                                style="width: 40px; height: 40px">
+                                @if(currentStep > index) {
+                                    <i class="bi bi-check2"></i>
+                                } else {
+                                    @(index + 1)
+                                }
+                            </div>
+                            <small class="text-muted text-center">@position.Position</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Main Voting Interface -->
+        @if (electionPositions.Any() && currentStep < electionPositions.Count())
+        {
+             var currentPosition = electionPositions.ElementAt(currentStep);
+            <section class="bg-white rounded-3 shadow-sm p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="h5 mb-0">
+                    @currentPosition.Position
+                    <span class="badge bg-primary ms-2">Page @(currentPage + 1) of @totalPages</span>
+                </h3>
+                    <div class="w-25">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" 
+                                   placeholder="Search candidates..." @bind="searchQuery">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    @foreach (var candidate in filteredCandidates)
+                    {
+                        <div class="col">
+                            <div class="card h-100 border-@(selectedCandidate?.Id == candidate.Id ? "primary" : "secondary") shadow-hover">
+                                <div class="card-header position-relative bg-transparent">
+                                    <img src="@GetCandidateImage(candidate)" class="card-img-top rounded" 
+                                            alt="@candidate.Name" style="height: 200px; object-fit: cover">
+
+                                    <img src="@GetPartyLogo(candidate.Party)" 
+                                         class="position-absolute top-0 end-0 m-2 bg-white rounded-circle shadow-sm" 
+                                         style="width: 50px; height: 50px; padding: 2px">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">@candidate.Name</h5>
+                                    <div class="d-flex gap-2 mb-3">
+                                        <span class="badge bg-primary">@candidate.Party</span>
+                                       @if (GetCandidateIsIncumbent(candidate))
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-star-fill me-1"></i>Incumbent
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-person-badge me-2"></i>
+                                                <small>@GetCandidateExperience(candidate) Experience</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-award me-2"></i>
+                                                <small> @GetCandidateEducation(candidate) </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-@(selectedCandidate?.Id == candidate.Id ? "success" : "primary")" 
+                                                @onclick="() => ShowConfirmation(candidate)">
+                                            <i class="bi bi-check2-circle me-2"></i>
+                                            @(selectedCandidate?.Id == candidate.Id ? "Selected" : "Select")
+                                        </button>
+                                        <button class="btn btn-link text-decoration-none" 
+                                                @onclick="() => ShowCandidateModal(candidate)">
+                                            View Full Profile <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                <nav class="d-flex justify-content-between align-items-center mt-4">                    
+                    <div>
+                        <button class="btn btn-outline-warning" @onclick="PrevPosition" title="Go To Previous Position">
+                            <i class="bi bi-arrow-left me-2"></i> Prev Position
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-warning" @onclick="SkipPosition" title="Skip this position without voting">
+                             Skip Position<i class="bi bi-arrow-right me-2"></i>
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <ul class="pagination mb-0">
+                            <li class="page-item @(currentPage == 0 ? "disabled" : "")">
+                                <button class="page-link" @onclick="PreviousPage">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                            </li>
+                            @for (int i = 0; i < totalPages; i++)
+                            {
+                                <li class="page-item @(currentPage == i ? "active" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(i)">@(i + 1)</button>
+                                </li>
+                            }
+                            <li class="page-item @(!HasNextPage ? "disabled" : "")">
+                                <button class="page-link" @onclick="NextPage">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </section>
+        }
+        else
+        {
+            <!-- Review Section -->
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <h3 class="h5 mb-4">Vote Review</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Position</th>
+                                <th>Candidate Selected</th>
+                                <th style="width: 120px"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var position in electionPositions)
+                            {
+                                <tr>
+                                    <td>@position.Position</td>
+                                    <td>@(selections.TryGetValue(position.Position, out var candidate) ? candidate.Name : "No Selection")</td>
+                                    <td>
+                                        @if (selections.ContainsKey(position.Position))
+                                        {
+                                            <button class="btn btn-sm btn-outline-warning" 
+                                                    @onclick="() => EditSelection(position.Position)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button class="btn btn-success btn-lg px-5" @onclick="StartSecureSubmission" disabled="@isSubmitting">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        @if (isSubmitting)
+                        {
+                            <span>Securing Votes...</span>
+                        }
+                        else
+                        {
+                            <span>Initiate Secure Submission</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Confirmation Modal -->
+    @if (showConfirmation)
+    {
+        <div class="modal fade show" style="display: block;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Selection</h5>
+                        <button type="button" class="btn-close" @onclick="CancelSelection"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to select @pendingCandidate?.Name for @currentSeat?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" @onclick="ConfirmSelection">Confirm</button>
+                        <button class="btn btn-outline-secondary" @onclick="CancelSelection">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+    }
+
+    <!-- Submission Progress Modal -->
+    @if (showSubmissionProgress)
+    {
+       <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-primary">
+                            <i class="bi bi-shield-lock me-2"></i>Secure Vote Submission
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="submission-steps">
+                            <div class="step-item @GetStepClass(1)">
+                                <div class="step-icon">
+                                    <i class="bi @GetStepIcon(1)"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h6>Validating Selections</h6>
+                                    <small class="text-muted">Verifying vote integrity</small>
+                                </div>
+                            </div>
+
+                            <div class="step-item @GetStepClass(2)">
+                                <div class="step-icon">
+                                    <i class="bi @GetStepIcon(2)"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h6>Encrypting Data</h6>
+                                    <small class="text-muted">Applying AES-256 encryption</small>
+                                </div>
+                            </div>
+
+                            <div class="step-item @GetStepClass(3)">
+                                <div class="step-icon">
+                                    <i class="bi @GetStepIcon(3)"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h6>Securing Connection</h6>
+                                    <small class="text-muted">Establishing TLS 1.3 tunnel</small>
+                                </div>
+                            </div>
+
+                            <div class="step-item @GetStepClass(4)">
+                                <div class="step-icon">
+                                    <i class="bi @GetStepIcon(4)"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h6>Final Confirmation</h6>
+                                    <small class="text-muted">Committing to backend api</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3 text-primary fw-bold">@currentStatusMessage</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 justify-content-center">
+                        <button class="btn btn-danger" @onclick="CancelSubmission" disabled="@(!allowCancel)">
+                            <i class="bi bi-x-circle me-2"></i>Abort Process
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+        </div>
+    }
+
+    <!-- Help Modal -->
+    <div class="modal @(showHelp ? "show" : "")" style="@(showHelp ? "display: block" : "display: none"); background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Voting Assistance</h5>
+                    <button type="button" class="btn-close" @onclick="ToggleHelp"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="lead">Select candidates for each position following these steps:</p>
+                    <ol>
+                        <li>Browse candidates using pagination controls</li>
+                        <li>Review candidate details and qualifications</li>
+                        <li>Click 'Select' to choose your preferred candidate</li>
+                        <li>Verify all selections before final submission</li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="ToggleHelp">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Candidate Modal -->
+    <div class="modal @(showCandidateModal ? "show" : "")" style="@(showCandidateModal ? "display: block" : "display: none"); background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@selectedCandidate?.Name's Profile</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="@GetCandidateImage(selectedCandidate)" class="img-fluid rounded mb-3" alt="Profile">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-uppercase text-muted">Quick Facts</h6>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="bi bi-briefcase me-2"></i>@GetCandidateExperience(selectedCandidate) Experience
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="bi bi-mortarboard me-2"></i>@GetCandidateEducation(selectedCandidate)
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="bi bi-people me-2"></i>@selectedCandidate?.Party
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h6 class="text-uppercase text-muted mt-3">Key Policies</h6>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var policy in GetCandidatePolicies(selectedCandidate))
+                                {
+                                    <li class="list-group-item">@policy</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+
+@code {
+    // SERVICES
+    [Inject] private IJSRuntime JSRuntime { get; set; }
+    [Inject] private IElectionsService ElectionService { get; set; }
+    [Inject] private ICandidatesService CandidateService { get; set; }
+
+    // ELECTION DATA
+    private List<ElectionPositionSerialized> electionPositions = new();
+    private Guid currentElectionId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+    private List<CandidateSerializedDto> allCandidates = new();
+
+    // USER & UI STATE
+    private string userId = "demo-user-123";
+    private bool isLoading = false;
+    private bool isSubmitting = false;
+    private bool showHelp = false;
+    private bool showCandidateModal = false;
+    private bool showConfirmation = false;
+    private bool showSubmissionProgress = false;
+    private bool showStatusAlert = true;
+    private void ToggleHelp() => showHelp = !showHelp;
+
+    // VOTING STATE
+    private int currentStep = 0;
+    private int currentPage = 0;
+    private string searchQuery = string.Empty;
+    private Dictionary<string, CandidateSerializedDto> selections = new();
+    private CandidateSerializedDto selectedCandidate;
+    private CandidateSerializedDto pendingCandidate;
+    private const int pageSize = 6;
+
+    // STATUS TRACKING
+    private string voteStatus = "Not Submitted";
+    private string voteStatusClass = "status-default";  
+    private string statusIcon = "bi-person";
+    private string currentStatusMessage = "";
+    private bool allowCancel = true;
+    private readonly string[] statusMessages =
+    {
+        "Initializing military grade encryption...",
+        "Verifying vote integrity",
+        "Encrypting sensitive data",
+        "Establishing secure channel",
+        "Finalizing vote commitment"
+    };
+
+    // Submission progress tracker (separate from voting step)
+    private int submissionStep = 0;
+
+    // Computed Properties
+    private string currentSeat =>
+        electionPositions.Any() && currentStep < electionPositions.Count
+            ? electionPositions[currentStep].Position
+            : string.Empty;
+
+    private double progressPercentage => electionPositions.Any()
+        ? (currentStep / (double)electionPositions.Count) * 100
+        : 0;
+
+    private IEnumerable<CandidateSerializedDto> filteredCandidates =>
+        allCandidates.Where(c => c.Position == currentSeat)
+                     .Where(c => string.IsNullOrEmpty(searchQuery) ||
+                                 c.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                                 c.Party.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+                     .OrderByDescending(c => GetCandidateIsIncumbent(c))
+                     .Skip(currentPage * pageSize)
+                     .Take(pageSize);
+
+    private int totalPages =>
+        (int)Math.Ceiling(allCandidates.Count(c => c.Position == currentSeat) / (double)pageSize);
+
+    private bool HasNextPage =>
+        allCandidates.Count(c => c.Position == currentSeat) > (currentPage + 1) * pageSize;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadElectionData();
+    }
+
+    private async Task LoadElectionData()
+    {
+        try
+        {
+            isLoading = true;
+            // Load positions and candidates in parallel
+            var positionsTask = ElectionService.GetElectionPositionsAsync(currentElectionId);
+            var candidatesTask = CandidateService.GetSerializedCandidatesAsync();
+            await Task.WhenAll(positionsTask, candidatesTask);
+            electionPositions = (await positionsTask).ToList();
+            allCandidates = (await candidatesTask).ToList();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"Error loading data: {ex.Message}");
+            ShowStatusMessage("Failed to load election data", "danger");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Pagination methods
+    private void GoToPage(int pageIndex)
+    {
+        if (pageIndex >= 0 && pageIndex < totalPages)
+        {
+            currentPage = pageIndex;
+        }
+    }
+    private void NextPage() => currentPage = Math.Min(totalPages - 1, currentPage + 1);
+    private void PreviousPage() => currentPage = Math.Max(0, currentPage - 1);
+
+    // Candidate selection and confirmation
+    private void SelectCandidate(CandidateSerializedDto candidate)
+    {
+        selections[currentSeat] = candidate;
+        selectedCandidate = candidate;
+    }
+
+    private void ShowConfirmation(CandidateSerializedDto candidate)
+    {
+        pendingCandidate = candidate;
+        showConfirmation = true;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmSelection()
+    {
+        try
+        {
+            if (pendingCandidate != null)
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", "Selection confirmed");
+                SelectCandidate(pendingCandidate);
+                MoveToNextStep();
+            }
+        }
+        catch (Exception ex)
+        {
+            //TODO
+        }
+    }
+
+    private void CancelSelection()
+    {
+        showConfirmation = false;
+        pendingCandidate = null;
+        StateHasChanged();
+    }
+
+    private void MoveToNextStep()
+    {
+        if (currentStep < electionPositions.Count - 1)
+        {
+            currentStep++;
+            ResetPagination();
+        }
+        else
+        {
+            currentStep = electionPositions.Count;
+        }
+        showConfirmation = false;
+        pendingCandidate = null;
+        StateHasChanged();
+    }
+
+    private void ResetPagination()
+    {
+        currentPage = 0;
+        searchQuery = string.Empty;
+        selectedCandidate = null;
+    }
+
+    private void SkipPosition()
+    {
+        if (selections.ContainsKey(currentSeat))
+            selections.Remove(currentSeat);
+        if (currentStep < electionPositions.Count - 1)
+        {
+            currentStep++;
+            ResetPagination();
+        }
+        else
+        {
+            currentStep = electionPositions.Count; // Move to review stage
+        }
+        StateHasChanged();
+    }
+
+    private void PrevPosition()
+    {
+        if (selections.ContainsKey(currentSeat))
+            selections.Remove(currentSeat);
+        // Only decrement if currentStep is greater than 0
+        if (currentStep > 0)
+        {
+            currentStep--;
+            ResetPagination();
+        }
+        else
+        {
+            currentStep = 0; // Ensure it doesn't go negative
+        }
+        StateHasChanged();
+    }
+
+
+
+    // Secure submission workflow
+    private async Task StartSecureSubmission()
+    {
+        showSubmissionProgress = true;
+        isSubmitting = true;
+        allowCancel = true;
+        submissionStep = 0;
+
+        try
+        {
+            for (submissionStep = 0; submissionStep < statusMessages.Length; submissionStep++)
+            {
+                currentStatusMessage = statusMessages[submissionStep];
+                StateHasChanged();
+                await Task.Delay(2000);
+                if (submissionStep == statusMessages.Length - 1)
+                {
+                    allowCancel = false;
+                    await SubmitVotes();
+                }
+            }
+        }
+        catch
+        {
+            currentStatusMessage = "Submission protocol failure!";
+            allowCancel = true;
+        }
+        finally
+        {
+            showSubmissionProgress = false;
+            isSubmitting = false;
+        }
+    }
+
+    private async Task SubmitVotes()
+    {
+        try
+        {
+            await Task.Delay(2000); // TODO!!
+            ShowStatusMessage("Vote successfully submitted", "success");
+        }
+        catch
+        {
+            ShowStatusMessage("Vote submission failed", "danger");
+        }
+    }
+
+    // Helpers for submission steps
+    private string GetStepClass(int step)
+    {
+        if (step < submissionStep) return "completed";
+        if (step == submissionStep) return "processing";
+        return "";
+    }
+    private string GetStepIcon(int step)
+    {
+        if (step < submissionStep) return "bi-check2 text-white";
+        if (step == submissionStep) return "bi-shield-check text-white";
+        return "bi-circle";
+    }
+
+    // Status alert helper
+    private void ShowStatusMessage(string message, string type)
+    {
+        voteStatus = message;
+        voteStatusClass = $"alert-{type}";
+        statusIcon = type switch
+        {
+            "success" => "bi-check-circle",
+            "danger" => "bi-exclamation-circle",
+            _ => "bi-info-circle"
+        };
+    }
+
+    // Modal controls
+    private void ShowCandidateModal(CandidateSerializedDto candidate)
+    {
+        selectedCandidate = candidate;
+        showCandidateModal = true;
+        StateHasChanged();
+    }
+    private void CloseModal() { showCandidateModal = false; StateHasChanged(); }
+    private void BackdropClick()
+    {
+        if (showHelp) ToggleHelp();
+        if (showConfirmation) CancelSelection();
+        if (showSubmissionProgress) CancelSubmission();
+    }
+    private void CancelSubmission()
+    {
+        showSubmissionProgress = false;
+        isSubmitting = false;
+        currentStep = 0;
+        StateHasChanged();
+    }   
+
+
+    private bool GetCandidateIsIncumbent(CandidateSerializedDto? candidate) =>
+        // return false as default. atleast for now
+        false;
+
+   private string GetCandidateExperience(CandidateSerializedDto? candidate) =>
+    candidate == null ? "No experience provided" : "Experiencenot provided"; 
+
+    private string GetCandidateEducation(CandidateSerializedDto? candidate) =>
+    candidate == null ? "No Education details provided" : "No education details provided";
+
+    private List<string> GetCandidatePolicies(CandidateSerializedDto? candidate) =>
+        candidate == null ? new List<string> { "No policies provided" } : new List<string> { "No policies provided" };
+
+    private string GetCandidateImage(CandidateSerializedDto? candidate) =>
+        candidate?.PhotoUrl?.ToString() ?? "https://robohash.org/default?size=200x200&set=set1";
+
+
+
+
+
+    // Helper: Returns party logo URL based on party name. TODO!!
+    private string GetPartyLogo(string party) => party switch
+    {
+        "Democratic Party of Kenya" => "/images/parties/democratic.png",
+        "United Progressive Alliance" => "/images/parties/upa.png",
+        "Kenya African National Union" => "/images/parties/kanu.png",
+        _ => "/images/parties/default.png"
+    };
+
+    // Position navigation: Allow editing a previous selection.
+    private void EditSelection(string position)
+    {
+        var index = electionPositions.FindIndex(pos => pos.Position == position);
+        if (index >= 0)
+        {
+            currentStep = index;
+            selections.Remove(position);
+            currentPage = 0;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        // TODO!!
+    }
+}
