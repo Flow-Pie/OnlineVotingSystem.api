@@ -63,7 +63,14 @@ public class CandidatesService : ICandidatesService, IDisposable
         };
     }
 
-    return await response.Content.ReadFromJsonAsync<CandidateDetailsDto>();
+   var candidate = await response.Content.ReadFromJsonAsync<CandidateDetailsDto>();
+
+    if (candidate == null)
+    {
+        throw new InvalidOperationException("Failed to deserialize response into CandidateDetailsDto.");
+    }
+
+    return candidate;
 }
 
 
@@ -171,7 +178,12 @@ public class ApiException : Exception
         ProblemDetails = problemDetails;
     }
 
-    public ApiException(string? message) : base(message)
+   public ApiException(string? message) : base(message)
     {
+        ProblemDetails = new ProblemDetails
+        {
+            Detail = message ?? "An error occurred"
+        };
     }
+
 }

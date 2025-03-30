@@ -9,63 +9,67 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = WebUI
 build_property.RootNamespace = WebUI
-build_property.ProjectDir = /home/jon/Documents/OnlineVotingSystem.api/WebUI/
+build_property.ProjectDir = /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /home/jon/Documents/OnlineVotingSystem.api/WebUI
+build_property.MSBuildProjectDirectory = /home/jon/VoteProject/OnlineVotingSystem.api/WebUI
 build_property._RazorSourceGeneratorDebug = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/App.razor]
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/App.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BcHAucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/ActiveCandidate.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BY3RpdmVDYW5kaWRhdGUucmF6b3I=
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Admin/Candidates/ActiveCandidate.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZG1pbi9DYW5kaWRhdGVzL0FjdGl2ZUNhbmRpZGF0ZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/ActiveElections.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BY3RpdmVFbGVjdGlvbnMucmF6b3I=
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Admin/Candidates/AddCandidates.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZG1pbi9DYW5kaWRhdGVzL0FkZENhbmRpZGF0ZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/AddCandidates.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZGRDYW5kaWRhdGVzLnJhem9y
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Admin/Dashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZG1pbi9EYXNoYm9hcmQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/AddElection.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZGRFbGVjdGlvbi5yYXpvcg==
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Admin/ELections/ActiveElections.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZG1pbi9FTGVjdGlvbnMvQWN0aXZlRWxlY3Rpb25zLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/Dashboard.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EYXNoYm9hcmQucmF6b3I=
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Admin/ELections/AddElection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZG1pbi9FTGVjdGlvbnMvQWRkRWxlY3Rpb24ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/Error.razor]
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Admin/ELections/Result.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZG1pbi9FTGVjdGlvbnMvUmVzdWx0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Error.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9FcnJvci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/Result.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9SZXN1bHQucmF6b3I=
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Unauthorised.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9VbmF1dGhvcmlzZWQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Pages/UserLogin.razor]
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/UserLogin.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Vc2VyTG9naW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Routes.razor]
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Routes.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Sb3V0ZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/_Imports.razor]
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9fSW1wb3J0cy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Layout/MainLayout.razor]
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Layout/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTWFpbkxheW91dC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-jm9zh02tux
 
-[/home/jon/Documents/OnlineVotingSystem.api/WebUI/Components/Layout/NavMenu.razor]
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Layout/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTmF2TWVudS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-7a3jjhmv9o

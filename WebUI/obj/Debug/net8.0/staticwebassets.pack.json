@@ -1,31 +1,31 @@
 {
   "Files": [
     {
-      "Id": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/WebUI.bundle.scp.css",
+      "Id": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/scopedcss/projectbundle/WebUI.bundle.scp.css",
       "PackagePath": "staticwebassets/WebUI.bundle.scp.css"
     },
     {
-      "Id": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/app.css",
+      "Id": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/wwwroot/app.css",
       "PackagePath": "staticwebassets/app.css"
     },
     {
-      "Id": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/bootstrap/bootstrap.min.css",
+      "Id": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/wwwroot/bootstrap/bootstrap.min.css",
       "PackagePath": "staticwebassets/bootstrap/bootstrap.min.css"
     },
     {
-      "Id": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/bootstrap/bootstrap.min.css.map",
+      "Id": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/wwwroot/bootstrap/bootstrap.min.css.map",
       "PackagePath": "staticwebassets/bootstrap/bootstrap.min.css.map"
     },
     {
-      "Id": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/favicon.png",
+      "Id": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/wwwroot/favicon.png",
       "PackagePath": "staticwebassets/favicon.png"
     },
     {
-      "Id": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/js/charts.js",
+      "Id": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/wwwroot/js/charts.js",
       "PackagePath": "staticwebassets/js/charts.js"
     },
     {
-      "Id": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/wwwroot/js/dashboardCharts.js",
+      "Id": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/wwwroot/js/dashboardCharts.js",
       "PackagePath": "staticwebassets/js/dashboardCharts.js"
     },
     {

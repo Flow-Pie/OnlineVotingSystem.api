@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "JRDlNuDbgleQX7IsCBmiIipwHymjJcmesCyDfTBHU8MDf0SxYo5mTwu6WgypmF5tC91+DuRbaBUX/ng3idVzxA==",
+  "dgSpecHash": "K6lSnSn16PTKAwZWoS6hw8u2u3m9ui+pWLvxw2KsydRxEF8Nl7zlB/+zihO4WmJmL9QuKvdMRwLa7jOtqtrxQQ==",
   "success": true,
-  "projectFilePath": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/WebUI.csproj",
+  "projectFilePath": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/WebUI.csproj",
   "expectedPackageFiles": [
     "/home/jon/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/home/jon/.nuget/packages/blazored.localstorage/4.5.0/blazored.localstorage.4.5.0.nupkg.sha512",

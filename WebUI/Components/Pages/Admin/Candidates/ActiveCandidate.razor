@@ -280,10 +280,10 @@
 
 @code {
     // Dependencies
-    [Inject] private IJSRuntime JsRuntime { get; set; }
-    [Inject] private ICandidatesService CandidateService { get; set; }
-    [Inject] private IAuthService AuthService { get; set; }
-    [Inject] private IPositionsService PositionService { get; set; }
+    [Inject] private IJSRuntime? JsRuntime { get; set; }
+    [Inject] private ICandidatesService? CandidateService { get; set; }
+    [Inject] private IAuthService? AuthService { get; set; }
+    [Inject] private IPositionsService? PositionService { get; set; }
 
     // Page properties
     private string SearchTerm { get; set; } = "";
@@ -335,8 +335,16 @@
     {
         try
         {
-            var positions = await PositionService.GetPositionsAsync();
-            AvailablePositions = positions?.ToList() ?? new List<PositionDetails>();
+            if (PositionService != null)
+            {
+                var positions = await PositionService.GetPositionsAsync();
+                AvailablePositions = positions?.ToList() ?? new List<PositionDetails>();
+            }
+            else
+            {
+                ErrorMessage = "PositionService is unavailable.";
+            }
+
         }
         catch (Exception ex)
         {
@@ -356,7 +364,7 @@
             {
                 foreach (var result in validationResults)
                     foreach (var member in result.MemberNames)
-                        ValidationErrors[member] = result.ErrorMessage;
+                        ValidationErrors[member] = result.ErrorMessage ?? "Unknown validation error.";
                 StateHasChanged();
                 return;
             }
@@ -366,7 +374,20 @@
                 Bio: EditingModel.Bio,
                 PhotoUrl: null
             );
-            await CandidateService.UpdateCandidateAsync(SelectedCandidate!.Id, updateDto);
+            if (SelectedCandidate == null)
+            {
+                ErrorMessage = "No candidate selected for update.";
+                return;
+            }
+            if (SelectedCandidate?.Id == null)
+            {
+                ErrorMessage = "No candidate selected for update.";
+                return;
+            }
+
+            await CandidateService.UpdateCandidateAsync(SelectedCandidate.Id, updateDto);
+
+
             SuccessMessage = "Candidate updated successfully";
             Console.WriteLine($"[DEBUG] Update DTO:\n{JsonSerializer.Serialize(updateDto, new JsonSerializerOptions { WriteIndented = true })}");
             await LoadCandidates();

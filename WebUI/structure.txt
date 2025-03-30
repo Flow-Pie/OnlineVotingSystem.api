@@ -10,6 +10,7 @@
 │           ├── Blazored.LocalStorage.dll
 │           ├── Microsoft.AspNetCore.Authentication.JwtBearer.dll
 │           ├── Microsoft.AspNetCore.Authorization.dll
+│           ├── Microsoft.AspNetCore.Components.Authorization.dll
 │           ├── Microsoft.AspNetCore.Components.dll
 │           ├── Microsoft.AspNetCore.Components.Forms.dll
 │           ├── Microsoft.AspNetCore.Components.Web.dll
@@ -25,10 +26,14 @@
 │           ├── Microsoft.Extensions.DependencyInjection.Abstractions.dll
 │           ├── Microsoft.Extensions.DependencyInjection.dll
 │           ├── Microsoft.Extensions.DependencyModel.dll
+│           ├── Microsoft.Extensions.Diagnostics.Abstractions.dll
+│           ├── Microsoft.Extensions.Hosting.Abstractions.dll
 │           ├── Microsoft.Extensions.Logging.Abstractions.dll
 │           ├── Microsoft.Extensions.Logging.dll
+│           ├── Microsoft.Extensions.ObjectPool.dll
 │           ├── Microsoft.Extensions.Options.dll
 │           ├── Microsoft.Extensions.Primitives.dll
+│           ├── Microsoft.Extensions.WebEncoders.dll
 │           ├── Microsoft.IdentityModel.Abstractions.dll
 │           ├── Microsoft.IdentityModel.JsonWebTokens.dll
 │           ├── Microsoft.IdentityModel.Logging.dll
@@ -103,6 +108,10 @@
 │           │   ├── osx-x64
 │           │   │   └── native
 │           │   │       └── libe_sqlite3.dylib
+│           │   ├── win
+│           │   │   └── lib
+│           │   │       └── net8.0
+│           │   │           └── System.Security.Cryptography.Pkcs.dll
 │           │   ├── win-arm
 │           │   │   └── native
 │           │   │       └── e_sqlite3.dll
@@ -131,6 +140,8 @@
 │           ├── System.Diagnostics.DiagnosticSource.dll
 │           ├── System.IdentityModel.Tokens.Jwt.dll
 │           ├── System.IO.Pipelines.dll
+│           ├── System.Security.Cryptography.Pkcs.dll
+│           ├── System.Security.Cryptography.Xml.dll
 │           ├── System.Text.Encodings.Web.dll
 │           ├── System.Text.Json.dll
 │           ├── WebUI
@@ -148,18 +159,19 @@
 │   │   ├── NavMenu.razor
 │   │   └── NavMenu.razor.css
 │   ├── Pages
-│   │   ├── ActiveElections.razor
-│   │   ├── AddCandidates.razor
-│   │   ├── AddElection.razor
-│   │   ├── Candidate.razor
-│   │   ├── Counter.razor
-│   │   ├── Dashboard.razor
+│   │   ├── Admin
+│   │   │   ├── Candidates
+│   │   │   │   ├── ActiveCandidate.razor
+│   │   │   │   └── AddCandidates.razor
+│   │   │   ├── Dashboard.razor
+│   │   │   └── ELections
+│   │   │       ├── ActiveElections.razor
+│   │   │       ├── AddElection.razor
+│   │   │       └── Result.razor
 │   │   ├── Error.razor
-│   │   ├── Home.razor
-│   │   ├── Login.razor
-│   │   ├── Result.razor
-│   │   ├── UserLogin.razor
-│   │   └── Weather.razor
+│   │   ├── Unauthorised.razor
+│   │   ├── User
+│   │   └── UserLogin.razor
 │   └── Routes.razor
 ├── obj
 │   ├── Debug
@@ -199,12 +211,14 @@
 │   │       ├── WebUI.GlobalUsings.g.cs
 │   │       ├── WebUI.MvcApplicationPartsAssemblyInfo.cache
 │   │       ├── WebUI.MvcApplicationPartsAssemblyInfo.cs
-│   │       └── WebUI.pdb
+│   │       ├── WebUI.pdb
+│   │       └── WebUI.sourcelink.json
 │   ├── project.assets.json
 │   ├── project.nuget.cache
 │   ├── project.packagespec.json
 │   ├── rider.project.model.nuget.info
 │   ├── rider.project.restore.info
+│   ├── WebUI.csproj.EntityFrameworkCore.targets
 │   ├── WebUI.csproj.nuget.dgspec.json
 │   ├── WebUI.csproj.nuget.g.props
 │   └── WebUI.csproj.nuget.g.targets
@@ -212,17 +226,19 @@
 ├── Properties
 │   └── launchSettings.json
 ├── Services
-│   ├── AuthService.cs
-│   ├── CandidateService.cs
 │   ├── CustomAuthStateProvider.cs
-│   ├── ElectionService.cs
-│   ├── IAuthService.cs
-│   ├── ICandidatesService.cs
-│   ├── IElectionsService.cs
-│   ├── IPositionsService.cs
-│   ├── IUsersService.cs
-│   ├── PositionsService.cs
-│   └── UsersService.cs
+│   ├── Implimentations
+│   │   ├── AuthService.cs
+│   │   ├── CandidateService.cs
+│   │   ├── ElectionService.cs
+│   │   ├── PositionsService.cs
+│   │   └── UsersService.cs
+│   └── Interfaces
+│       ├── IAuthService.cs
+│       ├── ICandidatesService.cs
+│       ├── IElectionsService.cs
+│       ├── IPositionsService.cs
+│       └── IUsersService.cs
 ├── structure.txt
 ├── WebUI.csproj
 └── wwwroot
@@ -235,4 +251,4 @@
         ├── charts.js
         └── dashboardCharts.js
 
-70 directories, 166 files
+79 directories, 173 files

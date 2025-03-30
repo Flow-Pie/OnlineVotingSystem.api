@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Sec6pxq4bF8hYn29v/zZkLsX9W8kbJf0KYU4/ghZr3+XO8J+FRr94lJtqTDXFEn5vyLO2P2s3fU5SfaL8f++Gw==",
+  "dgSpecHash": "kVTV0KEdc/I6SrFfwuA2SvgaHfU/XCLZRuOJ2aGXiSwZ8vCG3+pnL2Qg+guIkFHUxSXycB1XBqLNTjvodqBBqg==",
   "success": true,
-  "projectFilePath": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
+  "projectFilePath": "/home/jon/VoteProject/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
   "expectedPackageFiles": [
     "/home/jon/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/home/jon/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",

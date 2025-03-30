@@ -17,7 +17,7 @@ public class AuthService : IAuthService
         _httpClient = httpClient;
     }
 
-     public async Task<string> GetTokenAsync()
+     public async Task<string?> GetTokenAsync()
         {
             var loginData = new
             {

@@ -1,0 +1,83 @@
+@page "/access-denied"
+@inject NavigationManager Navigation
+
+<div class="unauthorized-container">
+    <div class="unauthorized-card">
+        <div class="unauthorized-icon">
+            <i class="bi bi-shield-exclamation"></i>
+        </div>
+        <h1 class="unauthorized-title">Access Restricted</h1>
+        <div class="unauthorized-content">
+            <p>You don't have permission to view this resource.</p>
+            <p class="text-muted">Please contact your system administrator or 
+                <a href="/support" class="unauthorized-link">request access</a> if you believe this is an error.
+            </p>
+        </div>
+        <div class="unauthorized-actions">
+            <button class="btn btn-primary" @onclick="NavigateToHome">
+                <i class="bi bi-arrow-left"></i> Return to Safety
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .unauthorized-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--unauthorized-bg);
+        padding: 2rem;
+    }
+
+    .unauthorized-card {
+        background: white;
+        padding: 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        max-width: 600px;
+        text-align: center;
+    }
+
+    .unauthorized-icon {
+        font-size: 4rem;
+        color: var(--unauthorized-icon-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .unauthorized-title {
+        color: var(--unauthorized-title-color);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .unauthorized-content {
+        margin: 1.5rem 0;
+        line-height: 1.6;
+    }
+
+    .unauthorized-actions {
+        margin-top: 2rem;
+    }
+
+    .unauthorized-link {
+        color: var(--unauthorized-link-color);
+        font-weight: 500;
+        text-decoration: underline;
+    }
+
+    :root {
+        --unauthorized-bg: #f8f9fa;
+        --unauthorized-icon-color: #ffc107;
+        --unauthorized-title-color: #2c3e50;
+        --unauthorized-link-color: #2c3e50;
+    }
+</style>
+
+@code {
+    private void NavigateToHome()
+    {
+        Navigation.NavigateTo("/dashboard/home");
+    }
+}

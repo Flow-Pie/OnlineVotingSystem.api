@@ -303,7 +303,7 @@
     private Dictionary<Guid, string> PositionErrors = new();
     private string SearchTerm = string.Empty;
     private List<ElectionDetailsDto> FilteredElections = new();
-    private List<ElectionResultsView> ElectionsViewList;
+    private List<ElectionResultsView> ElectionsViewList = new();
 
     private bool ShowDeleteModal = false;
     private Guid SelectedElectionId;
@@ -366,12 +366,18 @@
     {
         try
         {
+            if (ElectionsModel == null)
+            {
+                FilteredElections = new List<ElectionDetailsDto>();
+                return;
+            }
+
             FilteredElections = string.IsNullOrWhiteSpace(SearchTerm)
                 ? new List<ElectionDetailsDto>(ElectionsModel)
-                : ElectionsModel.Where(e => 
-                    e.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    e.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
-                  .ToList();
+                : ElectionsModel
+                    .Where(e => e.Title?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true ||
+                                e.Description?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true)
+                    .ToList();
         }
         catch (Exception ex)
         {
@@ -379,6 +385,7 @@
         }
         StateHasChanged();
     }
+
 
     private async Task ToggleDetails(Guid electionId)
     {

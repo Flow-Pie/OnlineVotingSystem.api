@@ -255,9 +255,9 @@
 
 @code {
     // Injected Services
-    [Inject] private IJSRuntime JSRuntime { get; set; }
-    [Inject] private IElectionsService ElectionService { get; set; }
-    [Inject] private IUsersService UsersService { get; set; }
+    [Inject] private IJSRuntime? JSRuntime { get; set; }
+    [Inject] private IElectionsService? ElectionService { get; set; }
+    [Inject] private IUsersService? UsersService { get; set; }
 
     // Metrics and API data
     private int TotalVoters  =10;//TODO!!
@@ -282,10 +282,15 @@
     {
         try
         {
-            // Load election results from API
-            var results = await ElectionService.GetElectionsResultsAsync();
-            // Compute CompletedVotes by aggregating total votes from the results.
-            CompletedVotes = results.Sum(r => r.TotalVotes);
+            if (ElectionService != null)
+            {
+                var results = await ElectionService.GetElectionsResultsAsync();
+                CompletedVotes = results?.Sum(r => r.TotalVotes) ?? 0;
+            }
+            else
+            {
+                Console.WriteLine("ElectionService is not available.");
+            }
             //TODO!! Additional metrics calculations will go here            
 
             await LoadRecentActivities();

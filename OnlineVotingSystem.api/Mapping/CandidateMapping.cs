@@ -41,7 +41,7 @@ public static class CandidateMapping
             ElectionPositionId = electionPositionId,
             Bio = candidate.Bio,
             Party = candidate.Party,
-            PhotoUrl = new Uri(candidate.PhotoUrl)
+            PhotoUrl = new Uri(candidate.PhotoUrl ?? "https://unsplash.com/photos/man-in-white-crew-neck-shirt-wearing-black-framed-eyeglasses-C8Ta0gwPbQg")
         };
     }
 }

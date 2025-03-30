@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/jon/Documents/OnlineVotingSystem.api/WebUI/WebUI.csproj": {}
+    "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/WebUI.csproj": {}
   },
   "projects": {
-    "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {
+    "/home/jon/VoteProject/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
+        "projectUniqueName": "/home/jon/VoteProject/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
         "projectName": "OnlineVotingSystem.api",
-        "projectPath": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
+        "projectPath": "/home/jon/VoteProject/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj",
         "packagesPath": "/home/jon/.nuget/packages/",
-        "outputPath": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/obj/",
+        "outputPath": "/home/jon/VoteProject/OnlineVotingSystem.api/OnlineVotingSystem.api/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/jon/.nuget/NuGet/NuGet.Config"
@@ -92,14 +92,14 @@
         }
       }
     },
-    "/home/jon/Documents/OnlineVotingSystem.api/WebUI/WebUI.csproj": {
+    "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/WebUI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/WebUI.csproj",
+        "projectUniqueName": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/WebUI.csproj",
         "projectName": "WebUI",
-        "projectPath": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/WebUI.csproj",
+        "projectPath": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/WebUI.csproj",
         "packagesPath": "/home/jon/.nuget/packages/",
-        "outputPath": "/home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/",
+        "outputPath": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/jon/.nuget/NuGet/NuGet.Config"
@@ -114,8 +114,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {
-                "projectPath": "/home/jon/Documents/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj"
+              "/home/jon/VoteProject/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj": {
+                "projectPath": "/home/jon/VoteProject/OnlineVotingSystem.api/OnlineVotingSystem.api/OnlineVotingSystem.api.csproj"
               }
             }
           }
