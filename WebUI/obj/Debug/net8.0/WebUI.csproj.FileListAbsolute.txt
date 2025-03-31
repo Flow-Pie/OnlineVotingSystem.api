@@ -336,11 +336,11 @@
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/WebUI.pdb
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/WebUI.genruntimeconfig.cache
 /home/jon/Documents/OnlineVotingSystem.api/WebUI/obj/Debug/net8.0/ref/WebUI.dll
-/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.Development.json
-/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.json
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.deps.json
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api.runtimeconfig.json
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/OnlineVotingSystem.api
+/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.Development.json
+/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/appsettings.json
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/WebUI.staticwebassets.runtime.json
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/WebUI
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/WebUI.deps.json
@@ -352,8 +352,10 @@
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Authorization.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.dll
+/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Authorization.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Forms.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Web.dll
+/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.WebAssembly.Authentication.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Metadata.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.Data.Sqlite.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.dll

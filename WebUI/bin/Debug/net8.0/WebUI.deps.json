@@ -9,6 +9,7 @@
       "WebUI/1.0.0": {
         "dependencies": {
           "Blazored.LocalStorage": "4.5.0",
+          "Microsoft.AspNetCore.Components.WebAssembly.Authentication": "8.0.4",
           "Microsoft.Extensions.Http": "8.0.0",
           "OnlineVotingSystem.api": "1.0.0",
           "Syncfusion.Blazor.Charts": "28.2.11"
@@ -73,6 +74,18 @@
         }
       },
       "Microsoft.AspNetCore.Components.Analyzers/8.0.10": {},
+      "Microsoft.AspNetCore.Components.Authorization/8.0.4": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Authorization": "8.0.10",
+          "Microsoft.AspNetCore.Components": "8.0.10"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.AspNetCore.Components.Authorization.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.424.17014"
+          }
+        }
+      },
       "Microsoft.AspNetCore.Components.Forms/8.0.10": {
         "dependencies": {
           "Microsoft.AspNetCore.Components": "8.0.10"
@@ -97,6 +110,18 @@
           "lib/net8.0/Microsoft.AspNetCore.Components.Web.dll": {
             "assemblyVersion": "8.0.0.0",
             "fileVersion": "8.0.1024.46804"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Components.WebAssembly.Authentication/8.0.4": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Components.Authorization": "8.0.4",
+          "Microsoft.AspNetCore.Components.Web": "8.0.10"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.AspNetCore.Components.WebAssembly.Authentication.dll": {
+            "assemblyVersion": "8.0.4.0",
+            "fileVersion": "8.0.424.17014"
           }
         }
       },
@@ -844,6 +869,13 @@
       "path": "microsoft.aspnetcore.components.analyzers/8.0.10",
       "hashPath": "microsoft.aspnetcore.components.analyzers.8.0.10.nupkg.sha512"
     },
+    "Microsoft.AspNetCore.Components.Authorization/8.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zcpJs6PVR24h7cWkeOkFMifQE3ztMGLwOqt+7besNdtAS5QmveoDraSPvP+Ij0tmpWznMUv5Xp9hIOiW9haU1A==",
+      "path": "microsoft.aspnetcore.components.authorization/8.0.4",
+      "hashPath": "microsoft.aspnetcore.components.authorization.8.0.4.nupkg.sha512"
+    },
     "Microsoft.AspNetCore.Components.Forms/8.0.10": {
       "type": "package",
       "serviceable": true,
@@ -857,6 +889,13 @@
       "sha512": "sha512-gJa07Ni77Eoer/+3tocjnCzxfRcL0TJbKnzBP5auk/cxO5nxzJEHuTADX8gAzlyuLvdrnrtfqRAhR66MGkHmww==",
       "path": "microsoft.aspnetcore.components.web/8.0.10",
       "hashPath": "microsoft.aspnetcore.components.web.8.0.10.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Components.WebAssembly.Authentication/8.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-esDE1Vr3A7xwjH/pB+V6zM3xbwx7sLEqENTTm4ujrR/tGEolxBoUdKNobtlZNxvc6DR2aBaKbtnb+A9HVFY2Dg==",
+      "path": "microsoft.aspnetcore.components.webassembly.authentication/8.0.4",
+      "hashPath": "microsoft.aspnetcore.components.webassembly.authentication.8.0.4.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Metadata/8.0.10": {
       "type": "package",

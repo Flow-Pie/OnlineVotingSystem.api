@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "nkM6lUAYA5Wzqo6kQrcm4qZgeaE96I2m1JRVYbTuXLM=",
+  "Hash": "AT4qMasTmBpFiAI4DOk1HFBpBqwbZW1g1GdgnkA51rs=",
   "Source": "WebUI",
   "BasePath": "_content/WebUI",
   "Mode": "Default",
@@ -28,6 +28,25 @@
     }
   ],
   "Assets": [
+    {
+      "Identity": "/home/jon/.nuget/packages/microsoft.aspnetcore.components.webassembly.authentication/8.0.4/staticwebassets/AuthenticationService.js",
+      "SourceId": "Microsoft.AspNetCore.Components.WebAssembly.Authentication",
+      "SourceType": "Package",
+      "ContentRoot": "/home/jon/.nuget/packages/microsoft.aspnetcore.components.webassembly.authentication/8.0.4/staticwebassets/",
+      "BasePath": "_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication",
+      "RelativePath": "AuthenticationService.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/jon/.nuget/packages/microsoft.aspnetcore.components.webassembly.authentication/8.0.4/staticwebassets/AuthenticationService.js"
+    },
     {
       "Identity": "/home/jon/.nuget/packages/syncfusion.blazor.charts/28.2.11/staticwebassets/scripts/sf-accumulation-chart.min.js",
       "SourceId": "Syncfusion.Blazor.Charts",

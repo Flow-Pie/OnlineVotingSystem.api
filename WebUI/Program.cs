@@ -20,8 +20,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Register services as Scoped
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IElectionsService, ElectionService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IPositionsService, PositionsService>();
+builder.Services.AddScoped<ICandidatesService, CandidatesService>();
+builder.Services.AddScoped<IVoteService, VoteService>();
 
-// Register HttpClient services
+// Configure HttpClient instances
 builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);

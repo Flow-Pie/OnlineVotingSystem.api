@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "K6lSnSn16PTKAwZWoS6hw8u2u3m9ui+pWLvxw2KsydRxEF8Nl7zlB/+zihO4WmJmL9QuKvdMRwLa7jOtqtrxQQ==",
+  "dgSpecHash": "SE0z1ifQVOrHyvh4pPYFIFDf0x7lrvko74rU5VJNcXl8eje2zKuI96VRyjISA+QVb7RRxSsS6/QROSACrbtdYg==",
   "success": true,
   "projectFilePath": "/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/WebUI.csproj",
   "expectedPackageFiles": [
@@ -10,8 +10,10 @@
     "/home/jon/.nuget/packages/microsoft.aspnetcore.authorization/8.0.10/microsoft.aspnetcore.authorization.8.0.10.nupkg.sha512",
     "/home/jon/.nuget/packages/microsoft.aspnetcore.components/8.0.10/microsoft.aspnetcore.components.8.0.10.nupkg.sha512",
     "/home/jon/.nuget/packages/microsoft.aspnetcore.components.analyzers/8.0.10/microsoft.aspnetcore.components.analyzers.8.0.10.nupkg.sha512",
+    "/home/jon/.nuget/packages/microsoft.aspnetcore.components.authorization/8.0.4/microsoft.aspnetcore.components.authorization.8.0.4.nupkg.sha512",
     "/home/jon/.nuget/packages/microsoft.aspnetcore.components.forms/8.0.10/microsoft.aspnetcore.components.forms.8.0.10.nupkg.sha512",
     "/home/jon/.nuget/packages/microsoft.aspnetcore.components.web/8.0.10/microsoft.aspnetcore.components.web.8.0.10.nupkg.sha512",
+    "/home/jon/.nuget/packages/microsoft.aspnetcore.components.webassembly.authentication/8.0.4/microsoft.aspnetcore.components.webassembly.authentication.8.0.4.nupkg.sha512",
     "/home/jon/.nuget/packages/microsoft.aspnetcore.metadata/8.0.10/microsoft.aspnetcore.metadata.8.0.10.nupkg.sha512",
     "/home/jon/.nuget/packages/microsoft.data.sqlite.core/9.0.1/microsoft.data.sqlite.core.9.0.1.nupkg.sha512",
     "/home/jon/.nuget/packages/microsoft.entityframeworkcore/9.0.1/microsoft.entityframeworkcore.9.0.1.nupkg.sha512",
