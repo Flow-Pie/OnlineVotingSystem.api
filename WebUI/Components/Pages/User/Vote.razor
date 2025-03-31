@@ -3,116 +3,14 @@
 @using Microsoft.AspNetCore.Components
 @using OnlineVotingSystem.api.DTOs.ElectionPosition;
 @using OnlineVotingSystem.api.DTOs.Candidate;
+@using OnlineVotingSystem.api.DTOs.Vote;
 @inject NavigationManager Navigation
+@inject IVoteService VotesService
 @rendermode InteractiveServer
 
 
 <main class="voting-container bg-light scrollable-container">
-    <style>
-        :root{
-            --enterprise-success: green;
-        }
-        /* Enterprise Theme*/
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, var(--enterprise-chart-bg) 0%, #ffffff 100%);
-            border: 1px solid var(--enterprise-border);
-        }
-
-        .btn-outline-primary-hover {
-            border-color: var(--enterprise-border);
-            color: var(--enterprise-primary);
-            transition: all 0.2s ease;
-        }
-
-        .btn-outline-primary-hover:hover {
-            background: var(--enterprise-primary);
-            color: white;
-            border-color: var(--enterprise-primary);
-        }
-
-        .alert {
-            border-left: 3px solid var(--enterprise-primary);
-            border-radius: 0.25rem;
-            border-right: none;
-            box-shadow: 0 2px 8px rgba(42, 92, 141, 0.1);
-        }
-
-        .submission-steps {
-            border-left: 2px solid var(--enterprise-border);
-            margin-left: 1.5rem;
-            padding-left: 2rem;
-        }
-
-        .step-item.completed .step-icon {
-            background: var(--enterprise-success);
-            border-color: var(--enterprise-success);
-        }
-
-        .step-item.processing .step-icon {
-            background: var(--enterprise-primary);
-            border-color: var(--enterprise-primary);
-            animation: pulse 1.5s infinite;
-        }
-
-        .step-icon {
-            border: 2px solid var(--enterprise-border);
-            box-shadow: 0 2px 6px rgba(42, 92, 141, 0.1);
-            z-index: 1;
-            width: 40px;
-        }
-
-        .modal-header {
-            background: var(--enterprise-primary);
-            color: white;
-            border-bottom: 2px solid var(--enterprise-accent);
-        }
-
-        .card {
-            border: 1px solid var(--enterprise-border);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(42, 92, 141, 0.15);
-        }
-
-        .badge {
-            letter-spacing: 0.05em;
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            background-color: var(--enterprise-primary);
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: var(--enterprise-chart-bg);
-        }
-
-        .avatar-lg {
-            width: 80px;
-            height: 80px;
-            background: var(--enterprise-chart-bg);
-            border: 2px solid var(--enterprise-border);
-        }
-          .modal {
-            --bs-modal-zindex: 1055;
-            --bs-modal-bg: #fff;
-            --bs-backdrop-zindex: 1050;
-        }
-
-        .modal-backdrop {
-            z-index: var(--bs-backdrop-zindex);
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            position: relative;
-            z-index: var(--bs-modal-zindex);
-        }
-
-    </style>
+   
 
     <!-- Loading Overlay -->
     @if (isLoading)
@@ -640,7 +538,7 @@
     private List<CandidateSerializedDto> allCandidates = new();
 
     // USER & UI STATE
-    private string userId = "demo-user-123";
+    private string userId = "c73c299d-ed84-46ef-8e41-bf8c13d24186";//wiiliam
     private bool isLoading = false;
     private bool isSubmitting = false;
     private bool showHelp = false;
@@ -678,29 +576,31 @@
     private int submissionStep = 0;
 
     // Computed Properties
-    private string currentSeat =>
-        electionPositions.Any() && currentStep < electionPositions.Count
-            ? electionPositions[currentStep].Position
-            : string.Empty;
+   private string currentSeat =>
+    electionPositions.Any() && currentStep < electionPositions.Count
+        ? electionPositions[currentStep].Position
+        : string.Empty;
 
     private double progressPercentage => electionPositions.Any()
-        ? (currentStep / (double)electionPositions.Count) * 100
-        : 0;
+    ? (currentStep / (double)electionPositions.Count) * 100
+    : 0;
 
-    private IEnumerable<CandidateSerializedDto> filteredCandidates =>
-        allCandidates.Where(c => c.Position == currentSeat)
-                     .Where(c => string.IsNullOrEmpty(searchQuery) ||
-                                 c.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
-                                 c.Party.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
-                     .OrderByDescending(c => GetCandidateIsIncumbent(c))
-                     .Skip(currentPage * pageSize)
-                     .Take(pageSize);
+
+   private IEnumerable<CandidateSerializedDto> filteredCandidates =>
+    allCandidates.Where(c => c.Position == currentSeat)
+                 .Where(c => string.IsNullOrEmpty(searchQuery) ||
+                             c.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                             c.Party.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+                 // If 'IsIncumbent' property doesn't exist, order by Name instead:
+                 .OrderBy(c => c.Name)
+                 .Skip(currentPage * pageSize)
+                 .Take(pageSize);
 
     private int totalPages =>
-        (int)Math.Ceiling(allCandidates.Count(c => c.Position == currentSeat) / (double)pageSize);
+    (int)Math.Ceiling(allCandidates.Count(c => c.Position == currentSeat) / (double)pageSize);
 
     private bool HasNextPage =>
-        allCandidates.Count(c => c.Position == currentSeat) > (currentPage + 1) * pageSize;
+    allCandidates.Count(c => c.Position == currentSeat) > (currentPage + 1) * pageSize;
 
     protected override async Task OnInitializedAsync()
     {
@@ -712,7 +612,6 @@
         try
         {
             isLoading = true;
-            // Load positions and candidates in parallel
             var positionsTask = ElectionService.GetElectionPositionsAsync(currentElectionId);
             var candidatesTask = CandidateService.GetSerializedCandidatesAsync();
             await Task.WhenAll(positionsTask, candidatesTask);
@@ -730,6 +629,7 @@
         }
     }
 
+
     // Pagination methods
     private void GoToPage(int pageIndex)
     {
@@ -744,9 +644,12 @@
     // Candidate selection and confirmation
     private void SelectCandidate(CandidateSerializedDto candidate)
     {
+        // Log the key for debugging
+        JSRuntime.InvokeVoidAsync("console.log", $"Storing candidate {candidate.Name} for seat: {currentSeat}");
         selections[currentSeat] = candidate;
         selectedCandidate = candidate;
     }
+
 
     private void ShowConfirmation(CandidateSerializedDto candidate)
     {
@@ -755,20 +658,25 @@
         StateHasChanged();
     }
 
-    private async Task ConfirmSelection()
+   private async Task ConfirmSelection()
     {
         try
         {
             if (pendingCandidate != null)
             {
-                await JSRuntime.InvokeVoidAsync("console.log", "Selection confirmed");
+                await JSRuntime.InvokeVoidAsync("console.log", "Selection confirmed for " + pendingCandidate.Name);
                 SelectCandidate(pendingCandidate);
                 MoveToNextStep();
             }
         }
         catch (Exception ex)
         {
-            //TODO
+            // Handle error if needed
+        }
+        finally
+        {
+            showConfirmation = false;
+            pendingCandidate = null;
         }
     }
 
@@ -778,6 +686,7 @@
         pendingCandidate = null;
         StateHasChanged();
     }
+
      private void CloseDetails()
     {
         selectedCandidate = null;
@@ -851,22 +760,26 @@
 
         try
         {
-            for (submissionStep = 0; submissionStep < statusMessages.Length; submissionStep++)
+            foreach (var message in statusMessages)
             {
-                currentStatusMessage = statusMessages[submissionStep];
+                if (!showSubmissionProgress) break;
+
+                currentStatusMessage = message;
+                submissionStep++;
                 StateHasChanged();
                 await Task.Delay(2000);
-                if (submissionStep == statusMessages.Length - 1)
-                {
-                    allowCancel = false;
-                    await SubmitVotes();
-                }
+            }
+
+            if (showSubmissionProgress)
+            {
+                allowCancel = false;
+                await SubmitVotes();
             }
         }
-        catch
+        catch (Exception ex)
         {
-            currentStatusMessage = "Submission protocol failure!";
-            allowCancel = true;
+            currentStatusMessage = $"Submission protocol failure: {ex.Message}";
+            ShowStatusMessage($"Submission failed {ex.Message}", "danger");
         }
         finally
         {
@@ -875,18 +788,68 @@
         }
     }
 
-    private async Task SubmitVotes()
+   private async Task SubmitVotes()
     {
-        try
+        // List to collect error messages from the API.
+        var submissionErrors = new List<string>();
+
+        // Loop through all election positions and submit votes only for positions with a selection.
+        foreach (var position in electionPositions)
         {
-            await Task.Delay(2000); // TODO!!
-            ShowStatusMessage("Vote successfully submitted", "success");
+            if (!selections.ContainsKey(position.Position))
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", $"No candidate selected for {position.Position}. Skipping this position.");
+                continue;
+            }
+
+            var candidate = selections[position.Position];
+
+            // Build the vote DTO.
+            var voteDto = new CreateVoteDto(
+                Guid.Parse(userId),
+                candidate.Id,
+                position.Id
+            );
+            var dtoJson = System.Text.Json.JsonSerializer.Serialize(voteDto);
+            await JSRuntime.InvokeVoidAsync("console.log", $"Submitting DTO: {dtoJson}");
+
+            try
+            {
+                // Submit the vote via the real API call.
+                var result = await VotesService.SubmitVoteAsync(voteDto);
+
+                if (result.IsSuccess)
+                {
+                    await JSRuntime.InvokeVoidAsync("console.log", $"Vote successfully submitted for {position.Position}");
+                }
+                else
+                {
+                    var errorMessage = result.ErrorMessage ?? "Unknown error occurred.";
+                    await JSRuntime.InvokeVoidAsync("console.log", $"Vote submission failed for {position.Position}: {errorMessage}");
+                    submissionErrors.Add($"{position.Position}: {errorMessage}");
+                }
+            }
+            catch (Exception ex)
+            {
+                var exMessage = ex.Message;
+                await JSRuntime.InvokeVoidAsync("console.log", $"Exception during vote submission for {position.Position}: {exMessage}");
+                submissionErrors.Add($"{position.Position}: {exMessage}");
+            }
         }
-        catch
+
+        // Surface errors if any, otherwise show success.
+        if (submissionErrors.Any())
         {
-            ShowStatusMessage("Vote submission failed", "danger");
+            ShowStatusMessage($"Vote submission failed: {string.Join("; ", submissionErrors)}", "danger");
+        }
+        else
+        {
+            ShowStatusMessage("All votes successfully submitted", "success");
         }
     }
+
+
+
 
     // Helpers for submission steps
     private string GetStepClass(int step)
@@ -908,10 +871,10 @@
         voteStatus = message;
         voteStatusClass = $"alert-{type}";
         statusIcon = type switch
-        {
-            "success" => "bi-check-circle",
-            "danger" => "bi-exclamation-circle",
-            _ => "bi-info-circle"
+        {        
+            "success" => "bi-check-circle-fill text-success", 
+            "danger"  => "bi-exclamation-circle-fill text-danger", 
+            _         => "bi-info-circle-fill"
         };
     }
 

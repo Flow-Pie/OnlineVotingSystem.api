@@ -218,3 +218,104 @@ h1:focus {
     50% { transform: scale(1.05); }
     100% { transform: scale(0.95); }
 }
+
+
+/* Enterprise Theme*/
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--enterprise-chart-bg) 0%, #ffffff 100%);
+    border: 1px solid var(--enterprise-border);
+}
+
+.btn-outline-primary-hover {
+    border-color: var(--enterprise-border);
+    color: var(--enterprise-primary);
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary-hover:hover {
+    background: var(--enterprise-primary);
+    color: white;
+    border-color: var(--enterprise-primary);
+}
+
+.alert {
+    border-left: 3px solid var(--enterprise-primary);
+    border-radius: 0.25rem;
+    border-right: none;
+    box-shadow: 0 2px 8px rgba(42, 92, 141, 0.1);
+}
+
+.submission-steps {
+    border-left: 2px solid var(--enterprise-border);
+    margin-left: 1.5rem;
+    padding-left: 2rem;
+}
+
+.step-item.completed .step-icon {
+    background: var(--enterprise-success);
+    border-color: var(--enterprise-success);
+}
+
+.step-item.processing .step-icon {
+    background: var(--enterprise-primary);
+    border-color: var(--enterprise-primary);
+    animation: pulse 1.5s infinite;
+}
+
+.step-icon {
+    border: 2px solid var(--enterprise-border);
+    box-shadow: 0 2px 6px rgba(42, 92, 141, 0.1);
+    z-index: 1;
+    width: 40px;
+}
+
+.modal-header {
+    background: var(--enterprise-primary);
+    color: white;
+    border-bottom: 2px solid var(--enterprise-accent);
+}
+
+.card {
+    border: 1px solid var(--enterprise-border);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(42, 92, 141, 0.15);
+}
+
+.badge {
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.progress-bar {
+    background-color: var(--enterprise-primary);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--enterprise-chart-bg);
+}
+
+.avatar-lg {
+    width: 80px;
+    height: 80px;
+    background: var(--enterprise-chart-bg);
+    border: 2px solid var(--enterprise-border);
+}
+  .modal {
+    --bs-modal-zindex: 1055;
+    --bs-modal-bg: #fff;
+    --bs-backdrop-zindex: 1050;
+}
+
+.modal-backdrop {
+    z-index: var(--bs-backdrop-zindex);
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    position: relative;
+    z-index: var(--bs-modal-zindex);
+}
