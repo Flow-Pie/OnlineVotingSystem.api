@@ -21,7 +21,7 @@ body, html {
     --enterprise-primary: #2A5C8D;
     --enterprise-secondary: #5F7D95;
     --enterprise-accent: #48A3C6;
-    --enterprise-success: #3A9D85;
+    --enterprise-success: green;
     --enterprise-warning: #FFC107;
     --enterprise-danger: #DC3545;
     --enterprise-border: #EBEFF2;
