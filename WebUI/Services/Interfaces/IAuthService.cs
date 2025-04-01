@@ -8,5 +8,7 @@ public interface IAuthService
     Task<LoginResponseDto> LoginAsync(LoginUserDto loginRequest);
     Task<UserDetailsDto> RegisterAsync(CreateUserDto registerRequest);
     Task LogoutAsync();
-    Task<string?> GetTokenAsync();///for demo only!
+    Task<string?> GetTokenAsync();
+    // Task<string?> GetUserIdAsync();
+    // Task<string?> GetUserNameAsync();
 }

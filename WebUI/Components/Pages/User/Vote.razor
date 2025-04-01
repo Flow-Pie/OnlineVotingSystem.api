@@ -4,7 +4,7 @@
 @using OnlineVotingSystem.api.DTOs.ElectionPosition;
 @using OnlineVotingSystem.api.DTOs.Candidate;
 @using OnlineVotingSystem.api.DTOs.Vote;
-@inject NavigationManager Navigation
+@inject NavigationManager NavManager
 @inject IVoteService VotesService
 @rendermode InteractiveServer
 
@@ -531,6 +531,7 @@
     [Inject] private IJSRuntime JSRuntime { get; set; }
     [Inject] private IElectionsService ElectionService { get; set; }
     [Inject] private ICandidatesService CandidateService { get; set; }
+    [Inject] private IAuthService UserService { get; set; }
 
     // ELECTION DATA
     private List<ElectionPositionSerialized> electionPositions = new();
@@ -538,7 +539,7 @@
     private List<CandidateSerializedDto> allCandidates = new();
 
     // USER & UI STATE
-    private string userId = "c73c299d-ed84-46ef-8e41-bf8c13d24186";//wiiliam
+    private string userId = string.Empty;
     private bool isLoading = false;
     private bool isSubmitting = false;
     private bool showHelp = false;
@@ -604,7 +605,29 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadElectionData();
+        
+       isLoading = true;
+        
+        try 
+        {
+            
+            @* userId = await UserService.GetUserIdAsync(); *@
+            await LoadElectionData();
+            
+            if (string.IsNullOrEmpty(userId))
+                throw new Exception("User not authenticated");
+            
+          
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            //NavManager.NavigateTo("/login");
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task LoadElectionData()

@@ -1,0 +1,497 @@
+@page "/register"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using System.Net
+@using OnlineVotingSystem.api.DTOs.User;
+@inject ILocalStorageService _localStorage
+@inject AuthenticationStateProvider AuthStateProvider
+@using System.Text.Json
+@using System.IO
+
+<div class="enterprise-register-container">
+    <div class="enterprise-card">
+        <div class="enterprise-card-header">
+            <div class="enterprise-branding">
+                <svg class="enterprise-logo" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                </svg>
+                <h2 class="enterprise-title">
+                    <span class="text-primary">Voter</span> Registration
+                </h2>
+            </div>
+            <p class="enterprise-subtitle">Complete all fields to access enterprise systems</p>
+        </div>
+
+        <div class="enterprise-card-body">
+            <EditForm Model="@registerModel" OnValidSubmit="HandleRegistration">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="enterprise-validation-summary" />
+
+                <div class="enterprise-form-columns">
+                    <!-- Left Column -->
+                    <div class="enterprise-form-column">
+                        <div class="enterprise-form-group">
+                            <label class="enterprise-input-label">Full Legal Name</label>
+                            <InputText @bind-Value="registerModel.Name" 
+                                      class="form-control enterprise-input" 
+                                      placeholder="John Smith" />
+                            <ValidationMessage For="@(() => registerModel.Name)" />
+                        </div>
+
+                        <div class="enterprise-form-group">
+                            <label class="enterprise-input-label">Corporate Email</label>
+                            <InputText @bind-Value="registerModel.Email" 
+                                      class="form-control enterprise-input" 
+                                      placeholder="jon.Maina@vote.com" />
+                            <ValidationMessage For="@(() => registerModel.Email)" />
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="enterprise-form-column">
+                        <div class="enterprise-form-group">
+                            <label class="enterprise-input-label">National ID</label>
+                            <InputNumber @bind-Value="registerModel.NationalId" 
+                                        class="form-control enterprise-input" 
+                                        placeholder="12345678" />
+                            <ValidationMessage For="@(() => registerModel.NationalId)" />
+                        </div>
+
+                        <div class="enterprise-form-group">
+                            <label class="enterprise-input-label">Password</label>
+                            <div class="position-relative">
+                                <InputText type="@(showPassword ? "text" : "password")" 
+                                          @bind-Value="registerModel.Password" 
+                                          class="form-control enterprise-input" 
+                                          placeholder="••••••••" />
+                                <button type="button" 
+                                        class="btn btn-link enterprise-password-toggle"
+                                        @onclick="TogglePasswordVisibility">
+                                    <i class="bi @passwordIcon"></i>
+                                </button>
+                            </div>
+                            <ValidationMessage For="@(() => registerModel.Password)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Rules (full width) -->
+                <div class="enterprise-password-rules">
+
+
+                    <div class="rule @(ContainsUpper(registerModel.Password) ? "valid" : "")">
+                        <i class="bi @(ContainsUpper(registerModel.Password) ? "bi-check-circle-fill" : "bi-circle")"></i>
+                        Uppercase
+                    </div>
+
+
+                    <div class="rule @(ContainsNumber(registerModel.Password) ? "valid" : "")">
+                        <i class="bi @(ContainsNumber(registerModel.Password) ? "bi-check-circle-fill" : "bi-circle")"></i>
+                        Number
+                    </div>
+
+
+                    <div class="rule @(IsMinLength(registerModel.Password, 8) ? "valid" : "")">
+                        <i class="bi @(IsMinLength(registerModel.Password, 8) ? "bi-check-circle-fill" : "bi-circle")"></i>
+                        8+ chars
+                    </div>
+
+
+                    <div class="rule @(ContainsSpecial(registerModel.Password) ? "valid" : "")">
+                        <i class="bi @(ContainsSpecial(registerModel.Password) ? "bi-check-circle-fill" : "bi-circle")"></i>
+                        Special
+                    </div>
+                </div>
+
+                <!-- Terms and Submit (full width) -->
+                <div class="enterprise-legal-agreement">
+                    <InputCheckbox @bind-Value="termsAgreed" 
+                                  class="form-check-input enterprise-check-input" 
+                                  id="termsAgreement" />
+                    <label class="form-check-label" for="termsAgreement">
+                        I agree to the <a href="#terms" class="enterprise-link">Terms</a> and 
+                        <a href="#privacy" class="enterprise-link">Privacy Policy</a>
+                    </label>
+                    <ValidationMessage For="@(() => termsAgreed)" />
+                </div>
+
+                <div class="enterprise-action-bar">
+                    <button type="submit" 
+                            class="btn enterprise-btn-primary"
+                            disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="enterprise-spinner"></span>
+                            <span>Registering...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-plus"></i>
+                            <span>Complete Registration</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+        <div class="enterprise-footer">
+            <p class="enterprise-legal">
+                <i class="bi bi-shield-lock"></i>
+                Enterprise Security Protocol v3.2 | GDPR Compliant
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {        
+        --enterprise-border: #e2e8f0;
+        --enterprise-chart-bg: #f8fafc;
+        --enterprise-card-bg: #ffffff;
+    }
+
+    .enterprise-register-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        min-height: 100vh;
+        background: var(--enterprise-chart-bg);
+    }
+
+    .enterprise-card {
+        width: 100%;
+        max-width: 800px;
+        border-radius: 10px;
+        border: 1px solid var(--enterprise-border);
+        box-shadow: 0 4px 20px rgba(30, 64, 128, 0.08);
+        overflow: hidden;
+        background: var(--enterprise-card-bg);
+    }
+
+    .enterprise-card-header {
+        background: var(--enterprise-card-bg);
+        border-bottom: 2px solid var(--enterprise-primary);
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .enterprise-branding {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .enterprise-logo {
+        width: 32px;
+        height: 32px;
+        color: var(--enterprise-primary);
+    }
+
+    .enterprise-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0;
+        color: #1e293b;
+    }
+
+    .enterprise-subtitle {
+        color: var(--enterprise-secondary);
+        font-size: 0.85rem;
+        margin: 0.25rem 0 0;
+    }
+
+    .enterprise-card-body {
+        padding: 1.5rem;
+        max-height: 70vh; 
+        overflow-y: auto;
+        padding: 1.2rem;
+    }
+
+    .enterprise-form-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .enterprise-form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .enterprise-form-group {
+        margin-bottom: 0;
+    }
+
+    .enterprise-input-label {
+        display: block;
+        color: #334155;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.35rem;
+    }
+
+    .enterprise-input {
+        border: 1.5px solid var(--enterprise-border);
+        border-radius: 6px;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+        width: 100%;
+        transition: all 0.2s ease;
+        background: var(--enterprise-card-bg);
+    }
+
+    .enterprise-input:focus {
+        border-color: var(--enterprise-accent);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .enterprise-password-rules {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+    }
+
+    .enterprise-password-rules .rule {
+        color: var(--enterprise-secondary);
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .enterprise-password-rules .rule.valid {
+        color: var(--enterprise-success);
+    }
+
+    .enterprise-password-rules .bi {
+        font-size: 0.9rem;
+    }
+
+    .enterprise-password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--enterprise-secondary);
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .enterprise-legal-agreement {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: var(--enterprise-chart-bg);
+        border-radius: 6px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .enterprise-check-input {
+        margin: 0;
+    }
+
+    .enterprise-action-bar {
+        margin-top: 1.5rem;
+    }
+
+    .enterprise-btn-primary {
+        width: 100%;
+        padding: 0.8rem;
+        border-radius: 6px;
+        background: var(--enterprise-primary);
+        border: none;
+        color: white;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+    }
+
+    .enterprise-btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .enterprise-btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .enterprise-footer {
+        padding: 1rem;
+        background: var(--enterprise-chart-bg);
+        border-top: 1px solid var(--enterprise-border);
+        text-align: center;
+    }
+
+    .enterprise-legal {
+        color: var(--enterprise-secondary);
+        font-size: 0.75rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .enterprise-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @@media (max-width: 768px) {
+        .enterprise-form-columns {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .enterprise-card {
+            max-width: 500px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .enterprise-card {
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .enterprise-register-container {
+            padding: 0;
+        }
+        
+        .enterprise-password-rules {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+    private bool termsAgreed = false;
+    private bool showPassword = false;
+    private string passwordIcon => showPassword ? "bi-eye-slash" : "bi-eye";
+    private bool isLoading = false;
+    private string registrationError = string.Empty;
+    private string registrationSuccess = string.Empty;
+
+    [Inject]
+    private IAuthService AuthService { get; set; } = null!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = null!;
+
+     private class RegisterModel
+    {
+        [Required(ErrorMessage = "Full name is required")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Name must be 6-100 characters")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "National ID is required")]
+        [Range(10000000, 99999999, ErrorMessage = "Must be 8 digits")]
+        [RegularExpression(@"^[1-9]\d*$", ErrorMessage = "Cannot start with zero")]
+        public int NationalId { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [MaxLength(100, ErrorMessage = "Cannot exceed 100 characters")]
+        [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$", 
+            ErrorMessage = "Must be a valid .com email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required")]
+        [StringLength(120, MinimumLength = 8, ErrorMessage = "Must be 8-120 characters")]
+        [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+]).{8,}$",
+            ErrorMessage = "Requires 1 uppercase, 1 number, and 1 special character")]
+        public string Password { get; set; } = string.Empty;
+    }
+
+      private void TogglePasswordVisibility() => showPassword = !showPassword;
+
+    private bool ContainsUpper(string value) => !string.IsNullOrEmpty(value) && value.Any(char.IsUpper);
+    private bool ContainsNumber(string value) => !string.IsNullOrEmpty(value) && value.Any(char.IsDigit);
+    private bool ContainsSpecial(string value) => !string.IsNullOrEmpty(value) && 
+        value.Any(c => "!@#$%^&*()_+".Contains(c));
+    private bool IsMinLength(string value, int length) => !string.IsNullOrEmpty(value) && value.Length >= length;
+
+
+    private async Task HandleRegistration()
+    {
+        if (!termsAgreed)
+        {
+            registrationError = "You must agree to the terms and conditions";
+            return;
+        }
+
+        isLoading = true;
+        registrationError = string.Empty;
+        registrationSuccess = string.Empty;
+
+        try
+        {
+            var createUserDto = new CreateUserDto(
+                registerModel.Name,
+                registerModel.NationalId,
+                registerModel.Email,
+                registerModel.Password
+            );
+
+            var result = await AuthService.RegisterAsync(createUserDto);
+
+            registrationSuccess = "Registration successful! Please check your email for verification.";
+            registerModel = new();
+            termsAgreed = false;
+            
+            // Optional: Redirect after delay
+            await Task.Delay(3000);
+            NavigationManager.NavigateTo("/login");
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == HttpStatusCode.BadRequest)
+        {
+            registrationError = "Invalid registration data. Please check your inputs.";
+        }
+        catch (HttpRequestException httpEx)
+        {
+            registrationError = $"Registration failed: {httpEx.Message}";
+        }
+        catch (Exception ex)
+        {
+            registrationError = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    private void HandleValidSubmit()
+    {
+        // Separate handler for validation success
+        registrationError = string.Empty;
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        registrationError = "Please correct the validation errors";
+    }
+}

@@ -56,7 +56,6 @@ public class CandidatesService : ICandidatesService, IDisposable
                 throw new ArgumentNullException(nameof(candidateDto), "Candidate data cannot be null");
             }
 
-            // Create the request message with the Bearer token in the Authorization header
             var request = new HttpRequestMessage(HttpMethod.Post, "/candidates")
             {
                 Content = JsonContent.Create(candidateDto)
@@ -70,7 +69,6 @@ public class CandidatesService : ICandidatesService, IDisposable
             var responseContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"API Response: {response.StatusCode} - {responseContent}");
 
-            // Handle non-success status codes
             if (!response.IsSuccessStatusCode)
             {
                 throw new ApiException(responseContent, response.StatusCode);
