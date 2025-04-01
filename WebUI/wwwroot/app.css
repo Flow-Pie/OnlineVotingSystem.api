@@ -288,6 +288,7 @@ h1:focus {
 .badge {
     letter-spacing: 0.05em;
     font-weight: 600;
+    left:0;
 }
 
 .progress-bar {

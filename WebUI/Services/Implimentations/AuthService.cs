@@ -3,13 +3,14 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
-using OnlineVotingSystem.api.DTOs.User;
 using Microsoft.AspNetCore.Components.Authorization;
 using Blazored.LocalStorage;
 using System.Security.Claims;
 using System.Net;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Caching.Memory;
+using System.Text.Json;
+using OnlineVotingSystem.api.DTOs.User;
 
 namespace WebUI.Services
 {
@@ -17,96 +18,237 @@ namespace WebUI.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILocalStorageService _localStorage;
-        private readonly AuthenticationStateProvider _authenticationStateProvider;
+        private readonly AuthenticationStateProvider _authProvider;
         private readonly NavigationManager _navManager;
         private readonly IMemoryCache _memoryCache;
-        private const string CacheKey = "auth_token_cache"; 
 
-        public AuthService(HttpClient httpClient, 
-                           ILocalStorageService localStorage, 
-                           AuthenticationStateProvider authenticationStateProvider, 
-                           NavigationManager navManager,  
-                           IMemoryCache memoryCache)
+        private const string TokenCacheKey = "auth_token_cache";
+        private const string UserIdCacheKey = "auth_userid_cache";
+        private const string UserNameCacheKey = "auth_username_cache";
+        private const string TokenStorageKey = "authToken";
+        private const string RememberTokenKey = "rememberToken";
+
+        public AuthService(
+            HttpClient httpClient,
+            ILocalStorageService localStorage,
+            AuthenticationStateProvider authProvider,
+            NavigationManager navManager,
+            IMemoryCache memoryCache)
         {
             _httpClient = httpClient;
             _localStorage = localStorage;
-            _authenticationStateProvider = authenticationStateProvider;
-            _navManager = navManager; 
+            _authProvider = authProvider;
+            _navManager = navManager;
             _memoryCache = memoryCache;
         }
 
         public async Task<string?> GetTokenAsync()
         {
-            // 1. First try memory cache (works during prerendering)
-            if (_memoryCache.TryGetValue(CacheKey, out string? cachedToken))
-            {
-                return cachedToken;
-            }
-
-            // 2. Fallback to localStorage (browser-only)
             try
             {
-                var token = await _localStorage.GetItemAsync<string>("authToken");
-                if (!string.IsNullOrEmpty(token))
+                // 1. Check memory cache first
+                if (_memoryCache.TryGetValue(TokenCacheKey, out string? cachedToken))
                 {
-                    // Cache in memory for 30 minutes
-                    _memoryCache.Set(CacheKey, token, TimeSpan.FromMinutes(30));  // Use 'token' here
-                    return token;
+                    Console.WriteLine("[AuthService] Retrieved token from memory cache");
+                    return cachedToken;
                 }
+
+                // 2. Fallback to localStorage
+                try
+                {
+                    var token = await _localStorage.GetItemAsync<string>(TokenStorageKey);
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        var cacheOptions = new MemoryCacheEntryOptions()
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+                        
+                        _memoryCache.Set(TokenCacheKey, token, cacheOptions);
+                        Console.WriteLine("[AuthService] Retrieved and cached token from local storage");
+                        return token;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AuthService] ERROR - LocalStorage fallback failed: {ex.Message}");
+                    Console.WriteLine(ex.StackTrace);
+                }
+
+                Console.WriteLine("[AuthService] WARNING - No valid token found");
+                return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"LocalStorage fallback failed: {ex.Message}");
+                Console.WriteLine($"[AuthService] CRITICAL ERROR - GetTokenAsync failed: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                return null;
             }
-
-            return null;
         }
 
-        public void SetAuthHeader(string token)
+        public async Task<string?> GetUserIdAsync()
         {
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new AuthenticationHeaderValue("Bearer", token);
+            try
+            {
+                if (_memoryCache.TryGetValue(UserIdCacheKey, out string? cachedUserId))
+                {
+                    Console.WriteLine("[AuthService] Retrieved user ID from memory cache");
+                    return cachedUserId;
+                }
+
+                var token = await GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    Console.WriteLine("[AuthService] WARNING - Cannot get user ID (no token available)");
+                    return null;
+                }
+
+                var userId = ParseClaimFromToken(token, "nameid", true);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    _memoryCache.Set(UserIdCacheKey, userId, TimeSpan.FromMinutes(30));
+                    Console.WriteLine($"[AuthService] Parsed and cached user ID: {userId}");
+                }
+                else
+                {
+                    Console.WriteLine("[AuthService] WARNING - User ID claim not found in token");
+                }
+
+                return userId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AuthService] ERROR - Failed to get user ID: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                return null;
+            }
         }
 
-        private bool IsPrerendering()
+        public async Task<string?> GetUserNameAsync()
         {
-            // For Blazor WebAssembly, prerendering ends quickly
-            return !OperatingSystem.IsBrowser();
+            try
+            {
+                if (_memoryCache.TryGetValue(UserNameCacheKey, out string? cachedUserName))
+                {
+                    Console.WriteLine("[AuthService] Retrieved username from memory cache");
+                    return cachedUserName;
+                }
+
+                var token = await GetTokenAsync();
+                if (string.IsNullOrEmpty(token))
+                {
+                    Console.WriteLine("[AuthService] WARNING - Cannot get username (no token available)");
+                    return null;
+                }
+
+                // Extract second element (Full Name) from "nameid" array claim
+                var nameIdValues = ParseClaimFromToken(token, ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(nameIdValues))
+                {
+                    Console.WriteLine("[AuthService] WARNING - 'nameid' claim not found in token");
+                    return null;
+                }
+
+                var nameParts = nameIdValues.Split(',');
+                if (nameParts.Length < 2)
+                {
+                    Console.WriteLine("[AuthService] WARNING - 'nameid' claim does not contain a full name");
+                    return null;
+                }
+
+                string fullName = nameParts[1].Trim(); // Extract "Jane Wangari"
+
+                _memoryCache.Set(UserNameCacheKey, fullName, TimeSpan.FromMinutes(30));
+                Console.WriteLine($"[AuthService] Parsed and cached username: {fullName}");
+
+                return fullName;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AuthService] ERROR - Failed to get username: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                return null;
+            }
         }
 
-        private bool IsTokenExpired(string token)
+
+        private string? ParseClaimFromToken(string token, string claimType, bool isNameId = false)
         {
             try
             {
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
-                return jwtToken.ValidTo < DateTime.UtcNow.AddMinutes(1);
+                var claim = jwtToken.Claims.FirstOrDefault(c => c.Type == claimType);
+
+                if (claim == null)
+                {
+                    Console.WriteLine($"[AuthService] WARNING - Claim {claimType} not found in token");
+                    return null;
+                }
+
+                if (isNameId)
+                {
+                    try
+                    {
+                        var nameidValues = JsonSerializer.Deserialize<List<string>>(claim.Value);
+                        return nameidValues?.FirstOrDefault();
+                    }
+                    catch (JsonException ex)
+                    {
+                        Console.WriteLine($"[AuthService] WARNING - Failed to deserialize nameid claim: {ex.Message}");
+                        Console.WriteLine("Using raw value instead");
+                        return claim.Value;
+                    }
+                }
+
+                return claim.Value;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Token might be invalid or corrupted, so consider it expired
-                return true;
+                Console.WriteLine($"[AuthService] ERROR - Failed to parse {claimType} from token: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                return null;
             }
         }
 
-        // Login method that retrieves credentials from local storage
+        public void SetAuthHeader(string token)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(token))
+                {
+                    Console.WriteLine("[AuthService] WARNING - Attempted to set empty auth header");
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = 
+                    new AuthenticationHeaderValue("Bearer", token);
+                Console.WriteLine("[AuthService] Authorization header set successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AuthService] ERROR - Failed to set auth header: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+            }
+        }
+
         public async Task<LoginResponseDto> LoginAsync(LoginUserDto loginRequest)
         {
             try
             {
+                Console.WriteLine($"[AuthService] Attempting login for Indetifier: {loginRequest.Identifier}");
                 var response = await _httpClient.PostAsJsonAsync("/auth/login", loginRequest);
 
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[AuthService] ERROR - Login failed (Status: {response.StatusCode}): {errorContent}");
                     throw new HttpRequestException($"Login failed: {errorContent}");
                 }
 
                 var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-
                 if (result == null || string.IsNullOrEmpty(result.AccessToken))
                 {
-                    throw new InvalidDataException("Invalid server response or missing access token.");
+                    Console.WriteLine("[AuthService] ERROR - Invalid login response from server");
+                    throw new InvalidDataException("Invalid server response");
                 }
 
                 SetAuthHeader(result.AccessToken);
@@ -114,75 +256,95 @@ namespace WebUI.Services
                 var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(30));
 
-                // Store token in localStorage and cache
-                await _localStorage.SetItemAsync("authToken", result.AccessToken);
-                _memoryCache.Set(CacheKey, result.AccessToken, cacheOptions);
-
-                // Notify authentication state provider
-                ((CustomAuthStateProvider)_authenticationStateProvider).NotifyUserAuthentication(result.AccessToken);
+                try
+                {
+                    await _localStorage.SetItemAsync(TokenStorageKey, result.AccessToken);
+                    _memoryCache.Set(TokenCacheKey, result.AccessToken, cacheOptions);
+                    _memoryCache.Remove(UserIdCacheKey);
+                    _memoryCache.Remove(UserNameCacheKey);
+                    
+                    ((CustomAuthStateProvider)_authProvider).NotifyUserAuthentication(result.AccessToken);
+                    Console.WriteLine($"[AuthService] Login successful for email: {loginRequest.Identifier}");
+                }
+                
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"Login error: {ex.Message}");
+                    throw new Exception($"Login failed. Check your network or credentials: {ex.Message}", ex);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AuthService] ERROR - Failed to store authentication tokens: {ex.Message}");                   
+                    throw new Exception($"Login failed due to an unexpected error: {ex.Message}", ex);
+                }
 
                 return result;
             }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"Login error: {ex.Message}");
-                throw new Exception($"Login failed. Check your network or credentials: {ex.Message}", ex);
-            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
-                throw new Exception($"Login failed due to an unexpected error: {ex.Message}", ex);
+                Console.WriteLine($"[AuthService] CRITICAL ERROR - Login process failed: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                throw new Exception($"Login failed due to an unexpected error, Either wrong credentials entered or check your network: {ex.Message}", ex);
             }
         }
 
-        // Registration using credentials from local storage
-        public async Task<UserDetailsDto> RegisterAsync(CreateUserDto registerRequest)
-        {
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("/auth/register", registerRequest);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new HttpRequestException($"Registration failed: {response.StatusCode} - {errorMessage}");
-                }
-
-                return await response.Content.ReadFromJsonAsync<UserDetailsDto>() 
-                    ?? throw new InvalidOperationException("Invalid response received from registration.");
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"Registration error: {ex.Message}");
-                throw new Exception($"Registration failed: {ex.Message}", ex);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
-                throw new Exception($"Registration failed due to an unexpected error: {ex.Message}", ex);
-            }
-        }
-
-        // Logout method that removes the token from local storage and notifies authentication state
         public async Task LogoutAsync()
         {
             try
             {
-                await _localStorage.RemoveItemAsync("authToken");
-                await _localStorage.RemoveItemAsync("rememberToken");
+                Console.WriteLine("[AuthService] Initiating logout process");
+                
+                await _localStorage.RemoveItemAsync(TokenStorageKey);
+                await _localStorage.RemoveItemAsync(RememberTokenKey);
 
-                _memoryCache.Remove(CacheKey);
+                _memoryCache.Remove(TokenCacheKey);
+                _memoryCache.Remove(UserIdCacheKey);
+                _memoryCache.Remove(UserNameCacheKey);
 
-                // Notify logout to authentication state provider
-                ((CustomAuthStateProvider)_authenticationStateProvider).NotifyUserLogout();
-
-                // Navigate to login page
+                _httpClient.DefaultRequestHeaders.Authorization = null;
+                
+                ((CustomAuthStateProvider)_authProvider).NotifyUserLogout();
                 _navManager.NavigateTo("/login", true);
+                
+                Console.WriteLine("[AuthService] Logout completed successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Logout failed: {ex.Message}");
-                throw new Exception($"Logout failed due to an error: {ex.Message}", ex);
+                Console.WriteLine($"[AuthService] CRITICAL ERROR - Logout failed: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                throw;
+            }
+        }
+
+        public async Task<UserDetailsDto> RegisterAsync(CreateUserDto registerRequest)
+        {
+            try
+            {
+                Console.WriteLine($"[AuthService] Attempting registration for email: {registerRequest.Email}");
+                var response = await _httpClient.PostAsJsonAsync("/auth/register", registerRequest);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[AuthService] ERROR - Registration failed (Status: {response.StatusCode}): {errorContent}");
+                    throw new HttpRequestException($"Registration failed: {errorContent}");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<UserDetailsDto>();
+                if (result == null)
+                {
+                    Console.WriteLine("[AuthService] ERROR - Invalid registration response from server");
+                    throw new InvalidOperationException("Invalid response received from registration");
+                }
+
+                Console.WriteLine($"[AuthService] Registration successful for email: {registerRequest.Email}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AuthService] CRITICAL ERROR - Registration failed: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                throw;
             }
         }
     }

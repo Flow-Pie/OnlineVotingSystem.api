@@ -35,14 +35,17 @@
                             National Elections 2027
                         </h2>
                     </div>
-                    <div class="d-flex align-items-center mt-1">
-                        <small class="text-muted small me-3" style="font-family: 'Courier New', monospace; font-weight: 600">
-                            <i class="bi bi-person-badge me-1"></i> Voter ID: @userId
-                        </small>
-                        <span class="badge rounded-pill py-1 px-2" style="background-color: var(--enterprise-chart-bg); color: var(--enterprise-primary)">
+                    <div class="d-flex mt-1 flex-column">
+                         <small class="badge rounded-pill me-3" style="background-color: rgba(25, 135, 84, 0.1); color: var(--enterprise-primary); font-size:14px">
                             <i class="bi bi-patch-check-fill me-1" style="color: var(--enterprise-success)"></i>
-                            Verified
-                        </span>
+                            Verified Voter
+                        </small>
+                        <small class="text-muted small me-3 rounded-pill" style="font-family: 'Courier New', monospace; font-weight: 600; background-color: rgba(25, 135, 84, 0.1)">
+                            <i class="bi bi-person-badge me-1"></i> Username: @username
+                        </small>
+                        <small class="text-muted small me-3 rounded-pill" style="font-family: 'Courier New', monospace; font-weight: 600; font-size:11px; background-color: rgba(25, 135, 84, 0.1)">
+                            <i class="bi bi-person-badge me-1"></i> Voter ID: @userId
+                        </small>                       
                     </div>
                 </div>
 
@@ -540,6 +543,7 @@
 
     // USER & UI STATE
     private string userId = string.Empty;
+     private string username = string.Empty;
     private bool isLoading = false;
     private bool isSubmitting = false;
     private bool showHelp = false;
@@ -611,7 +615,8 @@
         try 
         {
             
-            @* userId = await UserService.GetUserIdAsync(); *@
+            userId = await UserService.GetUserIdAsync();
+            username = await UserService.GetUserNameAsync();
             await LoadElectionData();
             
             if (string.IsNullOrEmpty(userId))
@@ -622,7 +627,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
-            //NavManager.NavigateTo("/login");
+            NavManager.NavigateTo("/login");
         }
         finally
         {
@@ -667,9 +672,21 @@
     // Candidate selection and confirmation
     private void SelectCandidate(CandidateSerializedDto candidate)
     {
-        // Log the key for debugging
+        if (candidate == null)
+        {
+            JSRuntime.InvokeVoidAsync("console.error", "Attempted to store a null candidate.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentSeat))
+        {
+            JSRuntime.InvokeVoidAsync("console.error", "Cannot store candidate: 'currentSeat' is null or empty.");
+            return;
+        }
+
         JSRuntime.InvokeVoidAsync("console.log", $"Storing candidate {candidate.Name} for seat: {currentSeat}");
-        selections[currentSeat] = candidate;
+        
+        selections.TryAdd(currentSeat, candidate);
         selectedCandidate = candidate;
     }
 
@@ -826,6 +843,12 @@
             }
 
             var candidate = selections[position.Position];
+             if (candidate == null)
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", $"Candidate for {position.Position} is null. Skipping.");
+                submissionErrors.Add($"{position.Position}: No candidate selected.");
+                continue;
+            }
 
             // Build the vote DTO.
             var voteDto = new CreateVoteDto(
