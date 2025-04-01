@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 <head>    
 
     <!-- Bootstrap CSS -->
@@ -38,5 +41,21 @@
 
 @code
 {
- private void Logout() => Navigation.NavigateTo("/");
+    private async Task Logout()
+    {
+        try
+        {
+            @* await AuthService.LogoutAsync(); // Call the logout method to remove token
+            await JSRuntime.InvokeVoidAsync("console.log", "User logged out"); // Debugging
+
+            var customAuthProvider = AuthStateProvider as CustomAuthStateProvider;
+            customAuthProvider?.NotifyUserLogout(); // Notify Blazor about logout *@
+
+            Navigation.NavigateTo("/login", true); // Redirect to home page
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Logout failed: {ex.Message}");
+        }
+    }
 }

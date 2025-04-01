@@ -153,7 +153,7 @@
                                 <!-- Display candidate name (read-only) -->
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Candidate Name</label>
-                                    <input type="text" class="form-control" value="@SelectedCandidate?.Name" disabled/>
+                                    <input type="text" class="form-control text-muted" value="@SelectedCandidate?.Name" disabled/>
                                 </div>
                                 <!-- Editable Party field -->
                                 <div class="col-md-6 mb-3">
@@ -165,21 +165,20 @@
                                         <div class="invalid-feedback">@ValidationErrors[nameof(EditingModel.Party)]</div>
                                     }
                                 </div>
-                                <!-- Position selection -->
+                                
+
+                                <!-- Positions -->
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Position</label>
-                                    <select class="form-select @(ValidationErrors.ContainsKey(nameof(EditingModel.PositionId)) ? "is-invalid" : "")" 
-                                            @bind="EditingModel.PositionId">
-                                        @foreach (var pos in AvailablePositions)
-                                        {
-                                            <option value="@pos.Id">@pos.Name</option>
-                                        }
-                                    </select>
-                                    @if (ValidationErrors.ContainsKey(nameof(EditingModel.PositionId)))
-                                    {
-                                        <div class="invalid-feedback">@ValidationErrors[nameof(EditingModel.PositionId)]</div>
-                                    }
+                                    
+                                    <input type="text" class="form-control text-muted"
+                                        value="@SelectedCandidate.Position"
+                                        disabled />                                    
+                                    
                                 </div>
+
+
+                                
                                 <!-- Editable Bio field -->
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Biography</label>
@@ -294,6 +293,7 @@
     private List<CandidateSerializedDto> Candidates { get; set; } = new();
     private Dictionary<string, List<CandidateSerializedDto>> GroupedCandidates { get; set; } = new();
     private Dictionary<string, int> CurrentPages { get; set; } = new();
+    private Dictionary<Guid, string> PositionLookup = new();
     private const int PageSize = 3;
     private string SuccessMessage { get; set; } = "";
     private string ErrorMessage { get; set; } = "";
@@ -318,6 +318,16 @@
         try
         {
             IsLoading = true;
+
+            // Get the token
+            var token = await AuthService.GetTokenAsync();
+            if (string.IsNullOrEmpty(token))
+            {
+                await HandleUnauthorized();
+                return;
+            }
+
+            // Pass the token to service methods
             await LoadCandidates();
             await LoadAvailablePositions();
             GroupCandidates();
@@ -326,6 +336,7 @@
         catch (Exception ex)
         {
             ErrorMessage = $"Initialization failed: {ex.Message}";
+            await ClearMessagesAfterDelay(3000);
         }
         finally
         {
@@ -342,16 +353,19 @@
             {
                 var positions = await PositionService.GetPositionsAsync();
                 AvailablePositions = positions?.ToList() ?? new List<PositionDetails>();
+                PositionLookup = positions?.ToDictionary(p => p.Id, p => p.Name) ?? new Dictionary<Guid, string>();
             }
             else
             {
                 ErrorMessage = "PositionService is unavailable.";
+                await ClearMessagesAfterDelay(3000);
             }
 
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Error loading positions: {ex.Message}";
+            await ClearMessagesAfterDelay(3000);
         }
     }
 
@@ -371,28 +385,39 @@
                 StateHasChanged();
                 return;
             }
+
+            var position = AvailablePositions.FirstOrDefault(p => p.Name == SelectedCandidate?.Position);
+
             var updateDto = new UpdateCandidateDto(
-                PositionId: EditingModel.PositionId,
+                PositionId: position?.Id,  // Get PositionId based on Position name
                 Party: EditingModel.Party,
                 Bio: EditingModel.Bio,
                 PhotoUrl: null
             );
-            if (SelectedCandidate == null)
+
+            if (SelectedCandidate == null || SelectedCandidate?.Id == null)
             {
                 ErrorMessage = "No candidate selected for update.";
-                return;
-            }
-            if (SelectedCandidate?.Id == null)
-            {
-                ErrorMessage = "No candidate selected for update.";
+                await ClearMessagesAfterDelay(3000);
                 return;
             }
 
-            await CandidateService.UpdateCandidateAsync(SelectedCandidate.Id, updateDto);
+            // Get the token
+            var token = await AuthService.GetTokenAsync();
+            if (string.IsNullOrEmpty(token))
+            {
+                await HandleUnauthorized();
+                return;
+            }
 
+            // Pass the token to the service method
+            await CandidateService.UpdateCandidateAsync(SelectedCandidate.Id, updateDto, token);
 
             SuccessMessage = "Candidate updated successfully";
+            await ClearMessagesAfterDelay(3000);
+            StateHasChanged();
             Console.WriteLine($"[DEBUG] Update DTO:\n{JsonSerializer.Serialize(updateDto, new JsonSerializerOptions { WriteIndented = true })}");
+
             await LoadCandidates();
             GroupCandidates();
             InitializePagination();
@@ -402,6 +427,7 @@
         catch (Exception ex)
         {
             ErrorMessage = $"Update failed: {ex.Message}";
+            await ClearMessagesAfterDelay(3000);
         }
         finally
         {
@@ -421,6 +447,12 @@
             Console.WriteLine($"An error occured {ex.Message}");
         }
     }
+    private async Task HandleUnauthorized()
+    {
+        await AuthService.LogoutAsync();
+        NavManager.NavigateTo("/login");
+    }
+
     private void GroupCandidates()
     {
         GroupedCandidates = Candidates
@@ -518,13 +550,18 @@
         _messageTimeoutCts = new CancellationTokenSource();
         try
         {
+            // Wait for the specified delay time
             await Task.Delay(delay, _messageTimeoutCts.Token);
+
             SuccessMessage = "";
             ErrorMessage = "";
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged);  // Refresh the UI to reflect the changes
         }
-        catch (TaskCanceledException) { }
+        catch (TaskCanceledException)
+        {
+        }
     }
+
 
     private void ViewProfile(CandidateSerializedDto candidate)
     {
@@ -549,8 +586,7 @@
             await LoadAvailablePositions();
 
             EditingModel = new EditCandidateFormModel
-            {
-                PositionId = candidateDetails.ElectionPositionId,
+            {                
                 Party = candidateDetails.Party,
                 Bio = candidateDetails.Bio,
                 PhotoUrl = candidateDetails.PhotoUrl?.ToString()
@@ -561,7 +597,8 @@
         catch (Exception ex)
         {
             ErrorMessage = $"Failed to load candidate: {ex.Message}";
-            await ClearMessagesAfterDelay();
+            await ClearMessagesAfterDelay(3000);
+
         }
         finally
         {
@@ -579,9 +616,7 @@
     }
 
     public class EditCandidateFormModel
-    {
-        [Required(ErrorMessage = "Position is required")]
-        public Guid PositionId { get; set; }
+    {       
         [StringLength(100, ErrorMessage = "Party name too long (100 char max)")]
         public string? Party { get; set; }
         [Required(ErrorMessage = "Bio is required")]

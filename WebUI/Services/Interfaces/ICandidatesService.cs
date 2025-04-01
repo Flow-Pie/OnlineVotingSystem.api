@@ -6,9 +6,9 @@ public interface ICandidatesService
     
     Task<CandidateDetailsDto> GetCandidateDetailsAsync(Guid candidateId);
     
-    Task<CandidateDetailsDto> CreateCandidateAsync(CreateCandidateDto candidateDto);
+    Task<CandidateDetailsDto> CreateCandidateAsync(CreateCandidateDto candidateDto, string token);
     
-    Task<CandidateDetailsDto> UpdateCandidateAsync(Guid candidateId, UpdateCandidateDto updateDto);
+    Task<CandidateDetailsDto> UpdateCandidateAsync(Guid candidateId, UpdateCandidateDto updateDto, string token);
     
     Task DeleteCandidateAsync(Guid candidateId);
     

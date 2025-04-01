@@ -219,16 +219,16 @@
         try 
         {
             var token = await AuthService.GetTokenAsync();
+            Console.WriteLine($"Auth Token: {token}");
             if (string.IsNullOrEmpty(token))
             {
                 await HandleUnauthorized();
                 return;
             }
-            
-            
-            var positions = await PositionsService.GetPositionsAsync(); 
-            Positions = positions?.ToList() ?? new();
-            
+
+            var positions = await PositionsService.GetPositionsAsync();
+            Positions = positions?.ToList() ?? new List<PositionDetails>();
+
             if (!Positions.Any())
             {
                 errorMessage = "No positions available. Create positions first.";
@@ -271,17 +271,37 @@
                 PositionId: model.PositionId,
                 Party: model.Party,
                 Bio: model.Bio,
-                PhotoUrl: "http://www.avatar"                
+                PhotoUrl: "http://www.avatar" // You might want to dynamically assign this in a real app
             );
 
-            // Modified to match your service interface
-            await CandidateService.CreateCandidateAsync(candidateDto);
+            // Get the token
+            var token = await AuthService.GetTokenAsync();
+
+            // Pass the token directly to the CreateCandidateAsync method
+            await CandidateService.CreateCandidateAsync(candidateDto, token);
+
             successMessage = "Candidate added successfully!";
             ResetForm();
         }      
+        catch (ApiException apiEx)
+        {
+            // Extract meaningful API error response
+            errorMessage = $"API Error ({(int)apiEx.StatusCode}): {apiEx.Message}";
+
+            if (apiEx.ProblemDetails?.Detail != null)
+            {
+                errorMessage += $"\nDetails: {apiEx.ProblemDetails.Detail}";
+            }
+        }
+        catch (HttpRequestException httpEx)
+        {
+            errorMessage = "Network error: Unable to reach the server. Please try again later.";
+            Console.WriteLine(httpEx); // Log for debugging
+        }
         catch (Exception ex)
         {
-            errorMessage = $"Error: {ex.Message}";
+            errorMessage = $"Unexpected error: {ex.Message}";
+            Console.WriteLine(ex); // Log for debugging
         }
         finally 
         {

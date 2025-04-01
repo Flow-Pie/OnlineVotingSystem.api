@@ -46,49 +46,82 @@ public class CandidatesService : ICandidatesService, IDisposable
         return await HandleResponseAsync<CandidateDetailsDto>(response);
     }
 
-    public async Task<CandidateDetailsDto> CreateCandidateAsync(CreateCandidateDto candidateDto)
-{
-    var response = await _httpClient.PostAsJsonAsync("/candidates", candidateDto);
-    
-    var responseContent = await response.Content.ReadAsStringAsync();
-
-    Console.WriteLine($"Response status: {response.StatusCode}");
-    Console.WriteLine($"Response content: {responseContent}");
-
-    if (response == null)
+   public async Task<CandidateDetailsDto> CreateCandidateAsync(CreateCandidateDto candidateDto, string token)
     {
-        throw new ApiException($"API Error: {response.StatusCode} - {responseContent}")
+        try
         {
-            StatusCode = response.StatusCode,
-        };
+            // Validate input first
+            if (candidateDto == null)
+            {
+                throw new ArgumentNullException(nameof(candidateDto), "Candidate data cannot be null");
+            }
+
+            // Create the request message with the Bearer token in the Authorization header
+            var request = new HttpRequestMessage(HttpMethod.Post, "/candidates")
+            {
+                Content = JsonContent.Create(candidateDto)
+            };
+
+            // Set the Authorization header with the Bearer token
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Send the request
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"API Response: {response.StatusCode} - {responseContent}");
+
+            // Handle non-success status codes
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ApiException(responseContent, response.StatusCode);
+            }
+
+            // Deserialize response
+            var candidate = JsonSerializer.Deserialize<CandidateDetailsDto>(responseContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (candidate == null)
+            {
+                throw new ApiException("Invalid API response format", HttpStatusCode.InternalServerError);
+            }
+
+            return candidate;
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new ApiException($"Network error: {ex.Message}", HttpStatusCode.ServiceUnavailable);
+        }
+        catch (JsonException ex)
+        {
+            throw new ApiException($"Failed to parse API response: {ex.Message}", HttpStatusCode.InternalServerError);
+        }
     }
 
-   var candidate = await response.Content.ReadFromJsonAsync<CandidateDetailsDto>();
-
-    if (candidate == null)
-    {
-        throw new InvalidOperationException("Failed to deserialize response into CandidateDetailsDto.");
-    }
-
-    return candidate;
-}
 
 
-    public async Task<CandidateDetailsDto> UpdateCandidateAsync(Guid candidateId, UpdateCandidateDto updateDto)
+
+    public async Task<CandidateDetailsDto> UpdateCandidateAsync(Guid candidateId, UpdateCandidateDto updateDto, string token)
     {
         Console.WriteLine($"Updating candidate with ID: {candidateId}...");
 
+        // Create the request
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"/candidates/{candidateId}")
         {
             Content = JsonContent.Create(updateDto)
         };
 
+        // Set the Authorization header with the Bearer token
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        // Send the request
         var response = await _httpClient.SendAsync(request);
 
         Console.WriteLine($"Response status: {response.StatusCode}");
 
+        // Handle the response
         return await HandleResponseAsync<CandidateDetailsDto>(response);
     }
+
 
 
     public async Task DeleteCandidateAsync(Guid candidateId)
@@ -159,9 +192,12 @@ public class CandidatesService : ICandidatesService, IDisposable
             {
                 Title = "Unexpected Error",
                 Status = (int)HttpStatusCode.InternalServerError,
-                Detail = ex.Message
+                Detail = $"An unexpected error occurred: {ex.Message}"
             });
+
         }
+        
+        
     }
     public void Dispose() => _httpClient?.Dispose();
   
@@ -170,20 +206,27 @@ public class CandidatesService : ICandidatesService, IDisposable
 public class ApiException : Exception
 {
     public ProblemDetails ProblemDetails { get; }
-    public HttpStatusCode StatusCode { get; internal set; }
+    public HttpStatusCode StatusCode { get; }
 
-    public ApiException(ProblemDetails problemDetails)
+     public ApiException(ProblemDetails problemDetails)
         : base(problemDetails.Detail)
     {
         ProblemDetails = problemDetails;
     }
-
-   public ApiException(string? message) : base(message)
+    public ApiException(ProblemDetails problemDetails, HttpStatusCode statusCode)
+        : base(problemDetails.Detail)
+    {
+        ProblemDetails = problemDetails;
+        StatusCode = statusCode;
+    }
+         public ApiException(string? message, HttpStatusCode statusCode) 
+        : base(message)
     {
         ProblemDetails = new ProblemDetails
         {
             Detail = message ?? "An error occurred"
         };
+        StatusCode = statusCode;
     }
-
 }
+
