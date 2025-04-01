@@ -10,8 +10,8 @@
 @using System.Text.Json
 @using System.IO
 
-<div class="enterprise-login-container">
-    <div class="card enterprise-card">
+<div class="enterprise-login-container" style="min-height: 90vh; display: flex; align-items: center; padding: 5px;">
+    <div class="card enterprise-card" style="width: 100%; max-width: 450px; margin: 0 auto; scrollable-container">
         <div class="card-header enterprise-card-header">
             <div class="enterprise-branding">
                 <svg class="enterprise-logo" viewBox="0 0 24 24">
@@ -24,11 +24,11 @@
             <p class="enterprise-subtitle">Enter your credentials to continue</p>
         </div>
 
-        <div class="card-body enterprise-card-body">
+        <div class="card-body enterprise-card-body" style="padding: 0.5rem;">
             <EditForm Model="@model" OnValidSubmit="HandleLogin">
                 <DataAnnotationsValidator />
 
-                <div class="enterprise-form-group">
+                <div class="enterprise-form-group" style="margin-bottom: 1.0rem;">
                     <div class="form-floating">
                         <input type="text" 
                                class="form-control enterprise-input" 
@@ -59,7 +59,7 @@
                     <ValidationMessage For="@(() => model.Password)" />
                 </div>
 
-                <div class="enterprise-options">
+                <div class="enterprise-options" style="display: flex;  align-items: center; margin: 0 0;">
                     <div class="form-check enterprise-check">
                         <input type="checkbox" 
                                class="form-check-input enterprise-check-input" 
@@ -69,12 +69,12 @@
                             Maintain Session
                         </label>
                     </div>
-                    <a href="#forgot-password" class="enterprise-link">Trouble signing in?</a>
+                    <a href="#forgot-password" class="enterprise-link" style="font-size: 0.875rem;">Trouble signing in?</a>
                 </div>
 
                 @if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    <div class="enterprise-alert enterprise-alert-danger">
+                    <div class="enterprise-alert enterprise-alert-danger" style="margin: 1rem 0; padding: 0.75rem;">
                         <i class="bi bi-shield-exclamation"></i>
                         @errorMessage
                     </div>
@@ -82,19 +82,20 @@
 
                 @if (!string.IsNullOrEmpty(successMessage))
                 {
-                    <div class="enterprise-alert enterprise-alert-success">
+                    <div class="enterprise-alert enterprise-alert-success" style="margin: 1rem 0; padding: 0.75rem;">
                         <i class="bi bi-shield-check"></i>
-                        Authentication successful. Redirecting...
+                        Authentication successful. Redirecting top home page...
                     </div>
                     <script suppress-error="BL9992">
                         console.log('Access Token:', '@successMessage');
                     </script>
                 }
 
-                <div class="enterprise-action-bar">
+                <div class="enterprise-action-bar" style="margin-top: 0.3rem;">
                     <button type="submit" 
                             class="btn enterprise-btn-primary"
-                            disabled="@isLoading">
+                            disabled="@isLoading"
+                            style="width: 100%; padding: 0.40rem;">
                         @if (isLoading)
                         {
                             <span class="enterprise-spinner"></span>
@@ -109,10 +110,10 @@
             </EditForm>
         </div>
 
-        <div class="enterprise-footer">
-            <p class="enterprise-legal">
+        <div class="enterprise-footer" style="padding: 1rem; text-align: center;">
+            <p class="enterprise-legal" style="font-size: 0.75rem; margin: 0;">
                 <i class="bi bi-shield-lock"></i>
-                Protected by Enterprise Security Protocol v2.4
+                Protected by 0x4B47 Enterprise Security Protocol
             </p>
         </div>
     </div>
@@ -210,7 +211,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 1.5rem 0;
+        margin: 0.5rem 0;
     }
 
     .enterprise-check-label {

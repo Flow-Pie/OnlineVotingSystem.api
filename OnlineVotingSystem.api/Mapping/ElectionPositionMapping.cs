@@ -10,7 +10,8 @@ public static class ElectionPositionMapping
         return new ElectionPositionSerialized(
             electionPosition.Id,
             electionPosition.Election!.Title,
-            electionPosition.Position!.Name
+            electionPosition.Position!.Name,
+            electionPosition.PositionId
         );
     }
 

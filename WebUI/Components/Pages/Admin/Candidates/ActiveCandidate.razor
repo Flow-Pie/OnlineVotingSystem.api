@@ -527,6 +527,7 @@
             await CandidateService.DeleteCandidateAsync(candidateId);
             SuccessMessage = "Candidate deleted successfully!";
             Candidates.RemoveAll(c => c.Id == candidateId);
+            StateHasChanged();
             GroupCandidates();
             InitializePagination();
             await InvokeAsync(StateHasChanged);

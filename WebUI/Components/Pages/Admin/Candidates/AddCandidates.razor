@@ -11,6 +11,7 @@
 @using System.IdentityModel.Tokens.Jwt
 @using System.Text.Json
 @using System.ComponentModel.DataAnnotations
+@using OnlineVotingSystem.api.DTOs.Election;
 @inject ICandidatesService CandidatesService
 @inject IUsersService UsersService
 @inject IElectionsService ElectionsService
@@ -130,52 +131,80 @@
             </h2>
         </div>
         <div class="card-body p-4">
-            <!-- EditForm with model binding and submit handler -->
             <EditForm Model="@model" OnValidSubmit="AddCandidate">
+                <!-- National ID Field -->
                 <div class="mb-4">
                     <div class="form-floating">
                         <input type="text"
-                               class="form-control border-primary-subtle"
-                               id="nationalId"
-                               placeholder="Enter National ID"
-                               @bind="model.NationalId" />
+                            class="form-control border-primary-subtle"
+                            id="nationalId"
+                            placeholder="Enter National ID"
+                            @bind="model.NationalId" />
                         <label for="nationalId" class="text-muted">National ID</label>
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <div class="form-floating">
                         <select class="form-select border-primary-subtle"
-                                id="electionPositionId"
-                                @bind="model.PositionId">
-                            <option value="">Select a Position</option>
-                            @foreach (var position in Positions)
+                                id="electionId"
+                                value="@model.ElectionId"
+                                @onchange="OnElectionChanged">
+                            <option value="">Select an Election</option>
+                            @foreach (var election in _elections)
                             {
-                                <option value="@position.Id">@position.Name</option>
+                                <option value="@election.Id">@election.Title</option>
                             }
                         </select>
-                        <label for="electionPositionId" class="text-muted">Position</label>
+                        <label for="electionId" class="text-muted">Election</label>
                     </div>
                 </div>
+
+
+            <div class="mb-4">
+                <div class="form-floating">
+                    <select class="form-select border-primary-subtle"
+                            id="positionId"
+                            @bind="model.PositionId"  
+                            disabled="@(model.ElectionId == Guid.Empty || isLoading)">
+                        <option value="">Select a Position</option>
+                        @if (model.ElectionId != Guid.Empty)
+                        {
+                            @foreach (var pos in _filteredPositions)
+                            {
+                                <option value="@pos.PositionId">@pos.Position</option>
+                            }
+                        }
+                    </select>
+                        <label for="positionId" class="text-muted">Position</label>
+                </div>
+            </div>
+
+                <!-- Party Field -->
                 <div class="mb-4">
                     <div class="form-floating">
                         <input type="text"
-                               class="form-control border-primary-subtle"
-                               id="party"
-                               placeholder="Party"
-                               @bind="model.Party" />
+                            class="form-control border-primary-subtle"
+                            id="party"
+                            placeholder="Party"
+                            @bind="model.Party" />
                         <label for="party" class="text-muted">Party</label>
                     </div>
                 </div>
+
+                <!-- Bio Field -->
                 <div class="mb-4">
                     <div class="form-floating">
                         <textarea class="form-control border-primary-subtle"
-                                  id="bio"
-                                  placeholder="Bio"
-                                  style="height: 100px"
-                                  @bind="model.Bio"></textarea>
+                                id="bio"
+                                placeholder="Bio"
+                                style="height: 100px"
+                                @bind="model.Bio"></textarea>
                         <label for="bio" class="text-muted">Bio</label>
                     </div>
                 </div>
+
+                <!-- Buttons-->
                 <div class="d-flex gap-3 justify-content-end border-top pt-4 mt-4">
                     <button type="reset"
                             class="btn btn-outline-secondary px-4"
@@ -204,7 +233,8 @@
 
 @code {
     private CandidateFormModel model = new();
-    private List<PositionDetails> Positions = new();
+    private List<ElectionDetailsDto> _elections = new();
+    private List<ElectionPositionSerialized> _filteredPositions = new();
     private string errorMessage = "";
     private string successMessage = "";
     private bool isLoading = false;
@@ -214,32 +244,76 @@
     [Inject] private IPositionsService PositionsService { get; set; }
     [Inject] private NavigationManager NavigationManager { get; set; }
 
+    private async Task OnElectionChanged(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out Guid electionId))
+        {
+            model.ElectionId = electionId;
+            await OnElectionSelected();
+        }
+    }
+     private async Task OnElectionSelected()
+    {
+        if (model.ElectionId == Guid.Empty) return;
+        isLoading = true;
+        StateHasChanged();
+
+        try 
+        {
+            _filteredPositions = (await ElectionsService.GetElectionPositionsAsync(model.ElectionId)).ToList();
+            model.PositionId = Guid.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load positions: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnPositionChanged(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out Guid posId))
+        {
+            model.PositionId = posId;
+        }
+    }
+
+
     protected override async Task OnInitializedAsync()
     {
         try 
         {
             var token = await AuthService.GetTokenAsync();
-            Console.WriteLine($"Auth Token: {token}");
             if (string.IsNullOrEmpty(token))
             {
                 await HandleUnauthorized();
                 return;
             }
+            
+            var electionTask = ElectionsService.GetElectionsAsync();
+            var positionTask = PositionsService.GetPositionsAsync();
+            
+            await Task.WhenAll(electionTask, positionTask);
+            
+            _elections = electionTask.Result?.ToList() ?? new List<ElectionDetailsDto>();
+            var positions = positionTask.Result?.ToList() ?? new List<PositionDetails>();
 
-            var positions = await PositionsService.GetPositionsAsync();
-            Positions = positions?.ToList() ?? new List<PositionDetails>();
-
-            if (!Positions.Any())
-            {
+            if (!_elections.Any())
+                errorMessage = "No elections available. Create elections first.";
+            
+            if (!positions.Any())
                 errorMessage = "No positions available. Create positions first.";
-            }
         }
         catch (Exception ex)
         {
             errorMessage = $"Initialization error: {ex.Message}";
         }
     }
-
+  
     private async Task AddCandidate()
     {
         isLoading = true;
@@ -248,60 +322,56 @@
         
         try 
         {
-            // Client-side validation
             var validationErrors = new List<string>();
             
             if (model.NationalId.ToString().Length != 8)
                 validationErrors.Add("National ID must be 8 digits");
             
-            if (model.PositionId == Guid.Empty || !Positions.Any(p => p.Id == model.PositionId))
+            if (model.PositionId == Guid.Empty)
                 validationErrors.Add("Invalid position selected");
             
             if (string.IsNullOrWhiteSpace(model.Bio))
                 validationErrors.Add("Bio is required");
-
+            
             if (validationErrors.Any())
             {
                 errorMessage = string.Join(", ", validationErrors);
                 return;
             }
 
-            var candidateDto = new CreateCandidateDto(
-                NationalId: model.NationalId.ToString("D8"),
-                PositionId: model.PositionId,
-                Party: model.Party,
-                Bio: model.Bio,
-                PhotoUrl: "http://www.avatar" // You might want to dynamically assign this in a real app
-            );
+             var candidateDto = new CreateCandidateDto(
+            NationalId: model.NationalId.ToString("D8"),
+            PositionId: model.PositionId,
+            ElectionId: model.ElectionId,
+            Party: model.Party,
+            Bio: model.Bio,
+            PhotoUrl: "http://www.avatar"
+             );
 
-            // Get the token
+            // Print the DTO as JSON
+            Console.WriteLine($"Sending: {System.Text.Json.JsonSerializer.Serialize(candidateDto)}");
+
             var token = await AuthService.GetTokenAsync();
-
-            // Pass the token directly to the CreateCandidateAsync method
             await CandidateService.CreateCandidateAsync(candidateDto, token);
-
+            
             successMessage = "Candidate added successfully!";
             ResetForm();
         }      
         catch (ApiException apiEx)
         {
-            // Extract meaningful API error response
             errorMessage = $"API Error ({(int)apiEx.StatusCode}): {apiEx.Message}";
-
             if (apiEx.ProblemDetails?.Detail != null)
-            {
                 errorMessage += $"\nDetails: {apiEx.ProblemDetails.Detail}";
-            }
         }
         catch (HttpRequestException httpEx)
         {
             errorMessage = "Network error: Unable to reach the server. Please try again later.";
-            Console.WriteLine(httpEx); // Log for debugging
+            Console.WriteLine(httpEx); 
         }
         catch (Exception ex)
         {
             errorMessage = $"Unexpected error: {ex.Message}";
-            Console.WriteLine(ex); // Log for debugging
+            Console.WriteLine(ex); 
         }
         finally 
         {
@@ -329,6 +399,9 @@
 
         [Required(ErrorMessage = "Position is required")]
         public Guid PositionId { get; set; }
+
+        [Required(ErrorMessage = "Election is required")]
+        public Guid ElectionId { get; set; } = Guid.Empty;        
 
         [StringLength(100, ErrorMessage = "Party name too long")]
         public string Party { get; set; } = "";
