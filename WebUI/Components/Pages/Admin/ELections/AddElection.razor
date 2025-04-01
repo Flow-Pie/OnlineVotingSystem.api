@@ -2,11 +2,11 @@
 @using OnlineVotingSystem.api.DTOs.Election
 @using OnlineVotingSystem.api.DTOs.ElectionPosition
 @using OnlineVotingSystem.api.DTOs.Position
-@inject IElectionsService ElectionService
-@inject IPositionsService PositionsService
 @rendermode InteractiveServer
 @using System.Collections.ObjectModel
 @using System.Net
+@using System.IdentityModel.Tokens.Jwt
+@using System.ComponentModel.DataAnnotations
 <main class="container mt-4 scrollable-container">
     <style>
    
@@ -301,9 +301,13 @@
 
 
 
+
 @code {
-    [Inject]
-    private IAuthService AuthService { get; set; }
+    [Inject] private IAuthService AuthService { get; set; }
+    [Inject] private IElectionsService ElectionService { get; set; }
+    [Inject] private IPositionsService PositionsService { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
     // Form Fields
     private string Title { get; set; } = "";
     private string Description { get; set; } = "";
@@ -320,11 +324,20 @@
     // State Management
     private bool isLoading;
     private string errorMessage = "";
-    private string successMessage = "";   
+    private string successMessage = "";
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadPositions();
-        SelectedPositions.CollectionChanged += (s, e) => StateHasChanged();
+        try
+        {
+            await LoadPositions();
+            SelectedPositions.CollectionChanged += (s, e) => StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Initialization error: {ex.Message}";
+            StateHasChanged();
+        }
     }
 
     private async Task LoadPositions()
@@ -332,29 +345,20 @@
         try
         {
             var positions = await PositionsService.GetPositionsAsync();
-            availablePositions.Clear();
-            foreach (var position in positions)
-            {
-                availablePositions.Add(position);
-            }
+            availablePositions = new ObservableCollection<PositionDetails>(positions);
         }
         catch (Exception ex)
         {
             errorMessage = $"Failed to load positions: {ex.Message}";
-            StateHasChanged();
         }
     }
 
     private void TogglePosition(Guid positionId)
     {
         if (SelectedPositions.Contains(positionId))
-        {
             SelectedPositions.Remove(positionId);
-        }
         else
-        {
             SelectedPositions.Add(positionId);
-        }
     }
 
     private async Task HandleSubmit()
@@ -373,18 +377,23 @@
                 return;
             }
 
+            var token = await AuthService.GetTokenAsync();
             var electionDto = new CreateElectionDto(
                 Title.Trim(),
                 Description.Trim(),
                 StartTime,
                 EndTime
             );
-            var _bearerToken = await AuthService.GetTokenAsync();
-            var createdElection = await ElectionService.CreateElectionAsync(electionDto, _bearerToken);
+
+            var createdElection = await ElectionService.CreateElectionAsync(electionDto, token);
             await AssignPositionsToElection(createdElection.Id);
             
             ResetForm();
             successMessage = "Election created successfully!";
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            await HandleUnauthorized();
         }
         catch (HttpRequestException ex)
         {
@@ -392,16 +401,20 @@
         }
         catch (Exception ex)
         {           
-            successMessage = "Election created successfully!";
-            //DISCLAIMER! IT IS WORKING 
-            //TOUCH IT IF YOU KNOW WHAT YOU ARE DOING
-             Console.WriteLine($"Unexpected error: {ex.Message}");
+            errorMessage = $"Unexpected error: {ex.Message}";
         }
         finally
         {
             isLoading = false;
             StateHasChanged();
         }
+    }
+
+    private async Task HandleUnauthorized()
+    {
+        errorMessage = "Your session has expired. Please login again.";
+        await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("/login");
     }
 
     private List<string> ValidateForm()
@@ -418,10 +431,17 @@
     {
         foreach (var positionId in SelectedPositions)
         {
-            await ElectionService.CreateElectionPositionAsync(
-                electionId,
-                new CreateElectionPositionDto(positionId)
-            );
+            try
+            {
+                await ElectionService.CreateElectionPositionAsync(
+                    electionId,
+                    new CreateElectionPositionDto(positionId)
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error assigning position {positionId}: {ex}");
+            }
         }
     }
 
@@ -441,6 +461,7 @@
         {
             isCreatingPosition = true;
             positionCreationError = "";
+            successMessage = "";
             StateHasChanged();
 
             if (string.IsNullOrWhiteSpace(newPositionName))
@@ -449,29 +470,47 @@
                 return;
             }
 
+            var token = await AuthService.GetTokenAsync();
             var newPosition = new CreatePositionDto(newPositionName.Trim());
-            var _bearerToken = await AuthService.GetTokenAsync();
-            Console.WriteLine(_bearerToken);
-            var createdPosition = await PositionsService.CreatePositionAsync(newPosition, _bearerToken);
+            var createdPosition = await PositionsService.CreatePositionAsync(newPosition, token);
 
             availablePositions.Add(createdPosition);
             SelectedPositions.Add(createdPosition.Id);
             successMessage = "Position created successfully!";
             newPositionName = string.Empty;
         }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
+        {
+            positionCreationError = "Position with this name already exists";
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            await HandleUnauthorized();
+        }
         catch (Exception ex)
         {
-            positionCreationError = ex switch
-            {
-                HttpRequestException { StatusCode: HttpStatusCode.Conflict } => 
-                    "Position with this name already exists",
-                _ => $"Error creating position: {ex.Message}"
-            };
+            positionCreationError = $"Error creating position: {ex.Message}";
         }
         finally
         {
             isCreatingPosition = false;
             StateHasChanged();
         }
+    }
+
+    public class CandidateFormModel
+    {
+        [Range(10000000, 99999999, ErrorMessage = "Must be 8 digits")]
+        public int NationalId { get; set; }
+
+        [Required(ErrorMessage = "Position is required")]
+        public Guid PositionId { get; set; }
+
+        [StringLength(100, ErrorMessage = "Party name too long")]
+        public string Party { get; set; } = "";
+
+        [Required(ErrorMessage = "Bio is required")]
+        [StringLength(500, ErrorMessage = "Bio too long")]
+        public string Bio { get; set; } = "";
     }
 }

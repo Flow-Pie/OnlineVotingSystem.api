@@ -55,7 +55,7 @@ public class CandidatesService : ICandidatesService, IDisposable
     Console.WriteLine($"Response status: {response.StatusCode}");
     Console.WriteLine($"Response content: {responseContent}");
 
-    if (!response.IsSuccessStatusCode)
+    if (response == null)
     {
         throw new ApiException($"API Error: {response.StatusCode} - {responseContent}")
         {

@@ -138,6 +138,10 @@
               "target": "Package",
               "version": "[8.0.4, )"
             },
+            "Microsoft.Extensions.Caching.Memory": {
+              "target": "Package",
+              "version": "[9.0.1, )"
+            },
             "Microsoft.Extensions.Http": {
               "target": "Package",
               "version": "[8.0.0, )"
@@ -145,6 +149,10 @@
             "Syncfusion.Blazor.Charts": {
               "target": "Package",
               "version": "[28.2.11, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.7.0, )"
             }
           },
           "imports": [

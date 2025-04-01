@@ -5,7 +5,10 @@
 @using OnlineVotingSystem.api.DTOs.Position
 @using WebUI.Services
 @using System.Text.Json
+@using System.Net;
 @rendermode InteractiveServer
+@inject NavigationManager NavManager
+
 
 <main class="container mt-4 scrollable-container">
     <style>       
@@ -410,18 +413,14 @@
     {
         try
         {
-            var token = await AuthService.GetTokenAsync();
-            CandidateService.SetBearerToken(token);
+            
             Candidates = (await CandidateService.GetSerializedCandidatesAsync()).ToList();
-            ErrorMessage = "";
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex) 
         {
-            ErrorMessage = $"Error loading candidates: {ex.Message}";
-            SuccessMessage = "";
+            Console.WriteLine($"An error occured {ex.Message}");
         }
     }
-
     private void GroupCandidates()
     {
         GroupedCandidates = Candidates

@@ -5,10 +5,17 @@
 @using WebUI.Services
 @using OnlineVotingSystem.api.DTOs.ElectionPosition
 @using OnlineVotingSystem.api.DTOs.User
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.IdentityModel.Tokens.Jwt;
+@using System.Net
+@using System.IdentityModel.Tokens.Jwt
+@using System.Text.Json
+@using System.ComponentModel.DataAnnotations
 @inject ICandidatesService CandidatesService
 @inject IUsersService UsersService
 @inject IElectionsService ElectionsService
 @rendermode InteractiveServer
+
 
 <main class="container mt-4 scrollable-container">
     <style>
@@ -200,23 +207,26 @@
     private List<PositionDetails> Positions = new();
     private string errorMessage = "";
     private string successMessage = "";
-    private string positionError = "";
     private bool isLoading = false;
 
-    [Inject] private ICandidatesService CandidateService { get; set; } = null!;
-    [Inject] private IAuthService AuthService { get; set; } = null!;
-    [Inject] private IPositionsService PositionsService { get; set; } = null!;
+    [Inject] private ICandidatesService CandidateService { get; set; }
+    [Inject] private IAuthService AuthService { get; set; }
+    [Inject] private IPositionsService PositionsService { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try 
         {
             var token = await AuthService.GetTokenAsync();
-            if (string.IsNullOrEmpty(token)) throw new Exception("Authentication required");
+            if (string.IsNullOrEmpty(token))
+            {
+                await HandleUnauthorized();
+                return;
+            }
             
-            CandidateService.SetBearerToken(token);
             
-            var positions = await PositionsService.GetPositionsAsync();
+            var positions = await PositionsService.GetPositionsAsync(); 
             Positions = positions?.ToList() ?? new();
             
             if (!Positions.Any())
@@ -234,7 +244,7 @@
     {
         isLoading = true;
         errorMessage = "";
-        positionError = "";
+        successMessage = "";
         
         try 
         {
@@ -264,11 +274,11 @@
                 PhotoUrl: "http://www.avatar"                
             );
 
+            // Modified to match your service interface
             await CandidateService.CreateCandidateAsync(candidateDto);
             successMessage = "Candidate added successfully!";
             ResetForm();
         }      
-
         catch (Exception ex)
         {
             errorMessage = $"Error: {ex.Message}";
@@ -276,12 +286,20 @@
         finally 
         {
             isLoading = false;
+            StateHasChanged();
         }
     }
+
+    private async Task HandleUnauthorized()
+    {
+        await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+
     private void ResetForm()
     {
         model = new CandidateFormModel();
-        positionError = "";
+        StateHasChanged();
     }
 
     public class CandidateFormModel

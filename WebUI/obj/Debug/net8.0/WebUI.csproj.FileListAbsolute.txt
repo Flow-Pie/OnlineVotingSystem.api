@@ -357,6 +357,7 @@
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Web.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Components.WebAssembly.Authentication.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.AspNetCore.Metadata.dll
+/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.Bcl.Memory.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.Data.Sqlite.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.dll
 /home/jon/VoteProject/OnlineVotingSystem.api/WebUI/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll

@@ -21,6 +21,7 @@ builder.Services.AddCors(options =>
 });
 
 // Register services as Scoped
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IElectionsService, ElectionService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
@@ -68,7 +69,7 @@ builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
-// builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>(); 
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>(); 
 
 builder.Logging.SetMinimumLevel(LogLevel.Debug);  // Log everything from Debug level
 builder.Logging.AddConsole();
