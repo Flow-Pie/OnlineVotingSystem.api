@@ -45,42 +45,41 @@ public static class CandidateEndpoints
         // Create Candidate Admin only
         group.MapPost("/", async (CreateCandidateDto newCandidate, OnlineVotingSystemContext dbContext) =>
         {
-            //find user by national id
-            var user = await dbContext.Users.FirstOrDefaultAsync(u=>u.NationalId.ToString().Equals(newCandidate.NationalId));
-            if(user==null) return Results.BadRequest("Invalid (national Id user not found");
-            if(user.IsAdmin) return Results.BadRequest("Admins cannot be candidates");//FIX : ADD ADMIN CHECK            
+            // Find user by national id
+            var user = await dbContext.Users
+                .FirstOrDefaultAsync(u => u.NationalId.ToString() == newCandidate.NationalId.Trim()); //Trim() for consistency
+            if(user == null) return Results.BadRequest("Invalid National ID (user not found)"); 
+            if(user.IsAdmin) return Results.BadRequest("Admins cannot be candidates");
+
+            // FIND & VALIDATE ELECTIONID AND POSITIONID COMBO
+            var electionPosition = await dbContext.ElectionPositions
+                .FirstOrDefaultAsync(_ => 
+                    _.PositionId == newCandidate.PositionId && 
+                    _.ElectionId == newCandidate.ElectionId);
             
-
-            var electionPosition = await dbContext.ElectionPositions//FIX : USE POSITION ID
-                .Include(_ => _.Election) // Include the Election to access its ID
-                .FirstOrDefaultAsync(_ => _.PositionId == newCandidate.PositionId);
-            if (electionPosition == null)
+            if(electionPosition == null)
             {
-                return Results.BadRequest("Invalid Position ID.");
-            }            
-
-            var electionId = electionPosition.Election!.Id;
-            var userId = user.Id;
-
-            // Check if the user is already a candidate in the same election
-            var alreadyCandidate = await dbContext.Candidates
-                .AnyAsync(c => c.UserId == userId && c.ElectionPosition!.ElectionId == electionId);
-
-            if (alreadyCandidate)
-            {
-                return Results.Conflict("This user is already a candidate in this election.");
+                return Results.BadRequest("Invalid Position ID or Election ID in the election"); 
             }
-           
 
+            // Check for existing candidate
+            var alreadyCandidate = await dbContext.Candidates
+                .AnyAsync(c => c.UserId == user.Id && //check using ElectionPositionId
+                            c.ElectionPositionId == electionPosition.Id); 
+
+            if(alreadyCandidate)
+            {
+                return Results.Conflict("This user is already a candidate for this position in the specified election");
+            }
 
             // Convert DTO to Entity
-            var candidate = newCandidate.ToEntity(user.Id, electionPosition.Id);
+            var candidate =newCandidate.ToEntity(user.Id, electionPosition.Id);
 
             // Save candidate to DB
             dbContext.Candidates.Add(candidate);
             await dbContext.SaveChangesAsync();
 
-            return Results.CreatedAtRoute("getElections", new { id = candidate.Id },
+            return Results.CreatedAtRoute("getElections", new { id = candidate.Id }, //FIX: Changed to getCandidate route
                 candidate.ToCandidateSerializedDto()); 
         }).RequireAuthorization("AdminOnly");
 
