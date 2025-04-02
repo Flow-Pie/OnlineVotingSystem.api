@@ -448,7 +448,7 @@
             }
             else
             {
-                DeleteError = "Failed to delete election. Please try again.";
+                DeleteError = $"Failed to delete election {electionId}.Are you Admin? Please try again.";
             }
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)

@@ -83,7 +83,7 @@ namespace WebUI.Services
                 return null;
             }
         }
-
+        
         public async Task<string?> GetUserIdAsync()
         {
             try
@@ -101,7 +101,8 @@ namespace WebUI.Services
                     return null;
                 }
 
-                var userId = ParseClaimFromToken(token, "nameid", true);
+                // Retrieve all claims with type "nameid" and select the first element (index 0)
+                var userId = ParseClaimFromToken(token, "nameid", isArray: true, index: 0);
                 if (!string.IsNullOrEmpty(userId))
                 {
                     _memoryCache.Set(UserIdCacheKey, userId, TimeSpan.FromMinutes(30));
@@ -139,27 +140,19 @@ namespace WebUI.Services
                     return null;
                 }
 
-                // Extract second element (Full Name) from "nameid" array claim
-                var nameIdValues = ParseClaimFromToken(token, ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(nameIdValues))
+                // Retrieve all "nameid" claims and select the second element (index 1) for the full name
+                var userName = ParseClaimFromToken(token, "nameid", isArray: true, index: 1);
+                if (!string.IsNullOrEmpty(userName))
                 {
-                    Console.WriteLine("[AuthService] WARNING - 'nameid' claim not found in token");
-                    return null;
+                    _memoryCache.Set(UserNameCacheKey, userName, TimeSpan.FromMinutes(30));
+                    Console.WriteLine($"[AuthService] Parsed and cached username: {userName}");
+                }
+                else
+                {
+                    Console.WriteLine("[AuthService] WARNING - Username not found in token");
                 }
 
-                var nameParts = nameIdValues.Split(',');
-                if (nameParts.Length < 2)
-                {
-                    Console.WriteLine("[AuthService] WARNING - 'nameid' claim does not contain a full name");
-                    return null;
-                }
-
-                string fullName = nameParts[1].Trim(); // Extract "Jane Wangari"
-
-                _memoryCache.Set(UserNameCacheKey, fullName, TimeSpan.FromMinutes(30));
-                Console.WriteLine($"[AuthService] Parsed and cached username: {fullName}");
-
-                return fullName;
+                return userName;
             }
             catch (Exception ex)
             {
@@ -169,45 +162,57 @@ namespace WebUI.Services
             }
         }
 
-
-        private string? ParseClaimFromToken(string token, string claimType, bool isNameId = false)
+        /// <summary>
+        /// jwt json example "nameid": ["af3bf570-3ab0-40df-ba5d-5798b682491c","Jane Wangari" ]
+        /// Parses a claim from a JWT token. If isArray is true, it gathers all claims with the specified type
+        /// and returns the element at the provided index.
+        /// </summary>
+        
+        private string? ParseClaimFromToken(string token, string claimType, bool isArray, int index)
         {
             try
             {
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
-                var claim = jwtToken.Claims.FirstOrDefault(c => c.Type == claimType);
-
-                if (claim == null)
+                
+                // Get all claims of the specified type
+                var claims = jwtToken.Claims.Where(c => c.Type == claimType).Select(c => c.Value).ToArray();
+                
+                if (claims == null || claims.Length == 0)
                 {
                     Console.WriteLine($"[AuthService] WARNING - Claim {claimType} not found in token");
                     return null;
                 }
-
-                if (isNameId)
+                
+                if (isArray)
                 {
-                    try
+                    // Print the retrieved claim values for debugging
+                    Console.WriteLine($"[AuthService] Retrieved array claim {claimType}: {string.Join(" | ", claims)}");
+                    if (claims.Length > index)
                     {
-                        var nameidValues = JsonSerializer.Deserialize<List<string>>(claim.Value);
-                        return nameidValues?.FirstOrDefault();
+                        return claims[index];
                     }
-                    catch (JsonException ex)
+                    else
                     {
-                        Console.WriteLine($"[AuthService] WARNING - Failed to deserialize nameid claim: {ex.Message}");
-                        Console.WriteLine("Using raw value instead");
-                        return claim.Value;
+                        Console.WriteLine($"[AuthService] WARNING - Claim {claimType} does not have enough elements; found {claims.Length} elements, needed index {index}");
+                        return null;
                     }
                 }
-
-                return claim.Value;
+                else
+                {
+                    return claims[0];
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[AuthService] ERROR - Failed to parse {claimType} from token: {ex.Message}");
+                Console.WriteLine($"[AuthService] ERROR - Failed to parse {claimType}: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
                 return null;
             }
         }
+
+
+
 
         public void SetAuthHeader(string token)
         {
@@ -284,7 +289,7 @@ namespace WebUI.Services
             {
                 Console.WriteLine($"[AuthService] CRITICAL ERROR - Login process failed: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
-                throw new Exception($"Login failed due to an unexpected error, Either wrong credentials entered or check your network: {ex.Message}", ex);
+                throw new Exception($"Login failed due to an unexpected error, Either wrong credentials: {ex.Message}", ex);
             }
         }
 

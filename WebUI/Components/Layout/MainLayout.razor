@@ -1,29 +1,27 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
-@inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JSRuntime
+
 <head>    
-
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">  
-
-    <!-- Custom Styles -->
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="WebUI.styles.css" />   
-   
 </head>
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    @if (!ShouldHideSidebar())
+    {
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    }
 
     <main>
         <div class="top-row px-4">
-             <button class="btn btn-outline-danger" @onclick="Logout">
-                        <i class="bi bi-box-arrow-right"></i> Logout
+            <button class="btn btn-outline-danger" @onclick="async () => await Logout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
             </button>
         </div>
 
@@ -39,23 +37,27 @@
     <a class="dismiss">🗙</a>
 </div>
 
-@code
-{
+@code {
+    private bool ShouldHideSidebar()
+    {
+        var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        return currentPath.StartsWith("login", StringComparison.OrdinalIgnoreCase) ||
+               currentPath.StartsWith("register", StringComparison.OrdinalIgnoreCase) ||
+               currentPath.StartsWith("home", StringComparison.OrdinalIgnoreCase);
+    }
+
     private async Task Logout()
     {
         try
         {
-            @* await AuthService.LogoutAsync(); // Call the logout method to remove token
-            await JSRuntime.InvokeVoidAsync("console.log", "User logged out"); // Debugging
-
-            var customAuthProvider = AuthStateProvider as CustomAuthStateProvider;
-            customAuthProvider?.NotifyUserLogout(); // Notify Blazor about logout *@
-
-            Navigation.NavigateTo("/login", true); // Redirect to home page
+            await AuthService.LogoutAsync();
+            await JSRuntime.InvokeVoidAsync("console.log", "User logged out");
+            Navigation.NavigateTo("/login", forceLoad: true);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Logout failed: {ex.Message}");
+            // Consider showing an error message to the user
         }
     }
 }
