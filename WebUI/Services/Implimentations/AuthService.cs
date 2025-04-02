@@ -27,6 +27,8 @@ namespace WebUI.Services
         private const string UserNameCacheKey = "auth_username_cache";
         private const string TokenStorageKey = "authToken";
         private const string RememberTokenKey = "rememberToken";
+        private const string UserRoleCacheKey = "user_role_cache";
+
 
         public AuthService(
             HttpClient httpClient,
@@ -73,13 +75,16 @@ namespace WebUI.Services
                     Console.WriteLine(ex.StackTrace);
                 }
 
-                Console.WriteLine("[AuthService] WARNING - No valid token found");
+                // 3. No token found - navigate to login
+                Console.WriteLine("[AuthService] WARNING - No valid token found, redirecting to login");
+                _navManager.NavigateTo("/login", forceLoad: true);
                 return null;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[AuthService] CRITICAL ERROR - GetTokenAsync failed: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
+                _navManager.NavigateTo("/login", forceLoad: true);
                 return null;
             }
         }
@@ -161,6 +166,52 @@ namespace WebUI.Services
                 return null;
             }
         }
+        public async Task<string?> GetUserRoleAsync()
+            {
+                try
+                {
+                    // 1. Check memory cache for user role
+                    if (_memoryCache.TryGetValue(UserRoleCacheKey, out string? cachedRole))
+                    {
+                        Console.WriteLine("[AuthService] Retrieved user role from memory cache");
+                        return cachedRole;
+                    }
+
+                    // 2. Fallback to the token to get the role
+                    var token = await GetTokenAsync();
+                    if (string.IsNullOrEmpty(token))
+                    {
+                        Console.WriteLine("[AuthService] WARNING - Cannot get user role (no token available)");
+                        return null;
+                    }
+
+                    // Check if isAdmin claim exists and is true
+                    var isAdmin = ParseClaimFromToken(token, "isAdmin", isArray: false, index: 0);
+                    if (!string.IsNullOrEmpty(isAdmin) && bool.TryParse(isAdmin, out bool isAdminValue) && isAdminValue)
+                    {
+                        var role = "Admin";
+                        _memoryCache.Set(UserRoleCacheKey, role, TimeSpan.FromMinutes(30));
+                        Console.WriteLine($"[AuthService] Parsed and cached user role: {role}");
+                        return role;
+                    }
+                    else
+                    {
+                        var role = "User";
+                        _memoryCache.Set(UserRoleCacheKey, role, TimeSpan.FromMinutes(30));
+                        Console.WriteLine($"[AuthService] Parsed and cached user role: {role}");
+                        return role;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AuthService] ERROR - Failed to get user role: {ex.Message}");
+                    Console.WriteLine(ex.StackTrace);
+                    return null;
+                }
+            }
+
+
+
 
         /// <summary>
         /// jwt json example "nameid": ["af3bf570-3ab0-40df-ba5d-5798b682491c","Jane Wangari" ]
@@ -175,7 +226,12 @@ namespace WebUI.Services
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
                 
-                // Get all claims of the specified type
+                // Log the claims to inspect their structure
+                foreach (var claim in jwtToken.Claims)
+                {
+                    Console.WriteLine($"Claim type: {claim.Type}, value: {claim.Value}");
+                }
+
                 var claims = jwtToken.Claims.Where(c => c.Type == claimType).Select(c => c.Value).ToArray();
                 
                 if (claims == null || claims.Length == 0)
@@ -183,10 +239,9 @@ namespace WebUI.Services
                     Console.WriteLine($"[AuthService] WARNING - Claim {claimType} not found in token");
                     return null;
                 }
-                
+
                 if (isArray)
                 {
-                    // Print the retrieved claim values for debugging
                     Console.WriteLine($"[AuthService] Retrieved array claim {claimType}: {string.Join(" | ", claims)}");
                     if (claims.Length > index)
                     {
@@ -210,6 +265,7 @@ namespace WebUI.Services
                 return null;
             }
         }
+
 
 
 
@@ -239,7 +295,7 @@ namespace WebUI.Services
         {
             try
             {
-                Console.WriteLine($"[AuthService] Attempting login for Indetifier: {loginRequest.Identifier}");
+                Console.WriteLine($"[AuthService] Attempting login for Identifier: {loginRequest.Identifier}");
                 var response = await _httpClient.PostAsJsonAsync("/auth/login", loginRequest);
 
                 if (!response.IsSuccessStatusCode)
@@ -267,11 +323,10 @@ namespace WebUI.Services
                     _memoryCache.Set(TokenCacheKey, result.AccessToken, cacheOptions);
                     _memoryCache.Remove(UserIdCacheKey);
                     _memoryCache.Remove(UserNameCacheKey);
-                    
+                    _memoryCache.Remove(UserRoleCacheKey); // Remove 
                     ((CustomAuthStateProvider)_authProvider).NotifyUserAuthentication(result.AccessToken);
                     Console.WriteLine($"[AuthService] Login successful for email: {loginRequest.Identifier}");
                 }
-                
                 catch (HttpRequestException ex)
                 {
                     Console.WriteLine($"Login error: {ex.Message}");
@@ -293,6 +348,7 @@ namespace WebUI.Services
             }
         }
 
+
         public async Task LogoutAsync()
         {
             try
@@ -301,10 +357,12 @@ namespace WebUI.Services
                 
                 await _localStorage.RemoveItemAsync(TokenStorageKey);
                 await _localStorage.RemoveItemAsync(RememberTokenKey);
+                await _localStorage.RemoveItemAsync(UserRoleCacheKey); 
 
                 _memoryCache.Remove(TokenCacheKey);
                 _memoryCache.Remove(UserIdCacheKey);
                 _memoryCache.Remove(UserNameCacheKey);
+                _memoryCache.Remove(UserRoleCacheKey); 
 
                 _httpClient.DefaultRequestHeaders.Authorization = null;
                 
