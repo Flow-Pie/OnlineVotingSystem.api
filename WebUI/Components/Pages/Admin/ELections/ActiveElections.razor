@@ -172,7 +172,7 @@
                                                                         </small>
                                                                     </p>
                                                                 </div>
-                                                                
+
                                                             </AuthorizeView>
 
 
@@ -193,10 +193,7 @@
                                                                         <div class="card-body">
                                                                             <div class="d-flex justify-content-between align-items-center">
                                                                                 <div>
-                                                                                    <h6 class="mb-0">@position.Position</h6>
-                                                                                    <small class="text-muted">
-                                                                                        @CountCandidatesByPosition(ElectionsViewList, position.Id) candidates
-                                                                                    </small>
+                                                                                    <h6 class="mb-0">@position.Position</h6>                                                                                    
                                                                                 </div>
                                                                                 <span class="badge bg-primary bg-opacity-25 text-primary">
                                                                                     10 seat(s) max
@@ -298,9 +295,28 @@
                         </div>
                     }
                 }
-            </main>
+                 <footer class="mt-5 pt-4 border-top border-enterprise-border">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-muted small">
+                                <i class="bi bi-shield-lock me-2"></i>Secure Connection • AES-256 Encrypted
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="text-muted small">
+                                v2.8.1 • © 2025 Election Systems International
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </main>            
 
-         </Authorized>       
+         </Authorized> 
+         <NotAuthorized>
+                @{
+                    NavManager.NavigateTo("/access-denied");
+                }
+        </NotAuthorized>      
     </AuthorizeView>
 </CascadingAuthenticationState>
 }else{
@@ -309,12 +325,13 @@
 
 
 @code {
+    //dependacy injection
     [Inject] public required IElectionsService ElectionsService { get; set; }
     [Inject] public required IUsersService UsersService { get; set; }
     [Inject] public required IPositionsService PositionsService { get; set; }
     [Inject] public required IAuthService AuthService { get; set; }
 
-
+    //data fields to hold service data
     private Dictionary<Guid, string> UserNames = new();
     private Dictionary<Guid, string> UserEmails = new();
     private List<ElectionDetailsDto> ElectionsModel = new();
@@ -334,14 +351,7 @@
     private Timer? _electionTimer;
     private DateTime _currentTime = DateTime.UtcNow;
  
-
-    public int CountCandidatesByPosition(List<ElectionResultsView> results, Guid targetPositionId) 
-    => results
-        .Where(r => r.PositionId.Equals(targetPositionId))
-        .Select(r => r.CandidateId)
-        .Distinct()
-        .Count();
-
+    //load required data when page is initialized
     protected override async Task OnInitializedAsync()
     {
 
@@ -356,6 +366,7 @@
         try        
         {
             ElectionsViewList= (await ElectionsService.GetElectionsResultsAsync()).ToList();
+            Console.WriteLine($"[ACTIVE ELECTIONS] Total records: {ElectionsViewList.Count}");
             ElectionsModel = (await ElectionsService.GetElectionsAsync()).ToList();
             UsersModel = (await UsersService.GetUsersAsync()).ToList();
             FilteredElections = new List<ElectionDetailsDto>(ElectionsModel);
@@ -377,12 +388,14 @@
         }
     }
 
+    //getters
     private string GetCreatorName(Guid userId) => 
         UserNames.TryGetValue(userId, out var name) ? name : "Unknown";
 
     private string GetCreatorEmail(Guid userId) => 
         UserEmails.TryGetValue(userId, out var email) ? email : "Unknown";
 
+    //filter elections
     private void FilterElections()
     {
         try
@@ -407,7 +420,7 @@
         StateHasChanged();
     }
 
-
+    //toogle show details
     private async Task ToggleDetails(Guid electionId)
     {
         var currentState = ElectionDetailsState.GetValueOrDefault(electionId, false);
@@ -442,6 +455,7 @@
         DeleteError = null;
     }
 
+    //delete business logic
     private async Task DeleteElection(Guid electionId)
     {
         IsDeleting = true;
@@ -499,21 +513,22 @@
         //    startTime = now.AddHours(2);
          //   endTime = now.AddHours(4);
 
-        // Scenario 2: Election is active
-        //startTime = now.AddHours(-1);
-        //endTime = now.AddHours(2);
+        //Scenario 2: Election is active -so that all elections you create appear active
+        startTime = now.AddHours(-1);
+        endTime = now.AddHours(2);
 
         // Scenario 3: Election has ended
         //startTime = now.AddHours(-3);
        // endTime = now.AddHours(-1);
 
        //scenario 4: real election
-        startTime = election.StartTime;
-        endTime = election.EndTime;
+        @* startTime = election.StartTime;
+        endTime = election.EndTime; *@
 
         var startDiff = startTime - now;
         var endDiff = endTime - now;
-
+        
+        //formatings the start and end time for the election
         if (startDiff.TotalSeconds > 0)
         {
             return ($"Starts in {FormatTimeSpan(startDiff)}", ElectionStatus.Upcoming);
@@ -530,6 +545,7 @@
     private string FormatTimeSpan(TimeSpan span) => 
         $"{(int)span.TotalDays}d {span.Hours}h {span.Minutes}m {span.Seconds}s";
 
+    //getter for the election status class
     private string GetStatusBadgeClass(ElectionDetailsDto election) =>
         GetTimeRemaining(election).status switch
         {
@@ -541,6 +557,7 @@
 
     private enum ElectionStatus { Upcoming, Active, Ended }
 
+    // frees the memory 
     public void Dispose()
     {
         _electionTimer?.Dispose();

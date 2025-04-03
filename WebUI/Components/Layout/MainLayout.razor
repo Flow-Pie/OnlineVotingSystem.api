@@ -19,7 +19,8 @@
     }
 
     <main>
-        @if (!ShouldHideSidebar()){
+        @if (!ShouldHideSidebar())
+        {
             <div class="top-row px-4">
                 @* <button class="btn btn-outline-danger" @onclick="async () => await Logout()">
                     <i class="bi bi-box-arrow-right"></i> Logout
@@ -28,10 +29,9 @@
         }
 
         <article class="content px-4">           
-                @Body   
-
+            @Body               
         </article>
-    </main>
+    </main>   
 </div>
 
 <div id="blazor-error-ui">
@@ -46,7 +46,8 @@
         var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
         return currentPath.StartsWith("login", StringComparison.OrdinalIgnoreCase) ||
                currentPath.StartsWith("register", StringComparison.OrdinalIgnoreCase) ||
-               currentPath.StartsWith("home", StringComparison.OrdinalIgnoreCase);               
+               currentPath.StartsWith("home", StringComparison.OrdinalIgnoreCase) ||
+               currentPath.StartsWith("access-denied", StringComparison.OrdinalIgnoreCase);               
     }
 
     private async Task Logout()

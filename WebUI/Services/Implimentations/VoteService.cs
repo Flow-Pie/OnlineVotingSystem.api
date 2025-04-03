@@ -46,7 +46,6 @@ namespace WebUI.Services
             if (string.IsNullOrWhiteSpace(errorMessage))
                 return "Unknown error occurred.";
 
-            // Return the first line of the error message (up to the first newline).
             var firstLine = errorMessage.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)[0];
             return firstLine;
         }

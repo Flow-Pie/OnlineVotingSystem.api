@@ -22,6 +22,10 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BcHAucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Layout/Footer.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvRm9vdGVyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Admin/Candidates/ActiveCandidate.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BZG1pbi9DYW5kaWRhdGVzL0FjdGl2ZUNhbmRpZGF0ZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 

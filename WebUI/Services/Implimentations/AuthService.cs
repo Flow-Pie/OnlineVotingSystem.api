@@ -29,13 +29,13 @@ namespace WebUI.Services
         private const string RememberTokenKey = "rememberToken";
         private const string UserRoleCacheKey = "user_role_cache";
 
-
+        //pass all required services to the constructor so that they can be injected automatically by asp whenever we call authservice
         public AuthService(
             HttpClient httpClient,
             ILocalStorageService localStorage,
             AuthenticationStateProvider authProvider,
             NavigationManager navManager,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache)//CRITICAL SERVICE-WITHOUT THIS THE APP CRASHES WHEN RETRIEVAL OF TOKEN FROM LOCAL STORAGE FAILS ie jsInterop error
         {
             _httpClient = httpClient;
             _localStorage = localStorage;
@@ -89,7 +89,7 @@ namespace WebUI.Services
                 return null;
             }
         }
-        
+        //get authenticated user id
         public async Task<string?> GetUserIdAsync()
         {
             try
@@ -220,6 +220,7 @@ namespace WebUI.Services
         /// and returns the element at the provided index.
         /// </summary>
         
+        /// <returns>The value of the claim, or null if not found.</returns>
         private string? ParseClaimFromToken(string token, string claimType, bool isArray, int index)
         {
             try
@@ -299,6 +300,7 @@ namespace WebUI.Services
             }
         }
 
+        // Basic JWT structure validation without JS dependencies
         private bool IsValidTokenFormat(string token)
         {
             // Basic JWT structure validation
@@ -310,7 +312,7 @@ namespace WebUI.Services
         }
 
 
-
+//set auth header to each htttp request
         public void SetAuthHeader(string token)
         {
             try
@@ -331,7 +333,7 @@ namespace WebUI.Services
                 Console.WriteLine(ex.StackTrace);
             }
         }
-
+//login method
         public async Task<LoginResponseDto> LoginAsync(LoginUserDto loginRequest)
         {
             try
@@ -389,7 +391,7 @@ namespace WebUI.Services
             }
         }
 
-
+//CRITICAL - MEMORY CACHE MUST PROPERLY BE INVALIDATED
         public async Task LogoutAsync()
         {
             try

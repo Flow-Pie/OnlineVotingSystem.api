@@ -6,527 +6,757 @@
 @using OnlineVotingSystem.api.DTOs.Vote;
 @inject NavigationManager NavManager
 @inject IVoteService VotesService
+@inject IAuthService AuthService
 @rendermode InteractiveServer
 
+@if(AuthService.IsAuthenticated()){
+<CascadingAuthenticationState>
+     <AuthorizeView Roles="User">
+        <Authorized Context="adminContext">
+            <main class="voting-container bg-light scrollable-container">
 
-<main class="voting-container bg-light scrollable-container">
+                <style>
+                    .dashboard-header {
+                        box-shadow: 0 2px 8px rgba(42, 92, 141, 0.08);
+                    }
+
+                    .brand-accent-line {
+                        width: 4px;
+                        height: 40px;
+                        background: var(--enterprise-primary);
+                        border-radius: 2px;
+                    }
+
+                    .user-status-card {
+                        border-color: var(--enterprise-border)!important;
+                        transition: box-shadow 0.2s ease;
+                    }
+
+                    .user-status-card:hover {
+                        box-shadow: 0 1px 4px rgba(42, 92, 141, 0.08);
+                    }
+
+                    .avatar-sm {
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .btn-icon {
+                        width: 36px;
+                        height: 36px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 8px!important;
+                        transition: all 0.2s ease;
+                    }
+
+                    .btn-icon:hover {
+                        background-color: rgba(42, 92, 141, 0.08)!important;
+                    }
+
+                    .voting-status-alert {
+                        background-color: var(--enterprise-chart-bg);
+                        border: 1px solid var(--enterprise-border);
+                    }
+
+                    .enterprise-modal {
+                        --modal-radius: 12px;
+                        --step-icon-size: 32px;
+                    }
+
+                    .modal-content {
+                        border-radius: var(--modal-radius) !important;
+                        border: 1px solid var(--enterprise-border);
+                    }
+
+                    .step-icon {
+                        width: var(--step-icon-size);
+                        height: var(--step-icon-size);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: var(--enterprise-border);
+                        transition: all 0.3s ease;
+                    }
+
+                    .step-icon.active {
+                        background: var(--enterprise-primary);
+                        color: white;
+                        box-shadow: 0 4px 8px rgba(42, 92, 141, 0.15);
+                    }
+
+                    .step-icon.completed {
+                        background: var(--enterprise-success);
+                        color: white;
+                    }
+
+                    .encryption-badge {
+                        text-align: center;
+                        padding: 1rem;
+                        border: 1px solid var(--enterprise-border);
+                        border-radius: 8px;
+                        min-width: 100px;
+                        background: rgba(255, 255, 255, 0.9);
+                    }
+
+                    .animation-arrow {
+                        color: var(--enterprise-secondary);
+                        align-self: center;
+                        animation: pulse 1.5s infinite;
+                        font-size: 1.5rem;
+                    }
+
+                    .progress-line {
+                        position: absolute;
+                        top: 16px;
+                        left: 50px;
+                        right: 50px;
+                        z-index: 0;
+                    }
+
+                    .submission-steps {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    @@keyframes pulse {
+                        0% { opacity: 1; transform: scale(1); }
+                        50% { opacity: 0.5; transform: scale(1.1); }
+                        100% { opacity: 1; transform: scale(1); }
+                    }
+
+                    .badge-text {
+                        font-family: 'Courier New', monospace;
+                        font-size: 0.7rem;
+                        font-weight: 600;
+                        margin-top: 0.5rem;
+                    }
+                                        </style>
    
-
-    <!-- Loading Overlay -->
-    @if (isLoading)
-    {
-        <div class="position-fixed top-0 start-0 vw-100 vh-100 bg-white opacity-75 d-flex justify-content-center align-items-center">
-            <div class="spinner-border" style="width: 3rem; height: 3rem; color: var(--enterprise-primary)" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    }
-
-    <div class="container py-5">
-        <!-- Enterprise Header Section -->
-    <header class="bg-gradient-primary shadow-lg rounded-3 p-4 mb-5" style="border: 1px solid rgba(42, 92, 141, 0.15); background: linear-gradient(135deg, rgba(245, 248, 250, 0.9) 0%, white 100%)">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <!-- Left Section - Branding and Security -->
-            <div class="d-flex align-items-center gap-3">
-                <div class="border-start border-3 ps-3" style="border-color: var(--enterprise-accent)!important">
-                    <div class="d-flex align-items-baseline">
-                        <i class="bi bi-shield-lock me-2" style="color: var(--enterprise-primary); font-size: 1.25rem"></i>
-                        <h2 class="h3 mb-0 fw-bold" style="color: var(--enterprise-primary); letter-spacing: -0.5px; text-shadow: 0 1px 1px rgba(0,0,0,0.05)">
-                            National Elections 2027
-                        </h2>
+                <!-- Loading Overlay -->
+                @if (isLoading)
+                {
+                    <div class="position-fixed top-0 start-0 vw-100 vh-100 bg-white opacity-75 d-flex justify-content-center align-items-center">
+                        <div class="spinner-border" style="width: 3rem; height: 3rem; color: var(--enterprise-primary)" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
                     </div>
-                    <div class="d-flex mt-1 flex-column">
-                         <small class="badge rounded-pill me-3" style="background-color: rgba(25, 135, 84, 0.1); color: var(--enterprise-primary); font-size:14px">
-                            <i class="bi bi-patch-check-fill me-1" style="color: var(--enterprise-success)"></i>
-                            Verified Voter
-                        </small>
-                        <small class="text-muted small me-3 rounded-pill" style="font-family: 'Courier New', monospace; font-weight: 600; background-color: rgba(25, 135, 84, 0.1)">
-                            <i class="bi bi-person-badge me-1"></i> Username: @username
-                        </small>
-                        <small class="text-muted small me-3 rounded-pill" style="font-family: 'Courier New', monospace; font-weight: 600; font-size:11px; background-color: rgba(25, 135, 84, 0.1)">
-                            <i class="bi bi-person-badge me-1"></i> Voter ID: @userId
-                        </small>                       
+                }
+
+                <div class="container py-5">
+                <header class="dashboard-header bg-white border-bottom pb-3 mb-5" 
+                        style="border-color: var(--enterprise-border)!important">
+                    <div class="container-fluid">
+                        <div class="row align-items-center gx-5">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="brand-accent-line"></div>
+                                    <div class="ps-3">
+                                        <h1 class="h4 mb-1 fw-semibold text-primary">
+                                            <i class="bi bi-shield-lock me-2"></i>
+                                            National Elections 2027
+                                        </h1>
+                                        <div class="text-muted small">
+                                            Election Management System
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- User Status Column -->
+                            <div class="col-md-4">
+                                <div class="user-status-card border rounded p-2 bg-light">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle me-2">
+                                                <i class="bi bi-person-gear"></i>
+                                            </div>
+                                            <div>
+                                                <div class="small fw-medium text-primary">@username</div>
+                                                <div class="text-muted x-small">ID: @userId</div>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success bg-opacity-25 text-success small">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Verified
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Status Column -->
+                            <div class="col-md-4">
+                                <div class="d-flex justify-content-end align-items-center gap-3">
+                                    <div class="system-status">
+                                        <div class="d-flex align-items-center text-success">
+                                            <i class="bi bi-circle-fill me-1 small"></i>
+                                            <span class="small fw-medium">Operational</span>
+                                        </div>
+                                        <div class="text-muted x-small">Last Updated: @DateTime.Now.ToString("HH:mm:ss")</div>
+                                    </div>
+                                    <div class="vr"></div>
+                                    <button class="btn btn-icon" 
+                                            @onclick="ToggleHelp"
+                                            title="Get Assistance">
+                                        <i class="bi bi-headset text-primary"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Voting Status Bar -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="voting-status-alert alert border-start-4 rounded py-2 px-3 mb-0"
+                                    style="border-left-color: var(--enterprise-primary)!important">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-megaphone me-2 text-primary"></i>
+                                            <div>
+                                                <span class="small fw-medium text-primary">Current Phase:</span>
+                                                <span class="small ms-2 text-muted">Active Voting Session</span>
+                                            </div>
+                                        </div>
+                                        <div class="badge bg-primary bg-opacity-10 text-primary small">
+                                            <i class="bi bi-clock-history me-1"></i>
+                                            Ends: 2027-08-09 18:00
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="voting-status-alert alert border-start-4 rounded py-2 px-3 mb-0"
+                                    style="border-left-color: var(--enterprise-primary)!important">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-megaphone me-2 text-primary"></i>
+                                            <div>
+                                                <span class="small fw-medium text-primary">Status : </span>
+                                                <span class="small ms-2 text-muted">@voteStatus</span>
+                                            </div>
+                                        </div>                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </header>
 
-                <div class="vr opacity-25" style="height: 2rem"></div>
-                
-                <div class="d-flex align-items-center px-3 py-1 rounded-pill" style="background-color: rgba(25, 135, 84, 0.1)">
-                    <i class="bi bi-shield-check me-2" style="color: var(--enterprise-success); font-size: 1.1rem"></i>
-                    <span class="small fw-medium" style="color: var(--enterprise-success)">
-                        Secure Session Active
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Right Section - Actions -->
-            <div class="d-flex align-items-center gap-3">
-                <div class="vr opacity-25 d-none d-md-block" style="height: 2rem"></div>
-                
-                <button class="btn d-flex align-items-center rounded-pill" 
-                        @onclick="ToggleHelp"
-                        style="border: 1px solid var(--enterprise-border); 
-                            background-color: white;
-                            color: var(--enterprise-primary);
-                            padding: 0.5rem 1.25rem;
-                            transition: all 0.2s ease"
-                        onmouseover="this.style.backgroundColor='var(--enterprise-primary)'; this.style.color='white'" 
-                        onmouseout="this.style.backgroundColor='white'; this.style.color='var(--enterprise-primary)'">
-                    <i class="bi bi-life-preserver me-2"></i>
-                    <span class="fw-medium">Voting Assistance</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Status Alert -->
-        <div class="alert fade show shadow-sm mb-0" 
-            role="alert"
-            style="width: 340px; 
-                    border-left: 3px solid var(--enterprise-primary);
-                    background-color: white;
-                    border-radius: 8px;
-                    padding: 1rem">
-            <div class="d-flex align-items-center">
-                <div class="me-3 p-2 rounded-circle" style="background-color: rgba(42, 92, 141, 0.1)">
-                    <i class="bi @statusIcon fs-5" style="color: var(--enterprise-primary)"></i>
-                </div>
-                <div>
-                    <h6 class="alert-heading mb-1 fw-semibold" style="color: var(--enterprise-primary)">Voting Status</h6>
-                    <p class="small mb-0 fw-medium" style="color: var(--enterprise-secondary)">
-                        @voteStatus
-                        <span class="ms-2 badge bg-transparent border border-success text-success small fw-normal py-1">
-                            <i class="bi bi-check-circle-fill me-1"></i>Live
-                        </span>
-                    </p>
-                </div>                    
-            </div>
-        </div>
-    </header>
-
-        <!-- Voting Progress -->
-        @if (electionPositions.Any())
-        {
-            <div class="progress-steps mb-5 mx-5">
-                <div class="d-flex justify-content-between position-relative">
-                    <div class="progress position-absolute w-100" style="height: 3px; top: 20px">
-                        <div class="progress-bar" role="progressbar" 
-                            style="width: @(progressPercentage)%; background-color: var(--enterprise-primary)"></div>
-                    </div>
-                    
-                    @foreach (var (position, index) in electionPositions.Select((p, i) => (p, i)))
+                    <!-- Voting Progress -->
+                    @if (electionPositions.Any())
                     {
-                        <div class="step-item d-flex flex-column align-items-center">
-                            <div class="step-icon text-white rounded-circle d-flex justify-content-center align-items-center mb-2"
-                                style="width: 40px; height: 40px; background-color: @(currentStep > index ? "var(--enterprise-success)" : currentStep == index ? "var(--enterprise-primary)" : "var(--enterprise-secondary)")">
-                                @if(currentStep > index) {
-                                    <i class="bi bi-check2"></i>
-                                } else {
-                                    @(index + 1)
+                        <div class="progress-steps mb-5 mx-5">
+                            <div class="d-flex justify-content-between position-relative">
+                                <div class="progress position-absolute w-100" style="height: 3px; top: 20px">
+                                    <div class="progress-bar" role="progressbar" 
+                                        style="width: @(progressPercentage)%; background-color: var(--enterprise-primary)"></div>
+                                </div>
+                                
+                                @foreach (var (position, index) in electionPositions.Select((p, i) => (p, i)))
+                                {
+                                    <div class="step-item d-flex flex-column align-items-center">
+                                        <div class="step-icon text-white rounded-circle d-flex justify-content-center align-items-center mb-2"
+                                            style="width: 40px; height: 40px; background-color: @(currentStep > index ? "var(--enterprise-success)" : currentStep == index ? "var(--enterprise-primary)" : "var(--enterprise-secondary)")">
+                                            @if(currentStep > index) {
+                                                <i class="bi bi-check2"></i>
+                                            } else {
+                                                @(index + 1)
+                                            }
+                                        </div>
+                                        <small class="text-center" style="color: var(--enterprise-secondary)">@position.Position</small>
+                                    </div>
                                 }
                             </div>
-                            <small class="text-center" style="color: var(--enterprise-secondary)">@position.Position</small>
                         </div>
                     }
-                </div>
-            </div>
-        }
 
-        <!-- Main Voting Interface -->
-        @if (electionPositions.Any() && currentStep < electionPositions.Count())
-        {
-            var currentPosition = electionPositions.ElementAt(currentStep);
-            <section class="bg-white rounded-3 shadow-sm p-4">
-                <div class="d-flex align-items-center mb-4 p-3 rounded-top" style="background-color: var(--enterprise-primary); border-bottom: 2px solid var(--enterprise-accent)">
-                <div class="d-flex align-items-baseline flex-wrap">
-                    <h3 class="h4 mb-0 text-white fw-semibold me-3" style="letter-spacing: -0.5px; font-size: 1.5rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1)">
-                        <i class="bi bi-person-badge me-2"></i>
-                        @currentPosition.Position
-                    </h3>
-                    <span class="badge rounded-pill align-self-center py-2 px-3" 
-                        style="background-color: white; color: var(--enterprise-primary); font-weight: 600; letter-spacing: 0.5px">
-                        <i class="bi bi-file-text me-1"></i>
-                        Page @(currentPage + 1) of @totalPages
-                    </span>
-                </div>
-                <div class="ms-auto">
-                    <div class="input-group border-0 shadow-sm" style="width: 280px; border-radius: 20px; overflow: hidden">
-                        <span class="input-group-text bg-white border-0">
-                            <i class="bi bi-search" style="color: var(--enterprise-secondary)"></i>
-                        </span>
-                        <input type="text" 
-                            class="form-control border-0 ps-0" 
-                            placeholder="Search candidates..." 
-                            @bind="searchQuery"
-                            style="color: var(--enterprise-primary); font-weight: 500">
-                    </div>
-                </div>
-            </div>
-
-                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-                    @foreach (var candidate in filteredCandidates)
+                    <!-- Main Voting Interface -->
+                    @if (electionPositions.Any() && currentStep < electionPositions.Count())
                     {
-                        <div class="col">
-                            <div class="card h-100" style="border-color: @(selectedCandidate?.Id == candidate.Id ? "var(--enterprise-primary)" : "var(--enterprise-border)")">
-                                <div class="card-header position-relative bg-transparent">
-                                    <div class="avatar-lg rounded-circle d-inline-flex align-items-center justify-content-center"
-                                         style="border-color: var(--enterprise-border)">
-                                        <i class="bi bi-person-badge-fill fs-1" style="color: var(--enterprise-primary)"></i>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <h5 class="card-title mb-3" style="color: var(--enterprise-primary)">@candidate.Name</h5>
-                                    <div class="d-flex gap-2 mb-3">
-                                        <span class="badge fs-6" 
-                                              style="background-color: var(--enterprise-chart-bg); color: var(--enterprise-primary)">
-                                            @candidate.Party
-                                        </span>                                      
-                                    </div>
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-12">
-                                            <div class="d-flex align-items-center" style="color: var(--enterprise-secondary)">
-                                                <i class="bi bi-person-badge me-2"></i>
-                                                <small>8 yrs Public Service</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="d-flex align-items-center" style="color: var(--enterprise-secondary)">
-                                                <i class="bi bi-award me-2"></i>
-                                                <small>@candidate.Bio</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-grid gap-2">
-                                        <button class="btn" 
-                                                style="background-color: @(selectedCandidate?.Id == candidate.Id ? "var(--enterprise-success)" : "var(--enterprise-primary)"); color: white"
-                                                @onclick="() => ShowConfirmation(candidate)">
-                                            <i class="bi bi-check2-circle me-2"></i>
-                                            @(selectedCandidate?.Id == candidate.Id ? "Confirmed" : "Select Candidate")
-                                        </button>
-                                        <button class="btn btn-link text-decoration-none" 
-                                                style="color: var(--enterprise-accent)"
-                                                @onclick="() => ShowCandidateModal(candidate)">
-                                            View Full Profile <i class="bi bi-arrow-right"></i>
-                                        </button>
-                                    </div>
+                        var currentPosition = electionPositions.ElementAt(currentStep);
+                        <section class="bg-white rounded-3 shadow-sm p-4">
+                            <div class="d-flex align-items-center mb-4 p-3 rounded-top" style="background-color: var(--enterprise-primary); border-bottom: 2px solid var(--enterprise-accent)">
+                            <div class="d-flex align-items-baseline flex-wrap">
+                                <h3 class="h4 mb-0 text-white fw-semibold me-3" style="letter-spacing: -0.5px; font-size: 1.5rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1)">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    @currentPosition.Position
+                                </h3>
+                                <span class="badge rounded-pill align-self-center py-2 px-3" 
+                                    style="background-color: white; color: var(--enterprise-primary); font-weight: 600; letter-spacing: 0.5px">
+                                    <i class="bi bi-file-text me-1"></i>
+                                    Page @(currentPage + 1) of @totalPages
+                                </span>
+                            </div>
+                            <div class="ms-auto">
+                                <div class="input-group border-0 shadow-sm" style="width: 280px; border-radius: 20px; overflow: hidden">
+                                    <span class="input-group-text bg-white border-0">
+                                        <i class="bi bi-search" style="color: var(--enterprise-secondary)"></i>
+                                    </span>
+                                    <input type="text" 
+                                        class="form-control border-0 ps-0" 
+                                        placeholder="Search candidates..." 
+                                        @bind="searchQuery"
+                                        style="color: var(--enterprise-primary); font-weight: 500">
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
 
-                <!-- Pagination Controls -->
-                <nav class="d-flex justify-content-between align-items-center mt-4">                    
-                    <div>
-                        <button class="btn btn-outline-secondary" @onclick="PrevPosition" 
-                                style="border-color: var(--enterprise-border); color: var(--enterprise-primary)">
-                            <i class="bi bi-arrow-left me-2"></i> Previous
-                        </button>
-                    </div>
-                    <div>
-                        <ul class="pagination mb-0">
-                            @for (int i = 0; i < totalPages; i++)
-                            {
-                                <li class="page-item @(currentPage == i ? "active" : "")">
-                                    <button class="page-link" 
-                                            style="background-color: @(currentPage == i ? "var(--enterprise-primary)" : "transparent"); 
-                                                    color: @(currentPage == i ? "white" : "var(--enterprise-primary)")"
-                                            @onclick="() => GoToPage(i)">
-                                        @(i + 1)
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                                @foreach (var candidate in filteredCandidates)
+                                {
+                                    <div class="col">
+                                        <div class="card h-100" style="border-color: @(selectedCandidate?.Id == candidate.Id ? "var(--enterprise-primary)" : "var(--enterprise-border)")">
+                                            <div class="card-header position-relative bg-transparent">
+                                                <div class="avatar-lg rounded-circle d-inline-flex align-items-center justify-content-center"
+                                                    style="border-color: var(--enterprise-border)">
+                                                    <i class="bi bi-person-badge-fill fs-1" style="color: var(--enterprise-primary)"></i>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <h5 class="card-title mb-3" style="color: var(--enterprise-primary)">@candidate.Name</h5>
+                                                <div class="d-flex gap-2 mb-3">
+                                                    <span class="badge fs-6" 
+                                                        style="background-color: var(--enterprise-chart-bg); color: var(--enterprise-primary)">
+                                                        @candidate.Party
+                                                    </span>                                      
+                                                </div>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-12">
+                                                        <div class="d-flex align-items-center" style="color: var(--enterprise-secondary)">
+                                                            <i class="bi bi-person-badge me-2"></i>
+                                                            <small>8 yrs Public Service</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="d-flex align-items-center" style="color: var(--enterprise-secondary)">
+                                                            <i class="bi bi-award me-2"></i>
+                                                            <small>@candidate.Bio</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn" 
+                                                            style="background-color: @(selectedCandidate?.Id == candidate.Id ? "var(--enterprise-success)" : "var(--enterprise-primary)"); color: white"
+                                                            @onclick="() => ShowConfirmation(candidate)">
+                                                        <i class="bi bi-check2-circle me-2"></i>
+                                                        @(selectedCandidate?.Id == candidate.Id ? "Confirmed" : "Select Candidate")
+                                                    </button>
+                                                    <button class="btn btn-link text-decoration-none" 
+                                                            style="color: var(--enterprise-accent)"
+                                                            @onclick="() => ShowCandidateModal(candidate)">
+                                                        View Full Profile <i class="bi bi-arrow-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Pagination Controls -->
+                            <nav class="d-flex justify-content-between align-items-center mt-4">                    
+                                <div>
+                                    <button class="btn btn-outline-secondary" @onclick="PrevPosition" 
+                                            style="border-color: var(--enterprise-border); color: var(--enterprise-primary)">
+                                        <i class="bi bi-arrow-left me-2"></i> Previous
                                     </button>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                    <div>
-                        <button class="btn btn-outline-secondary" @onclick="SkipPosition"
-                                style="border-color: var(--enterprise-border); color: var(--enterprise-primary)">
-                            Skip <i class="bi bi-arrow-right me-2"></i>
-                        </button>
-                    </div>
-                </nav>
-            </section>
-        }
-        else
-        {
-            <!-- Review Section -->
-           <div class="card rounded-3 border-0 shadow-sm">
-            <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid var(--enterprise-border)">
-                <div>
-                    <h3 class="h5 fw-bold mb-0" style="color: var(--enterprise-primary)">Vote Review</h3>
-                    <small class="text-muted">Review your selections before final submission</small>
-                </div>
-                <span class="badge rounded-pill py-2 px-3" style="background-color: var(--enterprise-chart-bg); color: var(--enterprise-primary)">
-                    @electionPositions.Count Positions
-                </span>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                    <thead style="background-color: var(--enterprise-primary)">
-                        <tr>
-                            <th class="ps-4 text-white">Position</th>
-                            <th class="text-white">Selected Candidate</th>
-                            <th class="text-white">Party</th>
-                            <th class="text-end pe-4 text-white">Status</th>
-                            <th class="text-end pe-4 text-white">action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var position in electionPositions)
-                        {
-                            var hasSelection = selections.TryGetValue(position.Position, out var candidate);
-                            <tr>
-                                <td class="ps-4" style="color: var(--enterprise-secondary)">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="avatar-icon rounded-circle d-flex align-items-center justify-content-center" 
-                                            style="background-color: var(--enterprise-chart-bg); width: 36px; height: 36px">
-                                            <i class="bi bi-person-fill" style="color: var(--enterprise-primary)"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-semibold" style="color: var(--enterprise-primary)">@position.Position</div>                                           
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style="color: var(--enterprise-primary)">
-                                    @if (hasSelection ){
-                                        @candidate.Name 
-                                    }
-                                    else {
-                                         <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-                                        <span class="text-muted small">No selection made</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (hasSelection) {
-                                         <span class="badge rounded-pill py-2 px-3" 
-                                                  style="background-color: green;">
-                                                @candidate.Party
-                                        </span>
-                                    }else{
-                                         <span class="badge rounded-pill py-2 px-3" 
-                                                  style="background-color: green;">
-                                                No party
-                                        </span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-flex align-items-center justify-content-end gap-2">
-                                        @if (hasSelection) {
-                                            <i class="bi bi-check-circle-fill text-success"></i>
-                                            <span class="text-muted small">Confirmed</span>
-                                        } else {
-                                            <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-                                            <span class="text-muted small">Pending</span>
+                                </div>
+                                <div>
+                                    <ul class="pagination mb-0">
+                                        @for (int i = 0; i < totalPages; i++)
+                                        {
+                                            <li class="page-item @(currentPage == i ? "active" : "")">
+                                                <button class="page-link" 
+                                                        style="background-color: @(currentPage == i ? "var(--enterprise-primary)" : "transparent"); 
+                                                                color: @(currentPage == i ? "white" : "var(--enterprise-primary)")"
+                                                        @onclick="() => GoToPage(i)">
+                                                    @(i + 1)
+                                                </button>
+                                            </li>
                                         }
-                                    </div>
-                                </td>
-                                <td class="text-end pe-4">
-                                    @if (hasSelection)
-                                    {
-                                        <button class="btn btn-sm btn-link text-decoration-none" 
-                                                style="color: var(--enterprise-accent)"
-                                                @onclick="() => EditSelection(position.Position)">
-                                            <i class="bi bi-pencil-square"></i>
-                                            <span class="visually-hidden">Edit</span>
-                                        </button>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="card-footer bg-transparent py-3" style="border-top: 2px solid var(--enterprise-border)">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="text-muted small">
-                        <i class="bi bi-shield-lock me-2"></i>
-                        All votes are encrypted end-to-end
-                    </div>
-                    <button class="btn btn-lg px-5 rounded-pill" 
-                        style="background-color: var(--enterprise-success); color: white"
-                        disabled="@isSubmitting"
-                        @onclick="StartSecureSubmission">  
-                    <i class="bi bi-send-check me-2"></i>
-                    @if (isSubmitting) {
-                        <span>Finalizing Submission...</span>
-                    } else {
-                        <span>Confirm & Submit</span>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <button class="btn btn-outline-secondary" @onclick="SkipPosition"
+                                            style="border-color: var(--enterprise-border); color: var(--enterprise-primary)">
+                                        Skip <i class="bi bi-arrow-right me-2"></i>
+                                    </button>
+                                </div>
+                            </nav>
+                        </section>
                     }
-                </button>
+                    else
+                    {
+                        <!-- Review Section -->
+                    <div class="card rounded-3 border-0 shadow-sm">
+                        <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid var(--enterprise-border)">
+                            <div>
+                                <h3 class="h5 fw-bold mb-0" style="color: var(--enterprise-primary)">Vote Review</h3>
+                                <small class="text-muted">Review your selections before final submission</small>
+                            </div>
+                            <span class="badge rounded-pill py-2 px-3" style="background-color: var(--enterprise-chart-bg); color: var(--enterprise-primary)">
+                                @electionPositions.Count Positions
+                            </span>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead style="background-color: var(--enterprise-primary)">
+                                    <tr>
+                                        <th class="ps-4 text-white">Position</th>
+                                        <th class="text-white">Selected Candidate</th>
+                                        <th class="text-white">Party</th>
+                                        <th class="text-end pe-4 text-white">Status</th>
+                                        <th class="text-end pe-4 text-white">action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var position in electionPositions)
+                                    {
+                                        var hasSelection = selections.TryGetValue(position.Position, out var candidate);
+                                        <tr>
+                                            <td class="ps-4" style="color: var(--enterprise-secondary)">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="avatar-icon rounded-circle d-flex align-items-center justify-content-center" 
+                                                        style="background-color: var(--enterprise-chart-bg); width: 36px; height: 36px">
+                                                        <i class="bi bi-person-fill" style="color: var(--enterprise-primary)"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold" style="color: var(--enterprise-primary)">@position.Position</div>                                           
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="color: var(--enterprise-primary)">
+                                                @if (hasSelection ){
+                                                    @candidate.Name 
+                                                }
+                                                else {
+                                                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                                                    <span class="text-muted small">No selection made</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (hasSelection) {
+                                                    <span class="badge rounded-pill py-2 px-3" 
+                                                            style="background-color: green;">
+                                                            @candidate.Party
+                                                    </span>
+                                                }else{
+                                                    <span class="badge rounded-pill py-2 px-3" 
+                                                            style="background-color: green;">
+                                                            No party
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                                    @if (hasSelection) {
+                                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                                        <span class="text-muted small">Confirmed</span>
+                                                    } else {
+                                                        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                                                        <span class="text-muted small">Pending</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                @if (hasSelection)
+                                                {
+                                                    <button class="btn btn-sm btn-link text-decoration-none" 
+                                                            style="color: var(--enterprise-accent)"
+                                                            @onclick="() => EditSelection(position.Position)">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                        <span class="visually-hidden">Edit</span>
+                                                    </button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
 
+                        <div class="card-footer bg-transparent py-3" style="border-top: 2px solid var(--enterprise-border)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted small">
+                                    <i class="bi bi-shield-lock me-2"></i>
+                                    All votes are encrypted end-to-end
                                 </div>
-            </div>
-        </div>
-        }
-    </div>
+                                <button class="btn btn-lg px-5 rounded-pill" 
+                                    style="background-color: var(--enterprise-success); color: white"
+                                    disabled="@isSubmitting"
+                                    @onclick="StartSecureSubmission">  
+                                <i class="bi bi-send-check me-2"></i>
+                                @if (isSubmitting) {
+                                    <span>Finalizing Submission...</span>
+                                } else {
+                                    <span>Confirm & Submit</span>
+                                }
+                            </button>
 
-    <!-- Confirmation Modal -->
-    @if (showConfirmation)
-    {
-        <div class="modal fade show" style="display: block;">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirm Selection</h5>
-                        <button type="button" class="btn-close" @onclick="CancelSelection"></button>
+                                            </div>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to select @pendingCandidate?.Name for @currentSeat?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success" @onclick="ConfirmSelection">Confirm</button>
-                        <button class="btn btn-outline-secondary" @onclick="CancelSelection">Cancel</button>
-                    </div>
+                    }
                 </div>
-            </div>
-        </div>
-        <div class="modal-backdrop fade show"></div>
-    }
 
-    <!-- Submission Progress Modal -->
-    @if (showSubmissionProgress)
-    {
-       <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title text-danger">
-                            <i class="bi bi-shield-lock me-2"></i>Secure Vote Submission
-                        </h5>
-                    </div>
-                    <div class="modal-body">
-                        <div class="submission-steps">
-                            <div class="step-item @GetStepClass(1)">
-                                <div class="step-icon">
-                                    <i class="bi @GetStepIcon(1)"></i>
+                <!-- Confirmation Modal -->
+                @if (showConfirmation)
+                {
+                    <div class="modal fade show" style="display: block;">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Selection</h5>
+                                    <button type="button" class="btn-close" @onclick="CancelSelection"></button>
                                 </div>
-                                <div class="step-content">
-                                    <h6>Validating Selections</h6>
-                                    <small class="text-muted">Verifying vote integrity</small>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to select @pendingCandidate?.Name for @currentSeat?</p>
                                 </div>
-                            </div>
-
-                            <div class="step-item @GetStepClass(2)">
-                                <div class="step-icon">
-                                    <i class="bi @GetStepIcon(2)"></i>
-                                </div>
-                                <div class="step-content">
-                                    <h6>Encrypting Data</h6>
-                                    <small class="text-muted">Applying AES-256 encryption</small>
-                                </div>
-                            </div>
-
-                            <div class="step-item @GetStepClass(3)">
-                                <div class="step-icon">
-                                    <i class="bi @GetStepIcon(3)"></i>
-                                </div>
-                                <div class="step-content">
-                                    <h6>Securing Connection</h6>
-                                    <small class="text-muted">Establishing TLS 1.3 tunnel</small>
-                                </div>
-                            </div>
-
-                            <div class="step-item @GetStepClass(4)">
-                                <div class="step-icon">
-                                    <i class="bi @GetStepIcon(4)"></i>
-                                </div>
-                                <div class="step-content">
-                                    <h6>Final Confirmation</h6>
-                                    <small class="text-muted">Committing to backend api</small>
+                                <div class="modal-footer">
+                                    <button class="btn btn-success" @onclick="ConfirmSelection">Confirm</button>
+                                    <button class="btn btn-outline-secondary" @onclick="CancelSelection">Cancel</button>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="mt-4 text-center">
-                            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-3 text-primary fw-bold">@currentStatusMessage</p>
-                        </div>
                     </div>
-                    <div class="modal-footer border-0 justify-content-center">
-                        <button class="btn btn-danger" @onclick="CancelSubmission" disabled="@(!allowCancel)">
-                            <i class="bi bi-x-circle me-2"></i>Abort Process
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-backdrop fade show"></div>
-        </div>
-    }
+                    <div class="modal-backdrop fade show"></div>
+                }
 
-    <!-- Help Modal -->
-    <div class="modal @(showHelp ? "show" : "")" style="@(showHelp ? "display: block" : "display: none"); background: rgba(0,0,0,0.5)">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Voting Assistance</h5>
-                    <button type="button" class="btn-close" @onclick="ToggleHelp"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="lead">Select candidates for each position following these steps:</p>
-                    <ol>
-                        <li>Browse candidates using pagination controls</li>
-                        <li>Review candidate details and qualifications</li>
-                        <li>Click 'Select' to choose your preferred candidate</li>
-                        <li>Verify all selections before final submission</li>
-                    </ol>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" @onclick="ToggleHelp">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>   
-
-    @if (selectedCandidate != null)
-    {
-        <div class="modal-backdrop show d-block"></div>
-        <div class="modal fade show d-block" tabindex="-1" aria-modal="true" role="dialog">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-                <div class="modal-content shadow-lg">
-                    <div class="modal-header text-white" style="background-color: var(--enterprise-primary);">
-                        <h2 class="modal-title h5">Candidate Details</h2>
-                        <button type="button" class="btn-close btn-close-white" @onclick="CloseDetails" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-4 text-center mb-4 mb-md-0">
-                                <div class="avatar-lg bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <i class="bi bi-person-badge-fill fs-1 text-primary"></i>
-                                </div>
-                                <h3 class="h4 mt-3 mb-1">@selectedCandidate.Name</h3>
-                                <p class="text-muted mb-0">@selectedCandidate.Party</p>
-                            </div>
-                            <div class="col-md-8">
-                                <dl class="row g-3">
-                                    <dt class="col-sm-4 text-muted">Position</dt>
-                                    <dd class="col-sm-8 fw-semibold">@selectedCandidate.Position</dd>
-                                    <dt class="col-sm-4 text-muted">Election</dt>
-                                    <dd class="col-sm-8">@selectedCandidate.Election</dd>
-                                    <dt class="col-sm-4 text-muted">Bio</dt>
-                                    <dd class="col-sm-8 candidate-bio">@selectedCandidate.Bio</dd>
-                                    <dt class="col-sm-4 text-muted">Party</dt>
-                                    <dd class="col-sm-8">
-                                        <span class="badge bg-primary-subtle text-primary fs-6">
-                                            @selectedCandidate.Party
+                <!-- Submission Progress Modal -->
+                @if (showSubmissionProgress)
+                {
+                <div class="modal fade show enterprise-modal" style="display: block; background: rgba(0,0,0,0.5)">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0" style="box-shadow: 0 8px 32px rgba(42, 92, 141, 0.15)">
+                            <!-- Header -->
+                            <div class="modal-header border-bottom pb-3" style="background: var(--enterprise-chart-bg)">
+                                <div class="d-flex align-items-center justify-content-between w-100">
+                                    <div>
+                                        <h5 class="modal-title text-primary mb-0">
+                                            <i class="bi bi-shield-shaded me-2"></i>Secure Vote Processing
+                                        </h5>
+                                        <div class="text-muted small mt-1">
+                                            Transaction ID: #@(new Random().Next(100000, 999999))
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-success bg-opacity-25 text-success py-2">
+                                            <i class="bi bi-patch-check-fill me-2"></i>FIPS 140-2 Validated
                                         </span>
-                                    </dd>
-                                </dl>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Visualization -->
+                            <div class="modal-body pt-4">
+                                <div class="position-relative mb-5">
+                                    <div class="progress-line" style="height: 2px; background: var(--enterprise-border)">
+                                        <div class="progress-fill" style="width: @(currentStep*25)%; background: var(--enterprise-primary)"></div>
+                                    </div>
+
+                                    <div class="submission-steps d-flex justify-content-between">
+                                        <!-- Step 1 -->
+                                        <div class="step-item text-center">
+                                            <div class="step-icon @GetStepClass(1)" 
+                                                data-bs-toggle="tooltip" 
+                                                title="Vote integrity verification using SHA-256 hashing">
+                                                <i class="bi @GetStepIcon(1) fs-5"></i>
+                                            </div>
+                                            <div class="step-content mt-2">
+                                                <h6 class="mb-1 small fw-bold">Validation</h6>
+                                                <small class="text-muted d-block" style="font-size: 0.75rem">Phase 1/4</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 2 -->
+                                        <div class="step-item text-center">
+                                            <div class="step-icon @GetStepClass(2)" 
+                                                data-bs-toggle="tooltip" 
+                                                title="Military-grade encryption using AES-256-CBC">
+                                                <i class="bi @GetStepIcon(2) fs-5"></i>
+                                            </div>
+                                            <div class="step-content mt-2">
+                                                <h6 class="mb-1 small fw-bold">Encryption</h6>
+                                                <small class="text-muted d-block" style="font-size: 0.75rem">Phase 2/4</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 3 -->
+                                        <div class="step-item text-center">
+                                            <div class="step-icon @GetStepClass(3)" 
+                                                data-bs-toggle="tooltip" 
+                                                title="Secure TLS 1.3 connection with PFS">
+                                                <i class="bi @GetStepIcon(3) fs-5"></i>
+                                            </div>
+                                            <div class="step-content mt-2">
+                                                <h6 class="mb-1 small fw-bold">Transmission</h6>
+                                                <small class="text-muted d-block" style="font-size: 0.75rem">Phase 3/4</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 4 -->
+                                        <div class="step-item text-center">
+                                            <div class="step-icon @GetStepClass(4)" 
+                                                data-bs-toggle="tooltip" 
+                                                title="Immutable blockchain transaction recording">
+                                                <i class="bi @GetStepIcon(4) fs-5"></i>
+                                            </div>
+                                            <div class="step-content mt-2">
+                                                <h6 class="mb-1 small fw-bold">Commitment</h6>
+                                                <small class="text-muted d-block" style="font-size: 0.75rem">Phase 4/4</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Security Visualization -->
+                                <div class="security-animation mb-4">
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <div class="encryption-badge">
+                                            <i class="bi bi-file-lock2 fs-2 text-primary"></i>
+                                            <div class="badge-text">AES-256</div>
+                                        </div>
+                                        <div class="animation-arrow">➔</div>
+                                        <div class="encryption-badge">
+                                            <i class="bi bi-lock-fill fs-2 text-success"></i>
+                                            <div class="badge-text">TLS 1.3</div>
+                                        </div>
+                                        <div class="animation-arrow">➔</div>
+                                        <div class="encryption-badge">
+                                            <i class="bi bi-cpu fs-2 text-warning"></i>
+                                            <div class="badge-text">HSM</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Loading Indicator -->
+                                <div class="text-center mb-4">
+                                    <div class="position-relative" style="width: 80px; margin: 0 auto">
+                                        <div class="spinner-border text-primary" 
+                                            style="width: 3rem; height: 3rem; border-width: 0.2em" 
+                                            role="status">
+                                        </div>
+                                        <div class="position-absolute top-50 start-50 translate-middle">
+                                            <div class="small fw-bold">@currentStep/4</div>
+                                        </div>
+                                    </div>
+                                    <p class="mt-3 text-primary fw-bold mb-0">@currentStatusMessage</p>
+                                    <small class="text-muted">Estimated completion: <span id="timeEstimate">@(4 - currentStep)s</span></small>
+                                </div>
+                            </div>
+
+                            <!-- Audit Footer -->
+                            <div class="modal-footer border-top pt-3" style="background: var(--enterprise-chart-bg)">
+                                <div class="d-flex justify-content-between w-100 align-items-center">
+                                    <div class="text-muted small">
+                                        <i class="bi bi-clock-history me-2"></i>
+                                        Initiated @DateTime.Now.ToString("HH:mm:ss")
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-danger btn-sm px-3" 
+                                                @onclick="CancelSubmission" 
+                                                disabled="@(!allowCancel)">
+                                            <i class="bi bi-x-circle me-2"></i>Terminate
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="CloseDetails">Close</button>
-                    </div>
                 </div>
-            </div>
-        </div>
-    }
+                }
+
+                <!-- Help Modal -->
+                <div class="modal @(showHelp ? "show" : "")" style="@(showHelp ? "display: block" : "display: none"); background: rgba(0,0,0,0.5)">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Voting Assistance</h5>
+                                <button type="button" class="btn-close" @onclick="ToggleHelp"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="lead">Select candidates for each position following these steps:</p>
+                                <ol>
+                                    <li>Browse candidates using pagination controls</li>
+                                    <li>Review candidate details and qualifications</li>
+                                    <li>Click 'Select' to choose your preferred candidate</li>
+                                    <li>Verify all selections before final submission</li>
+                                </ol>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary" @onclick="ToggleHelp">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>   
+
+                @if (selectedCandidate != null)
+                {
+                    <div class="modal-backdrop show d-block"></div>
+                    <div class="modal fade show d-block" tabindex="-1" aria-modal="true" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                            <div class="modal-content shadow-lg">
+                                <div class="modal-header text-white" style="background-color: var(--enterprise-primary);">
+                                    <h2 class="modal-title h5">Candidate Details</h2>
+                                    <button type="button" class="btn-close btn-close-white" @onclick="CloseDetails" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 text-center mb-4 mb-md-0">
+                                            <div class="avatar-lg bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
+                                                <i class="bi bi-person-badge-fill fs-1 text-primary"></i>
+                                            </div>
+                                            <h3 class="h4 mt-3 mb-1">@selectedCandidate.Name</h3>
+                                            <p class="text-muted mb-0">@selectedCandidate.Party</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <dl class="row g-3">
+                                                <dt class="col-sm-4 text-muted">Position</dt>
+                                                <dd class="col-sm-8 fw-semibold">@selectedCandidate.Position</dd>
+                                                <dt class="col-sm-4 text-muted">Election</dt>
+                                                <dd class="col-sm-8">@selectedCandidate.Election</dd>
+                                                <dt class="col-sm-4 text-muted">Bio</dt>
+                                                <dd class="col-sm-8 candidate-bio">@selectedCandidate.Bio</dd>
+                                                <dt class="col-sm-4 text-muted">Party</dt>
+                                                <dd class="col-sm-8">
+                                                    <span class="badge bg-primary-subtle text-primary fs-6">
+                                                        @selectedCandidate.Party
+                                                    </span>
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" @onclick="CloseDetails">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
 
 
-</main>
+            </main>
+
+         </Authorized>
+           <NotAuthorized>
+                @{
+                    NavManager.NavigateTo("/access-denied");
+                }
+            </NotAuthorized>       
+    </AuthorizeView>
+</CascadingAuthenticationState>
+}else{
+    NavManager.NavigateTo("/login");
+}
+
 
 
 @code {
@@ -626,8 +856,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
-           // NavManager.NavigateTo("/login");
+            Console.WriteLine($"[VOTE] Error: {ex.Message}");
         }
         finally
         {
@@ -912,17 +1141,35 @@
     }
 
     // Status alert helper
-    private void ShowStatusMessage(string message, string type)
+   private void ShowStatusMessage(string message, string type)
+{
+    // Set the message text
+    voteStatus = message;
+
+    voteStatusClass = $"alert-{type}";
+    statusIcon = type switch
+    {        
+        "success" => "bi-check-circle-fill text-success", 
+        "danger"  => "bi-exclamation-circle-fill text-danger", 
+        _         => "bi-info-circle-fill text-info"
+    };
+
+    // Display user-friendly messages for each type
+    switch (type)
     {
-        voteStatus = message;
-        voteStatusClass = $"alert-{type}";
-        statusIcon = type switch
-        {        
-            "success" => "bi-check-circle-fill text-success", 
-            "danger"  => "bi-exclamation-circle-fill text-danger", 
-            _         => "bi-info-circle-fill"
-        };
+        case "success":
+            voteStatus = message ?? "Operation was successful!";
+            break;
+        case "danger":
+            voteStatus = message ?? "Oops! Something went wrong. Please try again.";
+            break;
+        default:
+            voteStatus = message ?? "Please wait... Loading.";
+            break;
     }
+    
+}
+
 
     // Modal controls
     private void ShowCandidateModal(CandidateSerializedDto candidate)

@@ -335,11 +335,13 @@
 </main>
 
 @code {
+    //data fields
     private int currentVotes = 1248573;
     private int activeElections = 42;
     private Timer statsTimer;
     private Random random = new Random();
 
+    //naviagate to home
     private void NavigateToLogin()
     {
         NavManager.NavigateTo("/login");
@@ -353,6 +355,7 @@
         NavManager.NavigateTo("https://github.com/Flow-Pie/OnlineVotingSystem.api/tree/master");
     }
 
+//redirect based on user role claim
     private async Task NavigateToDashboard()
     {     
         if(AuthService.IsAuthenticated()){
@@ -374,7 +377,7 @@
             NavManager.NavigateTo("/login");
         }
     }
-
+//data to load on page load
     protected override async Task OnInitializedAsync()
     {
         statsTimer = new Timer(UpdateVoteCount, null, 2000, 2000);

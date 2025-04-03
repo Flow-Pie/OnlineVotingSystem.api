@@ -302,8 +302,27 @@
                         </div>
                     </div>
                 </div>
-            </main>           
-        </Authorized>       
+                <footer class="mt-5 pt-4 border-top border-enterprise-border">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-muted small">
+                                <i class="bi bi-shield-lock me-2"></i>Secure Connection • AES-256 Encrypted
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="text-muted small">
+                                v2.8.1 • © 2025 Election Systems International
+                            </div>
+                        </div>
+                    </div>
+                </footer>     
+            </main>                   
+        </Authorized>  
+        <NotAuthorized>
+                @{
+                    NavManager.NavigateTo("/access-denied");
+                }
+        </NotAuthorized>      
     </AuthorizeView>
 </CascadingAuthenticationState>
 }else{
@@ -312,6 +331,7 @@
 
 
 @code {
+    //DI
     [Inject] private IAuthService AuthService { get; set; }
     [Inject] private IElectionsService ElectionService { get; set; }
     [Inject] private IPositionsService PositionsService { get; set; }
@@ -335,6 +355,7 @@
     private string errorMessage = "";
     private string successMessage = "";
 
+    //data to load first on page load
     protected override async Task OnInitializedAsync()
     {
         try
@@ -349,6 +370,7 @@
         }
     }
 
+    //helper method
     private async Task LoadPositions()
     {
         try
@@ -362,6 +384,7 @@
         }
     }
 
+    //toogle positions
     private void TogglePosition(Guid positionId)
     {
         if (SelectedPositions.Contains(positionId))
@@ -370,6 +393,7 @@
             SelectedPositions.Add(positionId);
     }
 
+    //submission business logic
     private async Task HandleSubmit()
     {
         try
@@ -419,6 +443,7 @@
         }
     }
 
+    //unaauthorised users handling logic
     private async Task HandleUnauthorized()
     {
         errorMessage = "Your session has expired. Please login again.";
@@ -426,6 +451,7 @@
         NavigationManager.NavigateTo("/login");
     }
 
+    //client side data validation
     private List<string> ValidateForm()
     {
         var errors = new List<string>();
@@ -449,7 +475,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error assigning position {positionId}: {ex}");
+                Console.WriteLine($"[ADD ELECTION] Error assigning position {positionId}: {ex}");
             }
         }
     }
@@ -464,6 +490,7 @@
         StateHasChanged();
     }
 
+    //position creation logic
     private async Task HandleCreatePosition()
     {
         try
@@ -507,6 +534,7 @@
         }
     }
 
+    //client side validation
     public class CandidateFormModel
     {
         [Range(10000000, 99999999, ErrorMessage = "Must be 8 digits")]
