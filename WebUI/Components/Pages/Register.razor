@@ -114,6 +114,13 @@
                     </label>
                     <ValidationMessage For="@(() => termsAgreed)" />
                 </div>
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="enterprise-alert enterprise-alert-danger" style="margin: 1rem 0; padding: 0.75rem;">
+                        <i class="bi bi-shield-exclamation"></i>
+                        @errorMessage
+                    </div>
+                }
 
                 <div class="enterprise-action-bar">
                     <button type="submit" 
@@ -396,6 +403,7 @@
     private bool isLoading = false;
     private string registrationError = string.Empty;
     private string registrationSuccess = string.Empty;
+    private string errorMessage = "";
 
     [Inject]
     private IAuthService AuthService { get; set; } = null!;
@@ -474,10 +482,12 @@
         catch (HttpRequestException httpEx)
         {
             registrationError = $"Registration failed: {httpEx.Message}";
+            errorMessage= httpEx.Message;
         }
         catch (Exception ex)
         {
             registrationError = $"An error occurred: {ex.Message}";
+            errorMessage = ex.Message;
         }
         finally
         {

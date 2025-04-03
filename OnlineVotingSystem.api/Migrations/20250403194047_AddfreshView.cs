@@ -5,12 +5,12 @@
 namespace OnlineVotingSystem.api.Migrations
 {
     /// <inheritdoc />
-    public partial class AddView : Migration
+    public partial class AddfreshView : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
+              migrationBuilder.Sql(@"
                 CREATE VIEW IF NOT EXISTS ElectionResults AS
                 SELECT 
                     e.Id AS ElectionId, 

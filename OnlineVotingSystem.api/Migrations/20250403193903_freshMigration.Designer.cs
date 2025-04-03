@@ -11,8 +11,8 @@ using OnlineVotingSystem.api.Data;
 namespace OnlineVotingSystem.api.Migrations
 {
     [DbContext(typeof(OnlineVotingSystemContext))]
-    [Migration("20250326232507_TestMigration")]
-    partial class TestMigration
+    [Migration("20250403193903_freshMigration")]
+    partial class freshMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
