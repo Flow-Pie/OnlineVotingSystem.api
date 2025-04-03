@@ -252,14 +252,21 @@
                                                                 @onclick="() => ViewProfile(candidate)" aria-label="View candidate profile">
                                                             <i class="bi bi-eye me-1"></i>View
                                                         </button>
-                                                        <button class="btn btn-outline-warning btn-sm" 
-                                                                @onclick="() => EditCandidate(candidate.Id, candidate)" aria-label="Edit candidate">
-                                                            <i class="bi bi-pencil-square me-1"></i>Edit
-                                                        </button>
-                                                        <button class="btn btn-outline-danger btn-sm" 
-                                                                @onclick="() => DeleteCandidate(candidate.Id)" aria-label="Delete candidate">
-                                                            <i class="bi bi-trash me-1"></i>Delete
-                                                        </button>
+                                                        <CascadingAuthenticationState>
+                                                            <AuthorizeView Roles="Admin">
+                                                                <button class="btn btn-outline-warning btn-sm" 
+                                                                        @onclick="() => EditCandidate(candidate.Id, candidate)" 
+                                                                        aria-label="Edit candidate">
+                                                                    <i class="bi bi-pencil-square me-1"></i>Edit
+                                                                </button>
+                                                                <button class="btn btn-outline-danger btn-sm" 
+                                                                        @onclick="() => DeleteCandidate(candidate.Id)" 
+                                                                        aria-label="Delete candidate">
+                                                                    <i class="bi bi-trash me-1"></i>Delete
+                                                                </button>
+                                                            </AuthorizeView>
+                                                        </CascadingAuthenticationState>
+
                                                     </div>
                                                 </div>
                                             </div>

@@ -54,6 +54,7 @@ namespace WebUI.Services
                     Console.WriteLine("[AuthService] Retrieved token from memory cache");
                     return cachedToken;
                 }
+                Console.WriteLine("[AuthService] failed to retrieve token from memory cache trying local storage");
 
                 // 2. Fallback to localStorage
                 try
@@ -266,7 +267,47 @@ namespace WebUI.Services
             }
         }
 
+        public bool IsAuthenticated()
+        {
+            try
+            {
+                // Check memory cache first
+                if (!_memoryCache.TryGetValue(TokenCacheKey, out string token) || 
+                    string.IsNullOrEmpty(token))
+                {
+                    return false;
+                }
 
+                // Validate token structure without JS dependencies
+                if (!IsValidTokenFormat(token))
+                {
+                    _memoryCache.Remove(TokenCacheKey);
+                    return false;
+                }
+
+                // Check token expiration
+                var handler = new JwtSecurityTokenHandler();
+                if (!handler.CanReadToken(token)) return false;
+                
+                var jwtToken = handler.ReadJwtToken(token);
+                return jwtToken.ValidTo > DateTime.UtcNow.AddMinutes(1);
+            }
+            catch
+            {
+                // Fail safe - treat as not authenticated
+                return false;
+            }
+        }
+
+        private bool IsValidTokenFormat(string token)
+        {
+            // Basic JWT structure validation
+            var parts = token.Split('.');
+            return parts.Length == 3 && 
+                parts[0].Length > 10 && 
+                parts[1].Length > 10 && 
+                parts[2].Length > 10;
+        }
 
 
 

@@ -50,8 +50,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9FcnJvci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Logout.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Mb2dvdXQucmF6b3I=
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Ib21lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9JbmRleC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Register.razor]
@@ -60,10 +64,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/Unauthorised.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9VbmF1dGhvcmlzZWQucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
-[/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/User/Index.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Vc2VyL0luZGV4LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/jon/VoteProject/OnlineVotingSystem.api/WebUI/Components/Pages/User/Vote.razor]

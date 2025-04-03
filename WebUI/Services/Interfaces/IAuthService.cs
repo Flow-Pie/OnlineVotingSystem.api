@@ -12,4 +12,5 @@ public interface IAuthService
     Task<string?> GetUserIdAsync();
     Task<string?> GetUserNameAsync();
     Task<string?> GetUserRoleAsync();
+    bool IsAuthenticated();
 }

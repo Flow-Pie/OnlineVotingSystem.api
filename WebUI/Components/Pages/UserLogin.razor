@@ -69,7 +69,7 @@
                             Maintain Session
                         </label>
                     </div>
-                    <a href="#forgot-password" class="enterprise-link" style="font-size: 0.875rem;">Trouble signing in?</a>
+                    <a href="/register" class="enterprise-link" style="font-size: 0.875rem;">No Account?</a>
                 </div>
 
                 @if (!string.IsNullOrEmpty(errorMessage))
@@ -319,6 +319,7 @@
     private bool rememberMe = false;
     private DateTime? lastAttemptTime;
     private const int attemptDelaySeconds = 3;
+   
 
     private async Task HandleLogin()
     {
@@ -338,7 +339,7 @@
         {
             var loginDto = new LoginUserDto(model.Identifier, model.Password);
             var response = await AuthService.LoginAsync(loginDto);
-            
+                
             await _localStorage.SetItemAsync("authToken", response.AccessToken);
             
             if (rememberMe)
@@ -348,8 +349,9 @@
 
             successMessage = response.AccessToken;
             ((CustomAuthStateProvider)AuthStateProvider).NotifyUserAuthentication(response.AccessToken);
-            
-            Navigation.NavigateTo("/dashboard", true);
+
+            var role = await AuthService.GetUserRoleAsync();
+            Navigation.NavigateTo(role == "Admin" ? "/dashboard" : "/");
         }
         catch (HttpRequestException ex)
         {

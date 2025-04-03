@@ -18,217 +18,227 @@
 @rendermode InteractiveServer
 
 
-<main class="container mt-4 scrollable-container">
-    <style>
-       
-        .scrollable-container {
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
+@if(AuthService.IsAuthenticated()){
+<CascadingAuthenticationState>
+     <AuthorizeView Roles="Admin">
+        <Authorized Context="adminContext">
+            <main class="container mt-4 scrollable-container">
+                <style>
+                
+                    .scrollable-container {
+                        max-height: calc(100vh - 100px);
+                        overflow-y: auto;
+                        padding-right: 0.5rem;
+                    }
 
-        .card {
-            border: 2px solid var(--enterprise-border);
-            border-radius: 0.75rem;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
+                    .card {
+                        border: 2px solid var(--enterprise-border);
+                        border-radius: 0.75rem;
+                        transition: transform 0.15s ease, box-shadow 0.15s ease;
+                    }
 
-        .card-header {
-            background-color: rgba(42, 92, 141, 0.08);
-            border-bottom: 2px solid var(--enterprise-border);
-            padding: 1.25rem 1.5rem;
-        }
+                    .card-header {
+                        background-color: rgba(42, 92, 141, 0.08);
+                        border-bottom: 2px solid var(--enterprise-border);
+                        padding: 1.25rem 1.5rem;
+                    }
 
-        .form-control, .form-select {
-            border: 2px solid var(--enterprise-border);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
+                    .form-control, .form-select {
+                        border: 2px solid var(--enterprise-border);
+                        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                    }
 
-        .form-control:focus, .form-select:focus {
-            border-color: var(--enterprise-accent);
-            box-shadow: 0 0 0 0.25rem rgba(72, 163, 198, 0.2);
-        }
+                    .form-control:focus, .form-select:focus {
+                        border-color: var(--enterprise-accent);
+                        box-shadow: 0 0 0 0.25rem rgba(72, 163, 198, 0.2);
+                    }
 
-        .btn-primary {
-            background-color: var(--enterprise-primary);
-            border-color: var(--enterprise-primary);
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
+                    .btn-primary {
+                        background-color: var(--enterprise-primary);
+                        border-color: var(--enterprise-primary);
+                        padding: 0.5rem 1.5rem;
+                        font-weight: 500;
+                        transition: all 0.2s ease;
+                    }
 
-        .btn-primary:hover {
-            background-color: #234d75;
-            border-color: #234d75;
-            transform: translateY(-1px);
-        }
+                    .btn-primary:hover {
+                        background-color: #234d75;
+                        border-color: #234d75;
+                        transform: translateY(-1px);
+                    }
 
-        .btn-outline-secondary {
-            border-color: var(--enterprise-border);
-            color: var(--enterprise-secondary);
-        }
+                    .btn-outline-secondary {
+                        border-color: var(--enterprise-border);
+                        color: var(--enterprise-secondary);
+                    }
 
-        .alert {
-            border: 2px solid transparent;
-            border-radius: 0.75rem;
-        }
+                    .alert {
+                        border: 2px solid transparent;
+                        border-radius: 0.75rem;
+                    }
 
-        .alert-danger {
-            background-color: rgba(220, 53, 69, 0.08);
-            border-color: var(--enterprise-danger);
-            color: var(--enterprise-danger);
-        }
+                    .alert-danger {
+                        background-color: rgba(220, 53, 69, 0.08);
+                        border-color: var(--enterprise-danger);
+                        color: var(--enterprise-danger);
+                    }
 
-        .alert-success {
-            background-color: rgba(58, 157, 133, 0.08);
-            border-color: var(--enterprise-success);
-            color: var(--enterprise-success);
-        }
+                    .alert-success {
+                        background-color: rgba(58, 157, 133, 0.08);
+                        border-color: var(--enterprise-success);
+                        color: var(--enterprise-success);
+                    }
 
-        .text-muted {
-            color: var(--enterprise-secondary) !important;
-        }
+                    .text-muted {
+                        color: var(--enterprise-secondary) !important;
+                    }
 
-        .border-primary-subtle {
-            border-color: rgba(42, 92, 141, 0.15) !important;
-        }
+                    .border-primary-subtle {
+                        border-color: rgba(42, 92, 141, 0.15) !important;
+                    }
 
-        .status-container .alert {
-            box-shadow: 0 2px 8px rgba(42, 92, 141, 0.08);
-        }
-    </style>
+                    .status-container .alert {
+                        box-shadow: 0 2px 8px rgba(42, 92, 141, 0.08);
+                    }
+                </style>
 
-    <header class="mb-5">
-        <h1 class="fw-bold display-6 text-primary">Add New Candidate</h1>
-        <hr class="border-primary opacity-50" style="height: 2px">
-    </header>
+                <header class="mb-5">
+                    <h1 class="fw-bold display-6 text-primary">Add New Candidate</h1>
+                    <hr class="border-primary opacity-50" style="height: 2px">
+                </header>
 
-    <!-- Status alerts -->
-    <div class="status-container position-fixed top-0 p-3" style="z-index: 9999">
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger d-flex align-items-center shadow-sm">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <div class="flex-grow-1">@errorMessage</div>
-                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
-            </div>
-        }
-        @if (!string.IsNullOrEmpty(successMessage))
-        {
-            <div class="alert alert-success d-flex align-items-center shadow-sm">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <div class="flex-grow-1">@successMessage</div>
-                <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
-            </div>
-        }
-    </div>
+                <!-- Status alerts -->
+                <div class="status-container position-fixed top-0 p-3" style="z-index: 9999">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center shadow-sm">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div class="flex-grow-1">@errorMessage</div>
+                            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success d-flex align-items-center shadow-sm">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <div class="flex-grow-1">@successMessage</div>
+                            <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                        </div>
+                    }
+                </div>
 
-    <!-- Candidate Form Card -->
-    <div class="card border-primary-subtle shadow-lg">
-        <div class="card-header">
-            <h2 class="h5 mb-0 fw-semibold text-primary">
-                <i class="bi bi-person-plus me-2"></i>Candidate Details
-            </h2>
-        </div>
-        <div class="card-body p-4">
-            <EditForm Model="@model" OnValidSubmit="AddCandidate">
-                <!-- National ID Field -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <input type="text"
-                            class="form-control border-primary-subtle"
-                            id="nationalId"
-                            placeholder="Enter National ID"
-                            @bind="model.NationalId" />
-                        <label for="nationalId" class="text-muted">National ID</label>
+                <!-- Candidate Form Card -->
+                <div class="card border-primary-subtle shadow-lg">
+                    <div class="card-header">
+                        <h2 class="h5 mb-0 fw-semibold text-primary">
+                            <i class="bi bi-person-plus me-2"></i>Candidate Details
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <EditForm Model="@model" OnValidSubmit="AddCandidate">
+                            <!-- National ID Field -->
+                            <div class="mb-4">
+                                <div class="form-floating">
+                                    <input type="text"
+                                        class="form-control border-primary-subtle"
+                                        id="nationalId"
+                                        placeholder="Enter National ID"
+                                        @bind="model.NationalId" />
+                                    <label for="nationalId" class="text-muted">National ID</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-floating">
+                                    <select class="form-select border-primary-subtle"
+                                            id="electionId"
+                                            value="@model.ElectionId"
+                                            @onchange="OnElectionChanged">
+                                        <option value="">Select an Election</option>
+                                        @foreach (var election in _elections)
+                                        {
+                                            <option value="@election.Id">@election.Title</option>
+                                        }
+                                    </select>
+                                    <label for="electionId" class="text-muted">Election</label>
+                                </div>
+                            </div>
+
+
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <select class="form-select border-primary-subtle"
+                                        id="positionId"
+                                        @bind="model.PositionId"  
+                                        disabled="@(model.ElectionId == Guid.Empty || isLoading)">
+                                    <option value="">Select a Position</option>
+                                    @if (model.ElectionId != Guid.Empty)
+                                    {
+                                        @foreach (var pos in _filteredPositions)
+                                        {
+                                            <option value="@pos.PositionId">@pos.Position</option>
+                                        }
+                                    }
+                                </select>
+                                    <label for="positionId" class="text-muted">Position</label>
+                            </div>
+                        </div>
+
+                            <!-- Party Field -->
+                            <div class="mb-4">
+                                <div class="form-floating">
+                                    <input type="text"
+                                        class="form-control border-primary-subtle"
+                                        id="party"
+                                        placeholder="Party"
+                                        @bind="model.Party" />
+                                    <label for="party" class="text-muted">Party</label>
+                                </div>
+                            </div>
+
+                            <!-- Bio Field -->
+                            <div class="mb-4">
+                                <div class="form-floating">
+                                    <textarea class="form-control border-primary-subtle"
+                                            id="bio"
+                                            placeholder="Bio"
+                                            style="height: 100px"
+                                            @bind="model.Bio"></textarea>
+                                    <label for="bio" class="text-muted">Bio</label>
+                                </div>
+                            </div>
+
+                            <!-- Buttons-->
+                            <div class="d-flex gap-3 justify-content-end border-top pt-4 mt-4">
+                                <button type="reset"
+                                        class="btn btn-outline-secondary px-4"
+                                        @onclick="ResetForm">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+                                </button>
+                                <button type="submit"
+                                        class="btn btn-primary px-4"
+                                        disabled="@isLoading">
+                                    @if (isLoading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-person-add me-2"></i>
+                                    }
+                                    Add Candidate
+                                </button>
+                            </div>
+                        </EditForm>
                     </div>
                 </div>
-
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <select class="form-select border-primary-subtle"
-                                id="electionId"
-                                value="@model.ElectionId"
-                                @onchange="OnElectionChanged">
-                            <option value="">Select an Election</option>
-                            @foreach (var election in _elections)
-                            {
-                                <option value="@election.Id">@election.Title</option>
-                            }
-                        </select>
-                        <label for="electionId" class="text-muted">Election</label>
-                    </div>
-                </div>
-
-
-            <div class="mb-4">
-                <div class="form-floating">
-                    <select class="form-select border-primary-subtle"
-                            id="positionId"
-                            @bind="model.PositionId"  
-                            disabled="@(model.ElectionId == Guid.Empty || isLoading)">
-                        <option value="">Select a Position</option>
-                        @if (model.ElectionId != Guid.Empty)
-                        {
-                            @foreach (var pos in _filteredPositions)
-                            {
-                                <option value="@pos.PositionId">@pos.Position</option>
-                            }
-                        }
-                    </select>
-                        <label for="positionId" class="text-muted">Position</label>
-                </div>
-            </div>
-
-                <!-- Party Field -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <input type="text"
-                            class="form-control border-primary-subtle"
-                            id="party"
-                            placeholder="Party"
-                            @bind="model.Party" />
-                        <label for="party" class="text-muted">Party</label>
-                    </div>
-                </div>
-
-                <!-- Bio Field -->
-                <div class="mb-4">
-                    <div class="form-floating">
-                        <textarea class="form-control border-primary-subtle"
-                                id="bio"
-                                placeholder="Bio"
-                                style="height: 100px"
-                                @bind="model.Bio"></textarea>
-                        <label for="bio" class="text-muted">Bio</label>
-                    </div>
-                </div>
-
-                <!-- Buttons-->
-                <div class="d-flex gap-3 justify-content-end border-top pt-4 mt-4">
-                    <button type="reset"
-                            class="btn btn-outline-secondary px-4"
-                            @onclick="ResetForm">
-                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
-                    </button>
-                    <button type="submit"
-                            class="btn btn-primary px-4"
-                            disabled="@isLoading">
-                        @if (isLoading)
-                        {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                        }
-                        else
-                        {
-                            <i class="bi bi-person-add me-2"></i>
-                        }
-                        Add Candidate
-                    </button>
-                </div>
-            </EditForm>
-        </div>
-    </div>
-</main>
+            </main>          
+        </Authorized>       
+    </AuthorizeView>
+</CascadingAuthenticationState>
+}else{
+    NavManager.NavigateTo("/login");
+}
 
 
 @code {

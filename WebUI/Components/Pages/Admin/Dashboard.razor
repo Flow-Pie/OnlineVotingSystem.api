@@ -1,257 +1,268 @@
 @page "/dashboard"  
 @rendermode InteractiveServer
 @using System.Timers
+@inject IAuthService AuthService
 
-<main class="container mt-4 scrollable-container">
-    <style>
-        
-        .scrollable-container {
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-        .card {
-            border: 2px solid var(--enterprise-border);
-            border-radius: 0.75rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card-header {
-            background-color: rgba(42, 92, 141, 0.08);
-            border-bottom: 2px solid var(--enterprise-border);
-        }
-        .bg-primary-subtle {
-            background-color: rgba(42, 92, 141, 0.08) !important;
-        }
-        .border-primary-subtle {
-            border-color: rgba(42, 92, 141, 0.15) !important;
-        }
-        .btn-primary {
-            background-color: var(--enterprise-primary);
-            border-color: var(--enterprise-primary);
-        }
-        .btn-outline-primary {
-            border-color: var(--enterprise-primary);
-            color: var(--enterprise-primary);
-        }
-        .progress-bar {
-            background-color: var(--enterprise-primary);
-        }
-        .list-group-item:hover {
-            background-color: var(--enterprise-chart-bg);
-        }
-        .scrollable-list {
-            scrollbar-width: thin;
-            scrollbar-color: var(--enterprise-primary) rgba(42, 92, 141, 0.1);
-        }
-        .text-muted {
-            color: var(--enterprise-secondary) !important;
-        }
-        .vr {
-            background-color: var(--enterprise-border);
-        }
-    </style>
+@if(AuthService.IsAuthenticated()){
+<CascadingAuthenticationState>
+     <AuthorizeView Roles="Admin">
+        <Authorized Context="adminContext">
+            <main class="container mt-4 scrollable-container">
+                <style>
+                    
+                    .scrollable-container {
+                        max-height: calc(100vh - 120px);
+                        overflow-y: auto;
+                        padding-right: 0.5rem;
+                    }
+                    .card {
+                        border: 2px solid var(--enterprise-border);
+                        border-radius: 0.75rem;
+                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    }
+                    .card-header {
+                        background-color: rgba(42, 92, 141, 0.08);
+                        border-bottom: 2px solid var(--enterprise-border);
+                    }
+                    .bg-primary-subtle {
+                        background-color: rgba(42, 92, 141, 0.08) !important;
+                    }
+                    .border-primary-subtle {
+                        border-color: rgba(42, 92, 141, 0.15) !important;
+                    }
+                    .btn-primary {
+                        background-color: var(--enterprise-primary);
+                        border-color: var(--enterprise-primary);
+                    }
+                    .btn-outline-primary {
+                        border-color: var(--enterprise-primary);
+                        color: var(--enterprise-primary);
+                    }
+                    .progress-bar {
+                        background-color: var(--enterprise-primary);
+                    }
+                    .list-group-item:hover {
+                        background-color: var(--enterprise-chart-bg);
+                    }
+                    .scrollable-list {
+                        scrollbar-width: thin;
+                        scrollbar-color: var(--enterprise-primary) rgba(42, 92, 141, 0.1);
+                    }
+                    .text-muted {
+                        color: var(--enterprise-secondary) !important;
+                    }
+                    .vr {
+                        background-color: var(--enterprise-border);
+                    }
+                </style>
 
-    <div class="alert alert-warning mb-4 d-flex align-items-center">
-        <i class="bi bi-tools me-2"></i>
-        <div class="flex-grow-1">This dashboard is currently under active development. Some features may be incomplete or unavailable.</div>
-    </div>
+                <div class="alert alert-warning mb-4 d-flex align-items-center">
+                    <i class="bi bi-tools me-2"></i>
+                    <div class="flex-grow-1">This dashboard is currently under active development. Some features may be incomplete or unavailable.</div>
+                </div>
 
-    <!-- Dashboard Header -->
-    <header class="mb-5">
-        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
-            <div class="text-center text-md-start mb-3 mb-md-0">
-                <h2 class="fw-bold text-primary mb-1">Election Dashboard</h2>
-            </div>
-            <div class="vr d-none d-md-block mx-3"></div>        
-            <p class="text-muted px-5 mb-0">Real-time voting analytics and monitoring</p>
-        </div>
-        <hr class="border-primary opacity-50 mt-3" style="height: 2px">
-    </header>
-
-    <div class="row g-4">
-        <!-- Main Metrics and Charts Column -->
-        <div class="col-xl-8">
-            <div class="card border-primary-subtle shadow-sm">
-                <div class="card-header py-3">
-                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center">
-                        <h5 class="h5 fw-semibold mb-0 text-primary">
-                            <i class="bi bi-graph-up me-2"></i>Voting Activity
-                            <span class="badge bg-primary bg-opacity-25 text-primary ms-2">Live</span>
-                        </h5>
-                        <div class="d-flex gap-2 mt-2 mt-lg-0">
-                            <button class="btn btn-sm btn-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("24h")'>24H</button>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("7d")'>7D</button>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("30d")'>30D</button>
+                <!-- Dashboard Header -->
+                <header class="mb-5">
+                    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+                        <div class="text-center text-md-start mb-3 mb-md-0">
+                            <h2 class="fw-bold text-primary mb-1">Election Dashboard</h2>
                         </div>
+                        <div class="vr d-none d-md-block mx-3"></div>        
+                        <p class="text-muted px-5 mb-0">Real-time voting analytics and monitoring</p>
                     </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="ratio ratio-21x9">
-                        <canvas id="activityChart" class="p-3"></canvas>
-                    </div>
-                </div>
-            </div>
+                    <hr class="border-primary opacity-50 mt-3" style="height: 2px">
+                </header>
 
-            <!-- Metrics Row -->
-            <div class="row g-4 mt-2">
-                <div class="col-md-6">
-                    <div class="card border-primary-subtle h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
-                                    <i class="bi bi-people-fill fs-3 text-primary"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="text-uppercase text-muted mb-1">Active Voters</h6>
-                                    <h3 class="mb-0 fw-bold">@ActiveVoters.ToString("N0")</h3>
-                                    <div class="mt-3">
-                                        <div class="d-flex justify-content-between small text-muted">
-                                            <span>Target: @TotalVoters.ToString("N0")</span>
-                                            <span>@voterRegistrationProgress%</span>
-                                        </div>
-                                        <div class="progress" style="height: 6px">
-                                            <div class="progress-bar" style="width: @voterRegistrationProgress%"></div>
-                                        </div>
+                <div class="row g-4">
+                    <!-- Main Metrics and Charts Column -->
+                    <div class="col-xl-8">
+                        <div class="card border-primary-subtle shadow-sm">
+                            <div class="card-header py-3">
+                                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center">
+                                    <h5 class="h5 fw-semibold mb-0 text-primary">
+                                        <i class="bi bi-graph-up me-2"></i>Voting Activity
+                                        <span class="badge bg-primary bg-opacity-25 text-primary ms-2">Live</span>
+                                    </h5>
+                                    <div class="d-flex gap-2 mt-2 mt-lg-0">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("24h")'>24H</button>
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("7d")'>7D</button>
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick='() => ChangeTimeRange("30d")'>30D</button>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card border-success-subtle h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-success bg-opacity-10 p-3 rounded-circle">
-                                    <i class="bi bi-check-circle-fill fs-3 text-success"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="text-uppercase text-muted mb-1">Completed Votes</h6>
-                                    <h3 class="mb-0 fw-bold">@CompletedVotes.ToString("N0")</h3>
-                                    <div class="mt-3">
-                                        <div class="d-flex justify-content-between small text-muted">
-                                            <span>Participation Rate</span>
-                                            <span>@participationRate%</span>
-                                        </div>
-                                        <div class="progress" style="height: 6px">
-                                            <div class="progress-bar bg-success" style="width: @participationRate%"></div>
-                                        </div>
-                                    </div>
+                            <div class="card-body p-0">
+                                <div class="ratio ratio-21x9">
+                                    <canvas id="activityChart" class="p-3"></canvas>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Demographics Card -->
-            <div class="card border-primary-subtle mt-4">
-                <div class="card-header py-3">
-                    <h5 class="h5 fw-semibold mb-0 text-primary">
-                        <i class="bi bi-person-lines-fill me-2"></i>Voter Demographics
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-md-7">
-                            <div class="ratio ratio-21x9">
-                                <canvas id="demographicsChart"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="h-100 d-flex flex-column justify-content-center">
-                                <div class="list-group list-group-flush">
-                                    @foreach (var demo in demographics)
-                                    {
-                                        <div class="list-group-item border-0 d-flex align-items-center px-0">
-                                            <span class="badge bg-primary bg-opacity-25 text-primary fs-7 me-3">
-                                                @demo.Percentage%
-                                            </span>
-                                            <div class="flex-fill">
-                                                <div class="d-flex justify-content-between mb-1">
-                                                    <span class="fw-medium">@demo.Category</span>
-                                                    <span class="text-muted">@demo.Count.ToString("N0")</span>
-                                                </div>
-                                                <div class="progress" style="height: 4px">
-                                                    <div class="progress-bar" style="width: @demo.Percentage%"></div>
+                        <!-- Metrics Row -->
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <div class="card border-primary-subtle h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                                <i class="bi bi-people-fill fs-3 text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="text-uppercase text-muted mb-1">Active Voters</h6>
+                                                <h3 class="mb-0 fw-bold">@ActiveVoters.ToString("N0")</h3>
+                                                <div class="mt-3">
+                                                    <div class="d-flex justify-content-between small text-muted">
+                                                        <span>Target: @TotalVoters.ToString("N0")</span>
+                                                        <span>@voterRegistrationProgress%</span>
+                                                    </div>
+                                                    <div class="progress" style="height: 6px">
+                                                        <div class="progress-bar" style="width: @voterRegistrationProgress%"></div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    }
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Right Sidebar -->
-        <div class="col-xl-4">
-            <div class="sticky-xl-top" style="top: 1rem">
-                <!-- Activity Stream -->
-                <div class="card border-primary-subtle shadow-sm">
-                    <div class="card-header py-3">
-                        <h5 class="h5 fw-semibold mb-0 text-primary">
-                            <i class="bi bi-activity me-2"></i>Activity Stream
-                        </h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush scrollable-list" style="max-height: 600px">
-                            @foreach (var activity in recentActivities)
-                            {
-                                <div class="list-group-item border-0 py-3 px-4">
-                                    <div class="d-flex gap-3">
-                                        <div class="bi @GetActivityIcon(activity.Type) fs-4 text-primary"></div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="fw-medium">@activity.Description</span>
-                                                <small class="text-muted">@activity.Timestamp.ToString("HH:mm")</small>
+                            <div class="col-md-6">
+                                <div class="card border-success-subtle h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                                <i class="bi bi-check-circle-fill fs-3 text-success"></i>
                                             </div>
-                                            <div class="text-muted small">@activity.Subtext</div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="text-uppercase text-muted mb-1">Completed Votes</h6>
+                                                <h3 class="mb-0 fw-bold">@CompletedVotes.ToString("N0")</h3>
+                                                <div class="mt-3">
+                                                    <div class="d-flex justify-content-between small text-muted">
+                                                        <span>Participation Rate</span>
+                                                        <span>@participationRate%</span>
+                                                    </div>
+                                                    <div class="progress" style="height: 6px">
+                                                        <div class="progress-bar bg-success" style="width: @participationRate%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            }
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- System Status -->
-                <div class="card border-primary-subtle mt-4">
-                    <div class="card-header py-3">
-                        <h5 class="h5 fw-semibold mb-0 text-primary">
-                            <i class="bi bi-heart-pulse me-2"></i>System Status
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="bi bi-server fs-4 text-success"></div>
-                                    <div>
-                                        <div class="small text-muted">API Health</div>
-                                        <div class="fw-bold">@apiLatency ms</div>
+                        <!-- Demographics Card -->
+                        <div class="card border-primary-subtle mt-4">
+                            <div class="card-header py-3">
+                                <h5 class="h5 fw-semibold mb-0 text-primary">
+                                    <i class="bi bi-person-lines-fill me-2"></i>Voter Demographics
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-md-7">
+                                        <div class="ratio ratio-21x9">
+                                            <canvas id="demographicsChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="h-100 d-flex flex-column justify-content-center">
+                                            <div class="list-group list-group-flush">
+                                                @foreach (var demo in demographics)
+                                                {
+                                                    <div class="list-group-item border-0 d-flex align-items-center px-0">
+                                                        <span class="badge bg-primary bg-opacity-25 text-primary fs-7 me-3">
+                                                            @demo.Percentage%
+                                                        </span>
+                                                        <div class="flex-fill">
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <span class="fw-medium">@demo.Category</span>
+                                                                <span class="text-muted">@demo.Count.ToString("N0")</span>
+                                                            </div>
+                                                            <div class="progress" style="height: 4px">
+                                                                <div class="progress-bar" style="width: @demo.Percentage%"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="bi bi-shield-check fs-4 text-primary"></div>
-                                    <div>
-                                        <div class="small text-muted">Security Level</div>
-                                        <div class="fw-bold">High</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar -->
+                    <div class="col-xl-4">
+                        <div class="sticky-xl-top" style="top: 1rem">
+                            <!-- Activity Stream -->
+                            <div class="card border-primary-subtle shadow-sm">
+                                <div class="card-header py-3">
+                                    <h5 class="h5 fw-semibold mb-0 text-primary">
+                                        <i class="bi bi-activity me-2"></i>Activity Stream
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="list-group list-group-flush scrollable-list" style="max-height: 600px">
+                                        @foreach (var activity in recentActivities)
+                                        {
+                                            <div class="list-group-item border-0 py-3 px-4">
+                                                <div class="d-flex gap-3">
+                                                    <div class="bi @GetActivityIcon(activity.Type) fs-4 text-primary"></div>
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="fw-medium">@activity.Description</span>
+                                                            <small class="text-muted">@activity.Timestamp.ToString("HH:mm")</small>
+                                                        </div>
+                                                        <div class="text-muted small">@activity.Subtext</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Status -->
+                            <div class="card border-primary-subtle mt-4">
+                                <div class="card-header py-3">
+                                    <h5 class="h5 fw-semibold mb-0 text-primary">
+                                        <i class="bi bi-heart-pulse me-2"></i>System Status
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="bi bi-server fs-4 text-success"></div>
+                                                <div>
+                                                    <div class="small text-muted">API Health</div>
+                                                    <div class="fw-bold">@apiLatency ms</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="bi bi-shield-check fs-4 text-primary"></div>
+                                                <div>
+                                                    <div class="small text-muted">Security Level</div>
+                                                    <div class="fw-bold">High</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</main>
+            </main>            
+        </Authorized>       
+    </AuthorizeView>
+</CascadingAuthenticationState>
+}else{
+    NavManager.NavigateTo("/login");
+}
 
 @code {
     // Injected Services

@@ -191,18 +191,17 @@
 
                             <!-- Regular USERS (Non-Admins) -->
                             <AuthorizeView Roles="User">
-                                <Authorized Context="userContext">
-                                    <!--Home -->
+                                <Authorized Context="userContext">                               
                                     <NavLink class="nav-link rounded-3 py-2 ps-3 mt-4 d-flex align-items-center hover-item"
                                              style="color: #e9ecef;"
-                                             href="home"
+                                             href="vote"
                                              ActiveClass="active-nav-item"
                                              Match="NavLinkMatch.All">
-                                        <i class="bi bi-house fs-6 me-3" style="color: #0dcaf0;"></i>
-                                        <span class="fw-light">Home</span>
+                                        <i class="bi bi-check2-circle fs-5 me-3" style="color: #0dcaf0;"></i>
+                                        <span class="fw-light">Vote</span>
                                     </NavLink>
 
-                                     <!-- Candidate Management -->
+                                    <!-- Candidate Management -->
                                      <div class="nav-item">
                                         <a class="nav-link rounded-3 py-2 ps-3 d-flex align-items-center hover-item"
                                            style="color: #e9ecef;"
@@ -228,15 +227,33 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <NavLink class="nav-link rounded-3 py-2 ps-3 mt-4 d-flex align-items-center hover-item"
-                                             style="color: #e9ecef;"
-                                             href="vote"
-                                             ActiveClass="active-nav-item"
-                                             Match="NavLinkMatch.All">
-                                        <i class="bi bi-check2-circle fs-5 me-3" style="color: #0dcaf0;"></i>
-                                        <span class="fw-light">Vote</span>
-                                    </NavLink>
+                                     <!-- Election Management -->
+                                    <div class="nav-item">
+                                        <a class="nav-link rounded-3 py-2 mb-2 ps-3 d-flex align-items-center hover-item"
+                                           style="color: #e9ecef;"
+                                           data-bs-toggle="collapse"
+                                           href="#electionManagement"
+                                           role="button"
+                                           aria-expanded="false"
+                                           aria-controls="electionManagement">
+                                            <i class="bi bi-clipboard-plus fs-5 me-3" style="color: #0dcaf0;"></i>
+                                            <span class="fw-light mt-4">ELECTIONS</span>
+                                            <i class="bi bi-chevron-down ms-auto fs-6"></i>
+                                        </a>
+                                        <div class="collapse ps-4" id="electionManagement">
+                                            <div class="nav flex-column">                                               
+                                                <NavLink class="nav-link rounded-3 py-2 ps-4 d-flex align-items-center hover-item"
+                                                         style="color: #e9ecef;"
+                                                         href="active-elections"
+                                                         ActiveClass="active-nav-item"
+                                                         Match="NavLinkMatch.All">
+                                                    <i class="bi bi-clock-history fs-6 me-3" style="color: #0dcaf0;"></i>
+                                                    <span class="fw-light mt-4">Active Elections</span>
+                                                </NavLink>
+                                            </div>
+                                        </div>
+                                    </div>
+                                   
                                     <div class="mt-4 position-relative overflow-hidden">
                                         <button class="btn  rounded-3 d-flex align-items-center justify-content-center py-2 ps-3 pe-4 hover-item ripple" 
                                                 style="width: 100%; color: var(--enterprise-danger); position: relative;"

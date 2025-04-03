@@ -11,281 +11,302 @@
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
-<main class="container mt-4 scrollable-container">
-    <style>        
-        .badge-status {
-            font-size: 0.85rem;  
-            padding: 0.25rem 0.5rem; 
-            border-radius: 0.95rem; 
-            font-weight: bolder;
-            display: inline-block; 
-            min-width: auto; 
-        }
 
-        .badge-status-upcoming { 
-            background-color: var(--enterprise-accent) !important; 
-            border: 1px solid var(--enterprise-accent);    
-        }
+@if(AuthService.IsAuthenticated()){
+<CascadingAuthenticationState>
+     <AuthorizeView Roles="Admin, User">
+        <Authorized Context="adminContext">
+            <main class="container mt-4 scrollable-container">
+                <style>        
+                    .badge-status {
+                        font-size: 0.85rem;  
+                        padding: 0.25rem 0.5rem; 
+                        border-radius: 0.95rem; 
+                        font-weight: bolder;
+                        display: inline-block; 
+                        min-width: auto; 
+                    }
 
-        .badge-status-active { 
-            background-color: var(--enterprise-success) !important;
-            border: 1px solid var(--enterprise-success);
-        } 
+                    .badge-status-upcoming { 
+                        background-color: var(--enterprise-accent) !important; 
+                        border: 1px solid var(--enterprise-accent);    
+                    }
 
-        .badge-status-ended { 
-            background-color: #dc3545 !important;
-            border: 1px solid #dc3545;
-        }
+                    .badge-status-active { 
+                        background-color: var(--enterprise-success) !important;
+                        border: 1px solid var(--enterprise-success);
+                    } 
 
-        .scrollable-container {
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
-        }
+                    .badge-status-ended { 
+                        background-color: #dc3545 !important;
+                        border: 1px solid #dc3545;
+                    }
 
-        .accordion-button:not(.collapsed) {
-            background-color: var(--enterprise-chart-bg);
-            color: var(--enterprise-primary);
-        }
+                    .scrollable-container {
+                        max-height: calc(100vh - 100px);
+                        overflow-y: auto;
+                    }
 
-        .accordion-item {
-            border-radius: 0.5rem !important;
-            overflow: hidden;
-            border-color: var(--enterprise-border);
-        }
+                    .accordion-button:not(.collapsed) {
+                        background-color: var(--enterprise-chart-bg);
+                        color: var(--enterprise-primary);
+                    }
 
-        .card {
-            border: 1px solid var(--enterprise-border);
-            border-radius: 0.5rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+                    .accordion-item {
+                        border-radius: 0.5rem !important;
+                        overflow: hidden;
+                        border-color: var(--enterprise-border);
+                    }
 
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(42, 92, 141, 0.1);
-        }
+                    .card {
+                        border: 1px solid var(--enterprise-border);
+                        border-radius: 0.5rem;
+                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    }
 
-        .position-card {
-            background-color: #ffffff;
-            border: 1px solid var(--enterprise-border);
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease;
-        }
+                    .card:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(42, 92, 141, 0.1);
+                    }
 
-        .position-card:hover {
-            background-color: var(--enterprise-chart-bg);
-        }
+                    .position-card {
+                        background-color: #ffffff;
+                        border: 1px solid var(--enterprise-border);
+                        border-radius: 0.5rem;
+                        transition: background-color 0.2s ease;
+                    }
 
-        .bg-primary-subtle {
-            background-color: rgba(42, 92, 141, 0.1) !important;
-        }
-        
-        .text-muted {
-            color: var(--enterprise-secondary) !important;
-        }
-    </style>
+                    .position-card:hover {
+                        background-color: var(--enterprise-chart-bg);
+                    }
 
-    <!-- Page Header -->
-     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0 text-primary">Active Elections</h2>
-        <div class="bg-primary-subtle rounded-circle p-3">
-            <i class="bi bi-megaphone-fill fs-4 text-primary"></i>
-        </div>
-    </div>
-    <hr class="border-primary opacity-50" style="height: 2px">
-
-    <!-- Search & Filter -->
-    <div class="mb-4 d-flex gap-2">
-        <input type="text" class="form-control" @bind="SearchTerm" 
-               placeholder="Search elections...">
-        <button class="btn btn-primary" @onclick="FilterElections">
-            <i class="bi bi-search"></i> Search
-        </button>
-    </div>
-
-    @if (ElectionsModel == null)
-    {
-        <div class="d-flex justify-content-center my-5 py-5">
-            <div class="spinner-grow text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    }
-    else if (!FilteredElections.Any())
-    {
-        <div class="alert alert-warning text-center py-4">
-            <i class="bi bi-calendar-x fs-4 me-2"></i>
-            No active elections found
-        </div>
-    }
-    else
-    {
-        <div class="accordion" id="electionsAccordion">
-            @foreach (var election in FilteredElections)
-            {
-                var electionKey = election.Id.ToString().Replace("-", "");
-                <div class="accordion-item mb-3 shadow-sm">
-                    <h2 class="accordion-header" id="heading-@electionKey">
-                        <button class="accordion-button collapsed" type="button" 
-                                data-bs-toggle="collapse" 
-                                data-bs-target="#collapse-@electionKey">
-                            <div class="d-flex w-100 justify-content-between pe-3">
-                                <div>
-                                    <h5 class="mb-1">@election.Title</h5>                                    
-                                </div>
-                                
-                            </div>
-                        </button>
-                    </h2>
+                    .bg-primary-subtle {
+                        background-color: rgba(42, 92, 141, 0.1) !important;
+                    }
                     
-                    <div id="collapse-@electionKey" class="accordion-collapse collapse" 
-                         data-bs-parent="#electionsAccordion">
-                        <div class="accordion-body pt-0">
-                            <div class="row mt-4 mb-4">
-                                <div class="col-md-8">
-                                    <p class="text-secondary">
-                                        @election.Description
-                                        <span class="badge-status @GetStatusBadgeClass(election) text-white mx-1">
-                                           @GetTimeRemaining(election).formattedTime
-                                        </span> 
-                                    </p>
-                                
-                                    
-                                    <div class="card border-0 bg-light mb-4">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
-                                                    <i class="bi bi-person-circle fs-4 text-primary"></i>
-                                                </div>                                                
-                                                <div>
-                                                    <h6 class="mb-1">Created By</h6>
-                                                    <p class="mb-0 fw-medium">
-                                                        @GetCreatorName(election.CreatedBy)
-                                                        <small class="text-muted d-block">
-                                                            @GetCreatorEmail(election.CreatedBy)
-                                                        </small>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                    .text-muted {
+                        color: var(--enterprise-secondary) !important;
+                    }
+                </style>
 
-                                    @if (ElectionDetailsState[election.Id])
-                                    {
-                                        <h6 class="mb-3">Election Positions</h6>
-                                        @if (ElectionPositions.TryGetValue(election.Id, out var positions))
-                                        {
-                                            <div class="row g-3">
-                                                @foreach (var position in positions)
-                                                {
-                                                    <div class="col-md-6">
-                                                        <div class="card position-card h-100">
-                                                            <div class="card-body">
-                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                    <div>
-                                                                        <h6 class="mb-0">@position.Position</h6>
-                                                                        <small class="text-muted">
-                                                                            @CountCandidatesByPosition(ElectionsViewList, position.Id) candidates
-                                                                        </small>
-                                                                    </div>
-                                                                    <span class="badge bg-primary bg-opacity-25 text-primary">
-                                                                        10 seat(s) max
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                }
-                                            </div>
-                                        }
-                                        else if (PositionErrors.TryGetValue(election.Id, out var error))
-                                        {
-                                            <div class="alert alert-danger">@error</div>
-                                        }
-                                        else
-                                        {
-                                            <div class="text-center py-3">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">Loading positions...</span>
-                                                </div>
-                                            </div>
-                                        }                                        
-                                    }
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="card border-0 bg-light h-100">
-                                        <div class="card-body d-flex flex-column gap-3">
-                                            <button class="btn btn-outline-primary w-100"
-                                                    @onclick="() => ToggleDetails(election.Id)">
-                                                <i class="bi bi-info-circle me-2"></i>
-                                                @(ElectionDetailsState[election.Id] ? "Hide" : "Show") Details
-                                            </button>
-                                            <button class="btn btn-outline-danger w-100"
-                                                    @onclick="() => ConfirmDeleteElection(election.Id)">
-                                                <i class="bi bi-trash me-2"></i>
-                                                Delete Election
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>                
-            }
-        </div>
-
-        @if (ShowDeleteModal)
-        {
-            <div class="modal @(ShowDeleteModal ? "show d-block" : "d-none")" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Delete Election</h5>
-                            <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Are you sure you want to delete this election?</p>
-                            @if (IsDeleting)
-                            {
-                                <div class="alert alert-info">
-                                    <div class="spinner-border spinner-border-sm" role="status"></div>
-                                    Deleting election...
-                                </div>
-                            }
-                            @if (!string.IsNullOrEmpty(DeleteError))
-                            {
-                                <div class="alert alert-danger">
-                                    <i class="bi bi-exclamation-triangle-fill"></i> @DeleteError
-                                </div>
-                            }
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" 
-                                    @onclick="CloseDeleteModal" 
-                                    disabled="@IsDeleting">
-                                Cancel
-                            </button>
-                            <button type="button" class="btn btn-danger" 
-                                    @onclick="() => DeleteElection(SelectedElectionId)"
-                                    disabled="@IsDeleting">
-                                @if (IsDeleting)
-                                {
-                                    <span class="spinner-border spinner-border-sm" role="status"></span>
-                                    <span>Deleting...</span>
-                                }
-                                else
-                                {
-                                    <span>Confirm Delete</span>
-                                }
-                            </button>
-                        </div>
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-0 text-primary">Active Elections</h2>
+                    <div class="bg-primary-subtle rounded-circle p-3">
+                        <i class="bi bi-megaphone-fill fs-4 text-primary"></i>
                     </div>
                 </div>
-            </div>
-        }
-    }
-</main>
+                <hr class="border-primary opacity-50" style="height: 2px">
+
+                <!-- Search & Filter -->
+                <div class="mb-4 d-flex gap-2">
+                    <input type="text" class="form-control" @bind="SearchTerm" 
+                        placeholder="Search elections...">
+                    <button class="btn btn-primary" @onclick="FilterElections">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+
+                @if (ElectionsModel == null)
+                {
+                    <div class="d-flex justify-content-center my-5 py-5">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else if (!FilteredElections.Any())
+                {
+                    <div class="alert alert-warning text-center py-4">
+                        <i class="bi bi-calendar-x fs-4 me-2"></i>
+                        No active elections found
+                    </div>
+                }
+                else
+                {
+                    <div class="accordion" id="electionsAccordion">
+                        @foreach (var election in FilteredElections)
+                        {
+                            var electionKey = election.Id.ToString().Replace("-", "");
+                            <div class="accordion-item mb-3 shadow-sm">
+                                <h2 class="accordion-header" id="heading-@electionKey">
+                                    <button class="accordion-button collapsed" type="button" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse-@electionKey">
+                                        <div class="d-flex w-100 justify-content-between pe-3">
+                                            <div>
+                                                <h5 class="mb-1">@election.Title</h5>                                    
+                                            </div>
+                                            
+                                        </div>
+                                    </button>
+                                </h2>
+                                
+                                <div id="collapse-@electionKey" class="accordion-collapse collapse" 
+                                    data-bs-parent="#electionsAccordion">
+                                    <div class="accordion-body pt-0">
+                                        <div class="row mt-4 mb-4">
+                                            <div class="col-md-8">
+                                                <p class="text-secondary">
+                                                    @election.Description
+                                                    <span class="badge-status @GetStatusBadgeClass(election) text-white mx-1">
+                                                    @GetTimeRemaining(election).formattedTime
+                                                    </span> 
+                                                </p>
+                                            
+                                                
+                                                <div class="card border-0 bg-light mb-4">
+                                                    <div class="card-body">
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <AuthorizeView Roles="Admin"> 
+
+                                                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                                                <i class="bi bi-person-circle fs-4 text-primary"></i>
+                                                            </div>                                                                                                           
+                                                                <div>
+                                                                    <h6 class="mb-1">Created By</h6>
+                                                                    <p class="mb-0 fw-medium">
+                                                                        @GetCreatorName(election.CreatedBy)
+                                                                        <small class="text-muted d-block">
+                                                                            @GetCreatorEmail(election.CreatedBy)
+                                                                        </small>
+                                                                    </p>
+                                                                </div>
+                                                                
+                                                            </AuthorizeView>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                @if (ElectionDetailsState[election.Id])
+                                                {
+                                                    <h6 class="mb-3">Election Positions</h6>
+                                                    @if (ElectionPositions.TryGetValue(election.Id, out var positions))
+                                                    {
+                                                        <div class="row g-3">
+                                                            @foreach (var position in positions)
+                                                            {
+                                                                <div class="col-md-6">
+                                                                    <div class="card position-card h-100">
+                                                                        <div class="card-body">
+                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                <div>
+                                                                                    <h6 class="mb-0">@position.Position</h6>
+                                                                                    <small class="text-muted">
+                                                                                        @CountCandidatesByPosition(ElectionsViewList, position.Id) candidates
+                                                                                    </small>
+                                                                                </div>
+                                                                                <span class="badge bg-primary bg-opacity-25 text-primary">
+                                                                                    10 seat(s) max
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    else if (PositionErrors.TryGetValue(election.Id, out var error))
+                                                    {
+                                                        <div class="alert alert-danger">@error</div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="text-center py-3">
+                                                            <div class="spinner-border text-primary" role="status">
+                                                                <span class="visually-hidden">Loading positions...</span>
+                                                            </div>
+                                                        </div>
+                                                    }                                        
+                                                }
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="card border-0 bg-light h-100">
+                                                    <div class="card-body d-flex flex-column gap-3">
+                                                        <button class="btn btn-outline-primary w-100"
+                                                                @onclick="() => ToggleDetails(election.Id)">
+                                                            <i class="bi bi-info-circle me-2"></i>
+                                                            @(ElectionDetailsState[election.Id] ? "Hide" : "Show") Details
+                                                        </button>
+                                                        <AuthorizeView Roles="Admin">
+                                                            <button class="btn btn-outline-danger w-100"
+                                                                    @onclick="() => ConfirmDeleteElection(election.Id)">
+                                                                <i class="bi bi-trash me-2"></i>
+                                                                Delete Election
+                                                            </button>
+                                                        </AuthorizeView>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                
+                        }
+                    </div>
+
+                    @if (ShowDeleteModal)
+                    {
+                        <div class="modal @(ShowDeleteModal ? "show d-block" : "d-none")" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Delete Election</h5>
+                                        <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Are you sure you want to delete this election?</p>
+                                        @if (IsDeleting)
+                                        {
+                                            <div class="alert alert-info">
+                                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                                Deleting election...
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(DeleteError))
+                                        {
+                                            <div class="alert alert-danger">
+                                                <i class="bi bi-exclamation-triangle-fill"></i> @DeleteError
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" 
+                                                @onclick="CloseDeleteModal" 
+                                                disabled="@IsDeleting">
+                                            Cancel
+                                        </button>
+                                        <button type="button" class="btn btn-danger" 
+                                                @onclick="() => DeleteElection(SelectedElectionId)"
+                                                disabled="@IsDeleting">
+                                            @if (IsDeleting)
+                                            {
+                                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                <span>Deleting...</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Confirm Delete</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </main>
+
+         </Authorized>       
+    </AuthorizeView>
+</CascadingAuthenticationState>
+}else{
+    NavManager.NavigateTo("/login");
+}
+
 
 @code {
     [Inject] public required IElectionsService ElectionsService { get; set; }

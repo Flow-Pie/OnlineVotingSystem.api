@@ -1,0 +1,393 @@
+@page "/home"  
+@rendermode InteractiveServer
+@using System.Threading
+@inject NavigationManager NavManager
+@inject IAuthService AuthService
+
+
+<main class="container-fluid px-0 scrollable-container">
+    <style>
+        
+        :root {
+            --enterprise-dark: #1A365D;
+            --enterprise-slate: #4A5568;
+            --enterprise-badge-bg: rgba(72, 163, 198, 0.1);
+            --enterprise-overlay: linear-gradient(45deg, rgba(42, 92, 141, 0.9), rgba(72, 163, 198, 0.9));
+        }
+
+        
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: none;
+        }
+
+        .nav-divider {
+            width: 1px;
+            background: var(--enterprise-border);
+            height: 24px;
+            margin: 0 1rem;
+        }
+
+        
+        .hero-section {
+            background: var(--enterprise-overlay), url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%232a5c8d' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-size: cover;
+            border-radius: 0;
+            padding: 140px 0 100px;
+        }
+
+        
+        .dashboard-preview {
+            border: 1px solid var(--enterprise-border);
+            border-radius: 16px;
+            background: var(--color-card-bg);
+            transform: translateY(60px);
+            box-shadow: 0 40px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .metric-card {
+            background: var(--enterprise-chart-bg);
+            border: 1px solid var(--enterprise-border);
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            background: var(--color-card-bg);
+        }
+
+        .compliance-badges {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .badge-item {
+            background: var(--enterprise-badge-bg);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            border: 1px solid var(--enterprise-accent);
+        }
+
+       
+        .chart-container {
+            height: 300px;
+            background: var(--enterprise-chart-bg);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-progress {
+            position: absolute;
+            bottom: 0;
+            height: 0;
+            width: 100%;
+            background: var(--enterprise-accent);
+            animation: chartFill 1.5s ease-out forwards;
+        }
+
+        @@keyframes chartFill {
+            from { height: 0; }
+            to { height: 75%; }
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            counter-reset: feature-counter;
+        }
+
+        .feature-card {
+            position: relative;
+            padding: 2rem;
+            background: var(--color-card-bg);
+            border: 1px solid var(--enterprise-border);
+            border-radius: 12px;
+        }
+
+        .feature-card::before {
+            counter-increment: feature-counter;
+            content: "0" counter(feature-counter);
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            background: var(--enterprise-primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        
+        .notification-bar {
+            background: var(--enterprise-dark);
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+            margin-top: 3.0rem;
+        }
+
+        .notification-bar::after {
+            content: "•";
+            color: var(--enterprise-accent);
+            animation: notificationPulse 1.5s infinite;
+            margin-left: 1rem;
+        }
+
+        @@keyframes notificationPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+
+    <!-- Global Notification -->
+    <div class="notification-bar">
+        System Status: All Services Operational • Last Updated: @DateTime.Now.ToString("HH:mm UTC")
+    </div>
+
+    <!--Navbar -->
+   <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/login">SecureVote</a>
+            <div class="nav-divider d-none d-lg-block"></div>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                                      
+                </ul>
+
+                <!-- Show buttons only if authenticated -->
+                
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-sm btn-info me-5" @onclick="NavigateToApi">
+                        API Docs
+                    </button>                    
+                </div>  
+                @if(AuthService.IsAuthenticated()){
+                    <button class="btn btn-success" @onclick="NavigateToDashboard">
+                         Launch Voting Dashboard
+                    </button>
+                    <button class="btn btn-light py-2" @onclick="Logout">
+                        Sign me out
+                    </button> 
+                } else{                   
+                    <button class="btn btn-success" @onclick="NavigateToLogin">
+                        Get me Started
+                    </button>  
+                }                  
+            </div>
+        </div>
+    </nav>
+    <!-- Hero Section with Dashboard Preview -->
+    <div class="hero-section">
+        <div class="container text-center position-relative">
+            <h1 class="display-4 fw-bold mb-4">0x4B47 Voting<br>Infrastructure</h1>
+            <p class="lead mb-5">End-to-end encrypted voting solutions for governments and organizations</p>
+            
+            <div class="dashboard-preview">
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="text-muted small">Live Votes</div>
+                        <div class="h2 fw-bold">@(currentVotes.ToString("N0"))</div>
+                        <div class="text-success small">+37.4% from last hour</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-muted small">Active Elections</div>
+                        <div class="h2 fw-bold">@activeElections</div>
+                        <div class="chart-container">
+                            <div class="chart-progress"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compliance Section -->
+    <section class="py-5 bg-light">
+        <div class="container text-center py-5">
+            <h2 class="mb-5">Certified Compliance</h2>
+            <div class="compliance-badges">
+                <div class="badge-item"> Compliant</div>
+                <div class="badge-item"> Certified</div>
+                <div class="badge-item">Validated</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-5">
+        <div class="container">
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Multi-Factor Authentication</h3>
+                    <p>Military-grade security with biometric verification and hardware token support</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Real-time Auditing</h3>
+                    <p>Blockchain-backed immutable audit trails with instant verification</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Global Scalability</h3>
+                    <p>Distributed infrastructure supporting millions of concurrent votes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--  API Section -->
+    <section class="py-5 bg-dark text-light">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2>Developer Integration</h2>
+                    <p>Integrate with our RESTful API or use ready-made SDKs:</p>
+                    <pre class="p-3 bg-light text-dark rounded"><code>
+                        #route = Vote
+                        POST http://localhost:5256/{{route}}
+                        Content-Type: application/json
+                        {
+                        "userId": "A977B58A-651D-474C-B0F4-36A97142D8E1",
+                        "electionPositionId": "FFB622FB-F615-44F8-80F9-564DA88FCB65",
+                        "candidateId": "D966DE4D-1239-4942-B84A-778C56B89C84"
+                        }
+                </code></pre>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 bg-slate rounded">
+                        <h5 class="mb-3">Try the API</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Endpoint</label>
+                            <select class="form-select">
+                                <option>http://localhost:5256/votes</option>
+                                <option>http://localhost:5256/elections</option>
+                                <option>http://localhost:5256/auth/login</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-accent w-100">Send Test Request</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-4">
+                    <h5>Trusted By</h5>
+                    <div class="client-logos">                        
+                        <span>Independent Electoral and Boundaries Commission</span>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5>Legal</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="#">Privacy Policy</a></li>
+                                <li><a href="#">Service Agreement</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Resources</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="#">Security Whitepaper</a></li>
+                                <li><a href="#">Audit Reports</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <div class="mb-3">
+                    <button class="btn btn-outline-light me-2">Status Page</button>
+                    <button class="btn btn-outline-light">Incident Report</button>
+                </div>
+                <div class="text-muted small">
+                    © 2025 SecureVote 0x4B47 Enterprise Certified
+                </div>
+            </div>
+        </div>
+    </footer>
+</main>
+
+@code {
+    private int currentVotes = 1248573;
+    private int activeElections = 42;
+    private Timer statsTimer;
+    private Random random = new Random();
+
+    private void NavigateToLogin()
+    {
+        NavManager.NavigateTo("/login");
+    }
+    private void Logout(){
+        AuthService.LogoutAsync();        
+    }
+
+    private void NavigateToApi()
+    {
+        NavManager.NavigateTo("https://github.com/Flow-Pie/OnlineVotingSystem.api/tree/master");
+    }
+
+    private async Task NavigateToDashboard()
+    {     
+        if(AuthService.IsAuthenticated()){
+            var token = await AuthService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                var userRole = await AuthService.GetUserRoleAsync();
+                if (userRole == "Admin")
+                {
+                    NavManager.NavigateTo("/dashboard");
+                }
+                else
+                {
+                    NavManager.NavigateTo("/vote");
+                }
+            }
+        }else
+        {
+            NavManager.NavigateTo("/login");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        statsTimer = new Timer(UpdateVoteCount, null, 2000, 2000);
+    }
+
+    private void UpdateVoteCount(object state)
+    {
+        currentVotes += random.Next(100, 500);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        statsTimer?.Dispose();
+    }
+}
