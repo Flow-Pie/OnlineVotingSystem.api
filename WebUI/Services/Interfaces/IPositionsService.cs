@@ -1,5 +1,5 @@
-using OnlineVotingSystem.api.DTOs.Election;
-using OnlineVotingSystem.api.DTOs.Position;
+using WebUI.DTOs.Election;
+using WebUI.DTOs.Position;
 
 namespace WebUI.Services;
 

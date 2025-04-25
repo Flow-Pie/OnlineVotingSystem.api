@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using OnlineVotingSystem.api.DTOs.Candidate;
+using WebUI.DTOs.Candidate;
 
 public class CandidatesService : ICandidatesService, IDisposable
 {

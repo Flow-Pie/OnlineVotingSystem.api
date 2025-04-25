@@ -1,17 +1,17 @@
 @page "/add-candidate"
-@using OnlineVotingSystem.api.DTOs.Candidate
-@using OnlineVotingSystem.api.DTOs.Position
+@using WebUI.DTOs.Candidate
+@using WebUI.DTOs.Position
 @using System.ComponentModel.DataAnnotations
 @using WebUI.Services
-@using OnlineVotingSystem.api.DTOs.ElectionPosition
-@using OnlineVotingSystem.api.DTOs.User
+@using WebUI.DTOs.ElectionPosition
+@using WebUI.DTOs.User
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.IdentityModel.Tokens.Jwt;
 @using System.Net
 @using System.IdentityModel.Tokens.Jwt
 @using System.Text.Json
 @using System.ComponentModel.DataAnnotations
-@using OnlineVotingSystem.api.DTOs.Election;
+@using WebUI.DTOs.Election;
 @inject ICandidatesService CandidatesService
 @inject IUsersService UsersService
 @inject IElectionsService ElectionsService

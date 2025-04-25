@@ -16,10 +16,6 @@
     <Import Project="$(NuGetPackageRoot)syncfusion.blazor.core/28.2.11/buildTransitive/Syncfusion.Blazor.Core.props" Condition="Exists('$(NuGetPackageRoot)syncfusion.blazor.core/28.2.11/buildTransitive/Syncfusion.Blazor.Core.props')" />
     <Import Project="$(NuGetPackageRoot)syncfusion.blazor.data/28.2.11/buildTransitive/Syncfusion.Blazor.Data.props" Condition="Exists('$(NuGetPackageRoot)syncfusion.blazor.data/28.2.11/buildTransitive/Syncfusion.Blazor.Data.props')" />
     <Import Project="$(NuGetPackageRoot)syncfusion.blazor.charts/28.2.11/buildTransitive/Syncfusion.Blazor.Charts.props" Condition="Exists('$(NuGetPackageRoot)syncfusion.blazor.charts/28.2.11/buildTransitive/Syncfusion.Blazor.Charts.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.entityframeworkcore/9.0.1/buildTransitive/net8.0/Microsoft.EntityFrameworkCore.props" Condition="Exists('$(NuGetPackageRoot)microsoft.entityframeworkcore/9.0.1/buildTransitive/net8.0/Microsoft.EntityFrameworkCore.props')" />
     <Import Project="$(NuGetPackageRoot)microsoft.aspnetcore.components.webassembly.authentication/8.0.4/buildTransitive/Microsoft.AspNetCore.Components.WebAssembly.Authentication.props" Condition="Exists('$(NuGetPackageRoot)microsoft.aspnetcore.components.webassembly.authentication/8.0.4/buildTransitive/Microsoft.AspNetCore.Components.WebAssembly.Authentication.props')" />
   </ImportGroup>
-  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgMicrosoft_Extensions_ApiDescription_Server Condition=" '$(PkgMicrosoft_Extensions_ApiDescription_Server)' == '' ">/home/jon/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5</PkgMicrosoft_Extensions_ApiDescription_Server>
-  </PropertyGroup>
 </Project>

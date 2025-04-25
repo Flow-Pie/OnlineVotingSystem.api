@@ -10,7 +10,7 @@ using System.Net;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
-using OnlineVotingSystem.api.DTOs.User;
+using WebUI.DTOs.User;
 
 namespace WebUI.Services
 {

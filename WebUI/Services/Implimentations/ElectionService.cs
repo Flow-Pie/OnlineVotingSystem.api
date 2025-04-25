@@ -1,8 +1,8 @@
 using System.Net.Http.Headers;
-using OnlineVotingSystem.api.DTOs.Election;
-using OnlineVotingSystem.api.DTOs.ElectionPosition;
-using OnlineVotingSystem.api.DTOs.Position;
-using OnlineVotingSystem.api.Entities;
+using WebUI.DTOs.Election;
+using WebUI.DTOs.ElectionPosition;
+using WebUI.DTOs.Position;
+using WebUI.Entities;
 
 namespace WebUI.Services;
 

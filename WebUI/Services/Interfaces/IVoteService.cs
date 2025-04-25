@@ -1,4 +1,4 @@
-using OnlineVotingSystem.api.DTOs.Vote;
+using WebUI.DTOs.Vote;
 
 namespace WebUI.Services
 {

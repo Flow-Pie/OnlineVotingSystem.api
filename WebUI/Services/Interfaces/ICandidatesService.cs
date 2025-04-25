@@ -1,4 +1,4 @@
-using OnlineVotingSystem.api.DTOs.Candidate;
+using WebUI.DTOs.Candidate;
 
 public interface ICandidatesService
 {

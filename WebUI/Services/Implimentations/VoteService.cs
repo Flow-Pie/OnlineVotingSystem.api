@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc; // For ProblemDetails
-using OnlineVotingSystem.api.DTOs.Vote;
+using WebUI.DTOs.Vote;
 
 namespace WebUI.Services
 {
